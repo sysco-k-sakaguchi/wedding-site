@@ -36,7 +36,7 @@ let openingRemoveTimer = 0;
 // 開幕演出のテンポです。
 // ここを調整すると「文字を見せる時間」や「白い光の余韻」を変えられます。
 const openingTimeline = {
-  autoStartDelay: 3200,
+  autoStartDelay: 3000,
   copyHoldDelay: 1200,
   lightBloomDelay: 2500,
   revealDelay: 2900,
@@ -202,14 +202,11 @@ function closeMobileNav() {
   }
 
   mobileNav.classList.remove("is-open");
+  mobileNav.hidden = mobileNavBreakpoint.matches;
   menuToggle.setAttribute("aria-expanded", "false");
+  menuToggle.setAttribute("aria-label", "メニューを開く");
   body.classList.remove("is-menu-open");
-
-  if (mobileNavBreakpoint.matches) {
-    mobileNav.setAttribute("aria-hidden", "true");
-  } else {
-    mobileNav.removeAttribute("aria-hidden");
-  }
+  mobileNav.setAttribute("aria-hidden", String(mobileNavBreakpoint.matches));
 }
 
 function openMobileNav() {
@@ -217,9 +214,11 @@ function openMobileNav() {
     return;
   }
 
+  mobileNav.hidden = false;
   mobileNav.classList.add("is-open");
   mobileNav.setAttribute("aria-hidden", "false");
   menuToggle.setAttribute("aria-expanded", "true");
+  menuToggle.setAttribute("aria-label", "メニューを閉じる");
   body.classList.add("is-menu-open");
   menuClose?.focus();
 }
@@ -232,12 +231,16 @@ function setupMobileNav() {
   const syncMobileNav = () => {
     if (!mobileNavBreakpoint.matches) {
       closeMobileNav();
+      mobileNav.hidden = false;
+      mobileNav.removeAttribute("aria-hidden");
       return;
     }
 
     const isOpen = mobileNav.classList.contains("is-open");
+    mobileNav.hidden = !isOpen;
     mobileNav.setAttribute("aria-hidden", String(!isOpen));
     menuToggle.setAttribute("aria-expanded", String(isOpen));
+    menuToggle.setAttribute("aria-label", isOpen ? "メニューを閉じる" : "メニューを開く");
   };
 
   menuToggle.addEventListener("click", () => {
