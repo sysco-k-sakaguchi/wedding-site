@@ -2,6 +2,9 @@
 const body = document.body;
 const openingOverlay = document.querySelector("[data-opening-overlay]");
 const confettiRoot = document.querySelector("[data-confetti]");
+const menuToggle = document.querySelector("[data-menu-toggle]");
+const mobileNav = document.querySelector("[data-mobile-nav]");
+const menuClose = document.querySelector("[data-menu-close]");
 const fadeItems = document.querySelectorAll(".fade-up");
 const faqItems = document.querySelectorAll(".faq-item");
 const countdown = document.querySelector("[data-countdown]");
@@ -16,6 +19,7 @@ const placeholderLinks = document.querySelectorAll("[data-placeholder-link]");
 
 // OSの「動きを減らす」設定を見て、必要なら演出をやさしくします。
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const mobileNavBreakpoint = window.matchMedia("(max-width: 768px)");
 
 // 後から差し替えるURLは、まずこのあたりを見ると追いやすいです。
 const RSVP_FORM_URL = "FORM_URL";
@@ -189,6 +193,101 @@ function setLinkBehavior(link, href) {
 
   link.target = isExternal ? "_blank" : "_self";
   link.rel = isExternal ? "noopener noreferrer" : "";
+}
+
+// スマホではハンバーガーメニューとして開閉します。
+function closeMobileNav() {
+  if (!mobileNav || !menuToggle) {
+    return;
+  }
+
+  mobileNav.classList.remove("is-open");
+  menuToggle.setAttribute("aria-expanded", "false");
+  body.classList.remove("is-menu-open");
+
+  if (mobileNavBreakpoint.matches) {
+    mobileNav.setAttribute("aria-hidden", "true");
+  } else {
+    mobileNav.removeAttribute("aria-hidden");
+  }
+}
+
+function openMobileNav() {
+  if (!mobileNav || !menuToggle || !mobileNavBreakpoint.matches) {
+    return;
+  }
+
+  mobileNav.classList.add("is-open");
+  mobileNav.setAttribute("aria-hidden", "false");
+  menuToggle.setAttribute("aria-expanded", "true");
+  body.classList.add("is-menu-open");
+  menuClose?.focus();
+}
+
+function setupMobileNav() {
+  if (!menuToggle || !mobileNav || !menuClose) {
+    return;
+  }
+
+  const syncMobileNav = () => {
+    if (!mobileNavBreakpoint.matches) {
+      closeMobileNav();
+      return;
+    }
+
+    const isOpen = mobileNav.classList.contains("is-open");
+    mobileNav.setAttribute("aria-hidden", String(!isOpen));
+    menuToggle.setAttribute("aria-expanded", String(isOpen));
+  };
+
+  menuToggle.addEventListener("click", () => {
+    if (mobileNav.classList.contains("is-open")) {
+      closeMobileNav();
+      return;
+    }
+
+    openMobileNav();
+  });
+
+  menuClose.addEventListener("click", closeMobileNav);
+
+  navLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      if (mobileNavBreakpoint.matches) {
+        closeMobileNav();
+      }
+    });
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMobileNav();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!mobileNavBreakpoint.matches || !mobileNav.classList.contains("is-open")) {
+      return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof Node)) {
+      return;
+    }
+
+    if (mobileNav.contains(target) || menuToggle.contains(target)) {
+      return;
+    }
+
+    closeMobileNav();
+  });
+
+  if ("addEventListener" in mobileNavBreakpoint) {
+    mobileNavBreakpoint.addEventListener("change", syncMobileNav);
+  }
+
+  syncMobileNav();
 }
 
 function startOpeningSequence(triggerMap) {
@@ -464,6 +563,7 @@ function setupPlaceholderLinks() {
 // 初期化処理をまとめておくと、あとから見返したときに入口が分かりやすくなります。
 function initializeSite() {
   setupOpeningSequence();
+  setupMobileNav();
   setupFaq();
   setupCurrentNav();
   setupRevealOrbs();

@@ -43,7 +43,7 @@
       <p class="opening-intro__copy">
         最初に一度だけ、静かな幕開けの演出が流れます。
       </p>
-      <p class="opening-intro__hint">そのままお待ちいただくか、下へスクロールしてご覧ください</p>
+      <p class="opening-intro__hint">演出のあとに、ご案内がはじまります。</p>
     </div>
 
     <div class="opening-flash" aria-hidden="true"></div>
@@ -107,12 +107,44 @@
       <div class="header-bar">
         <a class="brand" href="#top">Masato and Haruka Wedding</a>
 
-        <nav class="site-nav" aria-label="ページ内ナビゲーション">
-          <a href="#top">トップ</a>
-          <a href="#okinawa">沖縄編</a>
-          <a href="#ceremony">挙式編</a>
-          <a href="#rsvp">出欠</a>
-          <a href="#party">パーティ編</a>
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          aria-label="メニューを開く"
+          data-menu-toggle
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav
+          class="site-nav"
+          id="site-nav"
+          aria-label="ページ内ナビゲーション"
+          data-mobile-nav
+        >
+          <div class="site-nav__header">
+            <p class="site-nav__title">Menu</p>
+            <button
+              class="site-nav__close"
+              type="button"
+              aria-label="メニューを閉じる"
+              data-menu-close
+            >
+              ×
+            </button>
+          </div>
+
+          <div class="site-nav__links">
+            <a href="#top">トップ</a>
+            <a href="#okinawa">沖縄編</a>
+            <a href="#ceremony">挙式編</a>
+            <a href="#rsvp">出欠</a>
+            <a href="#party">パーティ編</a>
+          </div>
         </nav>
       </div>
     </header>
@@ -492,5 +524,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
-<!-- update -->
