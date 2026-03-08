@@ -61,7 +61,6 @@ button {
 .eyebrow,
 .section-kicker,
 .card-label,
-.reveal-kicker,
 .opening-intro__eyebrow {
   margin: 0 0 0.8rem;
   font-size: 0.82rem;
@@ -75,8 +74,7 @@ button {
 }
 
 .section-kicker,
-.card-label,
-.reveal-kicker {
+.card-label {
   color: var(--color-wine);
 }
 
@@ -649,8 +647,7 @@ body.is-opening-complete .opening-hero {
 .section-heading h2,
 .card h3,
 .support-panel h4,
-.faq-heading h3,
-.reveal-display h4 {
+.faq-heading h3 {
   margin: 0;
   font-family: "Cormorant Garamond", "Noto Serif JP", serif;
   font-weight: 600;
@@ -692,18 +689,47 @@ body.is-opening-complete .opening-hero {
   margin-top: 1.35rem;
 }
 
-.hero-meta span,
+.hero-meta__item,
 .chip,
 .hero-photo__badge {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  gap: 0.3rem;
   min-height: 38px;
-  padding: 0.55rem 0.95rem;
-  border-radius: 999px;
+  padding: 0.75rem 0.95rem;
+  border-radius: 22px;
   border: 1px solid rgba(139, 24, 56, 0.18);
-  background: rgba(255, 250, 244, 0.9);
+  background: rgba(255, 250, 244, 0.92);
   color: var(--color-wine);
+}
+
+.hero-meta__item {
+  flex-direction: column;
+  justify-content: center;
+  min-width: 180px;
+}
+
+.hero-meta__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(84, 18, 32, 0.66);
+}
+
+.hero-meta__value {
+  font-size: 0.96rem;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.hero-meta__item strong {
+  font-weight: 600;
+}
+
+.chip,
+.hero-photo__badge {
+  justify-content: center;
   font-size: 0.85rem;
 }
 
@@ -1298,8 +1324,7 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   box-shadow: var(--shadow-soft);
 }
 
-.card h3,
-.reveal-display h4 {
+.card h3 {
   font-size: clamp(2rem, 3.6vw, 3.4rem);
   line-height: 1.04;
   margin-bottom: 0.85rem;
@@ -1387,6 +1412,32 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   margin: 0;
 }
 
+.map-facts {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1.2rem;
+}
+
+.map-facts__item {
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.map-facts__item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.map-facts__item span {
+  color: var(--color-text-soft);
+}
+
+.ceremony-map-card__actions {
+  margin-bottom: 1.15rem;
+}
+
 .map-embed {
   min-height: 420px;
   overflow: hidden;
@@ -1460,33 +1511,97 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
     linear-gradient(180deg, rgba(255, 252, 248, 0.92), rgba(255, 246, 237, 0.82));
 }
 
+.reveal-card__hint {
+  margin: -0.2rem 0 0;
+  color: rgba(84, 18, 32, 0.72);
+  font-size: 0.95rem;
+}
+
 .reveal-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
-  margin: 1.4rem 0;
+  margin: 1.5rem 0 0;
+}
+
+.reveal-item {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 0.9rem;
 }
 
 .reveal-orb {
+  position: relative;
   display: grid;
   place-items: center;
-  gap: 0.16rem;
+  cursor: pointer;
+  width: min(100%, 210px);
   aspect-ratio: 1;
+  padding: 1.7rem;
   border: 1px solid rgba(127, 23, 48, 0.14);
   border-radius: 50%;
   background:
     radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.58), transparent 22%),
+    radial-gradient(circle at 72% 78%, rgba(255, 211, 154, 0.16), transparent 36%),
     linear-gradient(180deg, #9a1f3b, #6a1226);
   color: var(--color-white);
   box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.16), 0 16px 28px rgba(69, 16, 24, 0.14);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.reveal-orb::before,
+.reveal-orb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.reveal-orb::before {
+  inset: 9%;
+  border: 1px solid rgba(255, 245, 226, 0.12);
+  opacity: 0.7;
+}
+
+.reveal-orb::after {
+  inset: 22%;
+  background:
+    linear-gradient(135deg, transparent 42%, rgba(255, 245, 226, 0.24) 50%, transparent 58%);
+  opacity: 0;
+  transform: rotate(-10deg) scale(0.8);
 }
 
 .reveal-orb:hover,
 .reveal-orb:focus-visible,
-.reveal-orb.is-active {
+.reveal-item.is-active .reveal-orb {
   transform: translateY(-4px) scale(1.02);
   box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.2), 0 22px 34px rgba(69, 16, 24, 0.2);
+}
+
+.reveal-item.is-active .reveal-orb {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.reveal-orb:focus-visible {
+  outline: 2px solid rgba(231, 200, 135, 0.92);
+  outline-offset: 4px;
+}
+
+.reveal-item.is-just-opened .reveal-orb {
+  animation: seal-open-pop 0.48s cubic-bezier(0.19, 0.89, 0.24, 1) both;
+}
+
+.reveal-item.is-just-opened .reveal-orb::after {
+  animation: seal-open-sheen 0.55s ease-out both;
+}
+
+.reveal-item.is-just-opened .reveal-panel {
+  animation: seal-card-rise 0.34s ease-out both;
 }
 
 .orb-label {
@@ -1500,16 +1615,137 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   text-transform: uppercase;
 }
 
-.reveal-display {
-  min-height: 220px;
-  padding: 1.3rem;
-  border: 1px solid rgba(127, 23, 48, 0.08);
-  border-radius: 24px;
-  background: rgba(255, 250, 244, 0.76);
+.reveal-panel__kicker {
+  margin: 0 0 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-wine);
 }
 
-.reveal-display p:last-child {
-  margin-bottom: 0;
+.reveal-panel__title {
+  margin: 0 0 0.85rem;
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: clamp(1.46rem, 2vw, 2rem);
+  line-height: 1.26;
+  text-wrap: balance;
+  color: var(--color-text);
+}
+
+.reveal-panel {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  border: 1px solid rgba(127, 23, 48, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 250, 244, 0.84);
+  box-shadow: 0 16px 28px rgba(84, 18, 32, 0.08);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.24s ease,
+    max-height 0.32s ease,
+    transform 0.24s ease,
+    padding 0.24s ease;
+}
+
+.reveal-panel::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  background: rgba(255, 250, 244, 0.96);
+  border-top: 1px solid rgba(127, 23, 48, 0.08);
+  border-left: 1px solid rgba(127, 23, 48, 0.08);
+  transform: translateX(-50%) rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.24s ease;
+}
+
+.reveal-item.is-active .reveal-panel {
+  padding: 1.15rem;
+  opacity: 1;
+  max-height: 320px;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.reveal-item.is-active .reveal-panel::before {
+  opacity: 1;
+}
+
+.reveal-panel__meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid rgba(202, 164, 107, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 247, 235, 0.88);
+  color: var(--color-wine);
+  font-size: 0.86rem;
+  letter-spacing: 0.08em;
+}
+
+.reveal-panel__meta strong {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.reveal-panel__copy {
+  margin: 0 0 1rem;
+  font-size: 0.98rem;
+  line-height: 1.8;
+}
+
+@keyframes seal-open-pop {
+  0% {
+    transform: scale(0.94);
+  }
+
+  55% {
+    transform: translateY(-5px) scale(1.02);
+  }
+
+  100% {
+    transform: translateY(-1px) scale(0.98);
+  }
+}
+
+@keyframes seal-open-sheen {
+  0% {
+    opacity: 0;
+    transform: rotate(-16deg) scale(0.7);
+  }
+
+  35% {
+    opacity: 0.85;
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(8deg) scale(1.25);
+  }
+}
+
+@keyframes seal-card-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .ceremony-support-card {
@@ -1528,6 +1764,14 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   border: 1px solid rgba(127, 23, 48, 0.08);
   border-radius: var(--radius-medium);
   background: rgba(255, 251, 246, 0.82);
+}
+
+.support-note {
+  margin: 1rem 0 0;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  background: rgba(255, 247, 235, 0.92);
+  color: var(--color-text-soft);
 }
 
 .support-panel--faq {
@@ -1560,6 +1804,10 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   cursor: pointer;
 }
 
+.faq-question span:first-child {
+  font-weight: 600;
+}
+
 .faq-icon {
   font-size: 1.5rem;
   line-height: 1;
@@ -1589,6 +1837,22 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
 
 .guide-list li + li {
   margin-top: 0.6rem;
+}
+
+.rsvp-primary-card {
+  background:
+    radial-gradient(circle at top right, rgba(202, 164, 107, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(255, 252, 248, 0.98), rgba(255, 244, 236, 0.86));
+  border-color: rgba(139, 24, 56, 0.14);
+}
+
+.rsvp-primary-card .button {
+  min-height: 58px;
+}
+
+.rsvp-support-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 250, 244, 0.76));
 }
 
 .party-card {
@@ -1744,7 +2008,7 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
 
   .opening-hero {
     gap: 1.2rem;
-    padding: 6.2rem 0 3.4rem;
+    padding: 5.8rem 0 3rem;
   }
 
   .opening-hero__copy {
@@ -1754,36 +2018,49 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   }
 
   .opening-hero__copy h2 {
-    order: 2;
-    font-size: clamp(2.5rem, 11vw, 4rem);
-    margin-bottom: 0.4rem;
+    order: 4;
+    font-size: clamp(2rem, 8.8vw, 3.2rem);
+    margin: 0.75rem 0 0;
   }
 
   .opening-hero__copy .eyebrow {
     order: 1;
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.88rem;
   }
 
   .hero-meta {
-    order: 3;
+    order: 2;
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.6rem;
+    margin-top: 0.35rem;
+  }
+
+  .hero-meta__item {
+    min-width: 0;
+    padding: 0.82rem 0.95rem;
+    border-radius: 18px;
+  }
+
+  .hero-meta__value {
+    font-size: 0.98rem;
   }
 
   .hero-actions {
-    order: 4;
+    order: 3;
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
-    margin-top: 1rem;
+    margin-top: 0.9rem;
   }
 
   .opening-hero__lead {
     order: 5;
     max-width: none;
-    margin-top: 1rem;
-    font-size: 0.98rem;
+    margin-top: 0.55rem;
+    font-size: 0.92rem;
+    line-height: 1.7;
   }
 
   .opening-hero__visual {
@@ -1791,7 +2068,7 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   }
 
   .hero-photo {
-    min-height: 300px;
+    min-height: 220px;
     border-radius: 24px;
   }
 
@@ -1835,7 +2112,7 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
     position: fixed;
     top: calc(env(safe-area-inset-top, 0px) + 70px);
     right: 12px;
-    width: min(236px, calc(100vw - 24px));
+    width: min(212px, calc(100vw - 24px));
     max-height: min(68svh, 380px);
     overflow-y: auto;
     padding: 0.7rem;
@@ -1907,6 +2184,7 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   .site-nav a {
     display: block;
     width: 100%;
+    min-height: 48px;
     padding: 0.8rem 0.92rem;
     border-radius: 18px;
     font-size: 0.95rem;
@@ -1952,15 +2230,15 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
 
   .section-copy {
     max-width: none;
-    font-size: 0.96rem;
+    font-size: 0.94rem;
+    line-height: 1.8;
   }
 
   .card {
     padding: 1.3rem;
   }
 
-  .card h3,
-  .reveal-display h4 {
+  .card h3 {
     font-size: clamp(1.7rem, 7vw, 2.6rem);
   }
 
@@ -1973,11 +2251,11 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
     gap: 1rem;
   }
 
-  .ceremony-schedule {
+  .ceremony-info {
     order: 1;
   }
 
-  .ceremony-info {
+  .ceremony-schedule {
     order: 2;
   }
 
@@ -2013,6 +2291,11 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
     text-align: left;
   }
 
+  .detail-list {
+    gap: 0.7rem;
+    margin: 1rem 0 1.25rem;
+  }
+
   .timeline {
     gap: 0.85rem;
   }
@@ -2032,17 +2315,52 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
     gap: 0.8rem;
   }
 
-  .reveal-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.7rem;
+  .ceremony-map-card__actions {
+    margin-bottom: 1rem;
   }
 
-  .reveal-display {
-    min-height: auto;
+  .map-facts {
+    gap: 0.75rem;
+  }
+
+  .map-facts__item {
+    gap: 0.3rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .reveal-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .reveal-item {
+    justify-items: stretch;
+  }
+
+  .reveal-orb {
+    width: min(100%, 188px);
+    justify-self: center;
+  }
+
+  .reveal-panel__copy {
+    font-size: 0.95rem;
+  }
+
+  .reveal-panel .button {
+    width: 100%;
+    min-height: 52px;
   }
 
   .support-panels {
     gap: 0.85rem;
+  }
+
+  .support-panel--faq {
+    order: 1;
+  }
+
+  .support-panel--share {
+    order: 2;
   }
 
   .countdown {
@@ -2053,7 +2371,7 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   .map-embed,
   .map-embed iframe {
     width: 100%;
-    min-height: 280px;
+    min-height: 240px;
   }
 
   .site-footer {
@@ -2062,13 +2380,28 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
 }
 
 @media (max-width: 480px) {
-  .reveal-grid,
+  .opening-hero__lead {
+    display: none;
+  }
+
+  .hero-photo {
+    min-height: 200px;
+  }
+
+  .brand {
+    font-size: 1rem;
+  }
+
   .countdown {
     grid-template-columns: 1fr;
   }
 
   .orb-label {
     font-size: 1.48rem;
+  }
+
+  .reveal-panel__title {
+    font-size: 1.36rem;
   }
 }
 

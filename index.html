@@ -71,8 +71,14 @@
 
           <!-- 日付と場所を更新する場合は、この2つの文言を変更してください -->
           <div class="hero-meta">
-            <span>2026年10月12日(月)</span>
-            <span>京都・梨木神社</span>
+            <div class="hero-meta__item">
+              <small class="hero-meta__label">Date</small>
+              <strong class="hero-meta__value">2026年10月12日(月)</strong>
+            </div>
+            <div class="hero-meta__item">
+              <small class="hero-meta__label">Place</small>
+              <strong class="hero-meta__value">京都・梨木神社</strong>
+            </div>
           </div>
 
           <div class="hero-actions">
@@ -220,12 +226,16 @@
                   <strong>2026年10月12日(月)</strong>
                 </div>
                 <div class="detail-row">
-                  <span>場所</span>
+                  <span>会場</span>
                   <strong>京都・梨木神社</strong>
                 </div>
                 <div class="detail-row">
+                  <span>住所</span>
+                  <strong>京都市上京区染殿町680</strong>
+                </div>
+                <div class="detail-row">
                   <span>アクセス</span>
-                  <strong>京都御所のほど近くにございます</strong>
+                  <strong>市バス「府立医大病院前」より徒歩約3分</strong>
                 </div>
               </div>
 
@@ -273,6 +283,14 @@
                     <p>落ち着いてお過ごしいただけるひとときをご案内いたします。</p>
                   </div>
                 </div>
+
+                <div class="timeline-item">
+                  <span class="timeline-time">4</span>
+                  <div>
+                    <h4>お開き</h4>
+                    <p>お帰りの流れや、お見送りの目安も分かりやすくご案内いたします。</p>
+                  </div>
+                </div>
               </div>
             </article>
           </div>
@@ -284,8 +302,34 @@
                 <h3>会場の地図</h3>
               </div>
               <p class="card-support">
-                会場の位置を見ながら、地図アプリでも道順をご確認いただけるようにしています。
+                地図アプリへそのまま進めるように、会場名とアクセスの目安をまとめています。
               </p>
+            </div>
+
+            <div class="map-facts">
+              <div class="map-facts__item">
+                <span>会場</span>
+                <strong>梨木神社</strong>
+              </div>
+              <div class="map-facts__item">
+                <span>住所</span>
+                <strong>京都市上京区染殿町680</strong>
+              </div>
+              <div class="map-facts__item">
+                <span>アクセス</span>
+                <strong>京阪「神宮丸太町駅」徒歩約15分 / 市バス「府立医大病院前」徒歩約3分</strong>
+              </div>
+            </div>
+
+            <div class="button-row ceremony-map-card__actions">
+              <a
+                class="button"
+                href="https://www.google.com/maps/search/?api=1&query=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Googleマップを見る
+              </a>
             </div>
 
             <div class="map-embed">
@@ -305,41 +349,101 @@
               <p class="card-label">Invitation Seal</p>
               <h3>印をひらく</h3>
               <p class="card-lead">
-                この丸い印を押すと、日付・場所・ご出欠などのご案内を
-                切り替えて見られる演出です。
+                封の印をそっとひらくように、気になるご案内をお選びください。
               </p>
+              <p class="reveal-card__hint">気になる封をひらくと、その印の中でご案内が現れます。</p>
 
               <div class="reveal-grid">
-                <button class="reveal-orb" type="button" data-reveal-key="date">
-                  <span class="orb-label">Date</span>
-                  <span class="orb-sub">日付</span>
-                </button>
+                <article class="reveal-item" data-reveal-item="date">
+                  <button
+                    class="reveal-orb"
+                    type="button"
+                    data-reveal-key="date"
+                    aria-expanded="false"
+                    aria-controls="reveal-panel-date"
+                  >
+                    <span class="orb-label">Date</span>
+                    <span class="orb-sub">日付</span>
+                  </button>
 
-                <button class="reveal-orb" type="button" data-reveal-key="venue">
-                  <span class="orb-label">Place</span>
-                  <span class="orb-sub">場所</span>
-                </button>
+                  <div class="reveal-panel" id="reveal-panel-date" data-reveal-panel aria-hidden="true">
+                    <p class="reveal-panel__kicker">Date</p>
+                    <h4 class="reveal-panel__title">2026年10月12日（月）</h4>
+                    <div class="reveal-panel__meta">
+                      <span>式まであと</span>
+                      <strong><span data-ceremony-days>--</span>日</strong>
+                    </div>
+                    <p class="reveal-panel__copy" data-reveal-copy>
+                      お日にちや受付時間など、当日に必要な日時情報をこちらでご案内します。
+                    </p>
+                    <a
+                      class="button button-ghost"
+                      data-reveal-link
+                      data-placeholder-link
+                      href="#ceremony"
+                    >
+                      挙式編を見る
+                    </a>
+                  </div>
+                </article>
 
-                <button class="reveal-orb" type="button" data-reveal-key="rsvp">
-                  <span class="orb-label">RSVP</span>
-                  <span class="orb-sub">出欠</span>
-                </button>
-              </div>
+                <article class="reveal-item" data-reveal-item="venue">
+                  <button
+                    class="reveal-orb"
+                    type="button"
+                    data-reveal-key="venue"
+                    aria-expanded="false"
+                    aria-controls="reveal-panel-venue"
+                  >
+                    <span class="orb-label">Place</span>
+                    <span class="orb-sub">場所</span>
+                  </button>
 
-              <div class="reveal-display" aria-live="polite">
-                <p class="reveal-kicker" data-reveal-kicker>Seal</p>
-                <h4 data-reveal-title>ご案内をお選びください</h4>
-                <p data-reveal-copy>
-                  印を押すと、選んだご案内がここに表示されます。
-                </p>
-                <a
-                  class="button button-ghost is-hidden"
-                  data-reveal-link
-                  data-placeholder-link
-                  href="#"
-                >
-                  リンクを開く
-                </a>
+                  <div class="reveal-panel" id="reveal-panel-venue" data-reveal-panel aria-hidden="true">
+                    <p class="reveal-panel__kicker">Place</p>
+                    <h4 class="reveal-panel__title">京都・梨木神社</h4>
+                    <p class="reveal-panel__copy" data-reveal-copy>
+                      会場の場所やアクセスの目安をこちらにまとめています。
+                    </p>
+                    <a
+                      class="button button-ghost"
+                      data-reveal-link
+                      data-placeholder-link
+                      href="https://www.google.com/maps/search/?api=1&query=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD"
+                    >
+                      Googleマップを開く
+                    </a>
+                  </div>
+                </article>
+
+                <article class="reveal-item" data-reveal-item="rsvp">
+                  <button
+                    class="reveal-orb"
+                    type="button"
+                    data-reveal-key="rsvp"
+                    aria-expanded="false"
+                    aria-controls="reveal-panel-rsvp"
+                  >
+                    <span class="orb-label">RSVP</span>
+                    <span class="orb-sub">出欠</span>
+                  </button>
+
+                  <div class="reveal-panel" id="reveal-panel-rsvp" data-reveal-panel aria-hidden="true">
+                    <p class="reveal-panel__kicker">RSVP</p>
+                    <h4 class="reveal-panel__title">出欠はこちら</h4>
+                    <p class="reveal-panel__copy" data-reveal-copy>
+                      こちらから外部フォームへ進み、ご出欠をご回答いただけます。
+                    </p>
+                    <a
+                      class="button button-ghost"
+                      data-reveal-link
+                      data-placeholder-link
+                      href="FORM_URL"
+                    >
+                      出欠回答はこちら
+                    </a>
+                  </div>
+                </article>
               </div>
             </article>
 
@@ -352,21 +456,13 @@
               </p>
 
               <div class="support-panels">
-                <section class="support-panel">
+                <section class="support-panel support-panel--share">
                   <h4>写真の共有</h4>
                   <p>
-                    共有アルバムのご案内が整いましたら、
-                    こちらからお写真をお送りいただけるようにいたします。
+                    当日のお写真をお送りいただく方法は、
+                    共有先が整い次第こちらでご案内いたします。
                   </p>
-                  <!-- 写真共有先を変更する場合は、下の href を差し替えてください -->
-                  <a
-                    class="button button-ghost"
-                    href="https://photos.google.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    写真共有アルバム
-                  </a>
+                  <p class="support-note">共有先の準備が整いましたら、こちらにリンクを掲載いたします。</p>
                 </section>
 
                 <section class="support-panel support-panel--faq">
@@ -387,24 +483,48 @@
 
                     <article class="faq-item">
                       <button class="faq-question" type="button" aria-expanded="false">
-                        <span>写真の共有先について</span>
+                        <span>受付時間について</span>
                         <span class="faq-icon" aria-hidden="true">＋</span>
                       </button>
                       <div class="faq-answer">
                         <p>
-                          共有アルバムのご案内が整い次第、こちらに掲載いたします。
+                          受付開始時間などの詳細は、正式なご案内の際にあらためてお知らせいたします。
                         </p>
                       </div>
                     </article>
 
                     <article class="faq-item">
                       <button class="faq-question" type="button" aria-expanded="false">
-                        <span>詳しい時間について</span>
+                        <span>写真の共有について</span>
                         <span class="faq-icon" aria-hidden="true">＋</span>
                       </button>
                       <div class="faq-answer">
                         <p>
-                          受付開始時間などの詳細は、追ってご案内いたします。
+                          共有先が整い次第、このページから分かりやすくご案内いたします。
+                        </p>
+                      </div>
+                    </article>
+
+                    <article class="faq-item">
+                      <button class="faq-question" type="button" aria-expanded="false">
+                        <span>遅刻・ご欠席について</span>
+                        <span class="faq-icon" aria-hidden="true">＋</span>
+                      </button>
+                      <div class="faq-answer">
+                        <p>
+                          ご都合が変わった場合は、分かり次第ご連絡いただけますと幸いです。ご案内の際に連絡方法も掲載いたします。
+                        </p>
+                      </div>
+                    </article>
+
+                    <article class="faq-item">
+                      <button class="faq-question" type="button" aria-expanded="false">
+                        <span>ご祝儀について</span>
+                        <span class="faq-icon" aria-hidden="true">＋</span>
+                      </button>
+                      <div class="faq-answer">
+                        <p>
+                          当日のご案内にあわせて、失礼のないよう分かりやすくご説明できる形で掲載いたします。
                         </p>
                       </div>
                     </article>
@@ -429,7 +549,7 @@
           </div>
 
           <div class="rsvp-grid">
-            <article class="card fade-up">
+            <article class="card rsvp-primary-card fade-up">
               <p class="card-label">Response</p>
               <h3>出欠回答はこちら</h3>
               <p>
@@ -453,7 +573,7 @@
               </div>
             </article>
 
-            <article class="card fade-up">
+            <article class="card rsvp-support-card fade-up">
               <p class="card-label">Information</p>
               <h3>回答前にご確認いただく内容</h3>
               <ul class="guide-list">

@@ -8,13 +8,10 @@ const menuClose = document.querySelector("[data-menu-close]");
 const fadeItems = document.querySelectorAll(".fade-up");
 const faqItems = document.querySelectorAll(".faq-item");
 const countdown = document.querySelector("[data-countdown]");
+const ceremonyDays = document.querySelector("[data-ceremony-days]");
 const navLinks = document.querySelectorAll(".site-nav a");
 const observedSections = document.querySelectorAll("section[id]");
-const revealButtons = document.querySelectorAll("[data-reveal-key]");
-const revealKicker = document.querySelector("[data-reveal-kicker]");
-const revealTitle = document.querySelector("[data-reveal-title]");
-const revealCopy = document.querySelector("[data-reveal-copy]");
-const revealLink = document.querySelector("[data-reveal-link]");
+const revealItems = document.querySelectorAll("[data-reveal-item]");
 const placeholderLinks = document.querySelectorAll("[data-placeholder-link]");
 
 // OSの「動きを減らす」設定を見て、必要なら演出をやさしくします。
@@ -23,8 +20,7 @@ const mobileNavBreakpoint = window.matchMedia("(max-width: 768px)");
 
 // 後から差し替えるURLは、まずこのあたりを見ると追いやすいです。
 const RSVP_FORM_URL = "FORM_URL";
-const CEREMONY_MAP_URL =
-  "https://www.google.com/maps/search/?api=1&query=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD";
+const CEREMONY_DATE = "2026-10-12T00:00:00+09:00";
 
 let revealAnimationStarted = false;
 let confettiPlayed = false;
@@ -43,31 +39,6 @@ const openingTimeline = {
   confettiDelay: 3000,
   completeDelay: 4700,
   overlayRemoveDelay: 900
-};
-
-// 印を押したときに表示を切り替える内容です。
-const revealContent = {
-  date: {
-    kicker: "Date",
-    title: "2026年10月12日(月)",
-    copy: "お日にちや受付時間など、当日に必要な日時情報をこちらでご案内します。",
-    linkText: "挙式編を見る",
-    linkHref: "#ceremony"
-  },
-  venue: {
-    kicker: "Place",
-    title: "京都・梨木神社",
-    copy: "会場名やアクセス案内、地図への入り口をこちらにまとめてご案内します。",
-    linkText: "Googleマップを開く",
-    linkHref: CEREMONY_MAP_URL
-  },
-  rsvp: {
-    kicker: "RSVP",
-    title: "ご出欠のご案内",
-    copy: "こちらから外部フォームへ進み、ご出欠をご回答いただけます。",
-    linkText: "出欠回答はこちら",
-    linkHref: RSVP_FORM_URL
-  }
 };
 
 // 通常セクションのふわっと表示は、サイト本体が見え始めてから動かします。
@@ -515,32 +486,90 @@ function setupCurrentNav() {
   observedSections.forEach((section) => navObserver.observe(section));
 }
 
-// 印を押したときに、右下の案内を切り替えます。
+// 各印の中身と、そのすぐ下の案内をまとめて切り替えます。
 function setupRevealOrbs() {
-  if (!revealButtons.length || !revealTitle || !revealCopy || !revealKicker || !revealLink) {
+  if (!revealItems.length) {
     return;
   }
 
-  revealButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const key = button.dataset.revealKey;
-      const content = revealContent[key];
+  const setRevealState = (targetItem) => {
+    revealItems.forEach((item) => {
+      const isActive = item === targetItem;
+      const button = item.querySelector("[data-reveal-key]");
+      const panel = item.querySelector("[data-reveal-panel]");
 
-      if (!content) {
+      item.classList.toggle("is-active", isActive);
+
+      if (button) {
+        button.setAttribute("aria-expanded", String(isActive));
+      }
+
+      if (panel) {
+        panel.setAttribute("aria-hidden", String(!isActive));
+      }
+    });
+  };
+
+  const activateRevealItem = (targetItem) => {
+    setRevealState(targetItem);
+
+    targetItem.classList.remove("is-just-opened");
+    window.requestAnimationFrame(() => {
+      targetItem.classList.add("is-just-opened");
+    });
+
+    window.setTimeout(() => {
+      targetItem.classList.remove("is-just-opened");
+    }, 520);
+
+    if (mobileNavBreakpoint.matches) {
+      window.setTimeout(() => {
+        targetItem.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "nearest"
+        });
+      }, 120);
+    }
+  };
+
+  revealItems.forEach((item) => {
+    const button = item.querySelector("[data-reveal-key]");
+    const revealLink = item.querySelector("[data-reveal-link]");
+
+    if (!button || !revealLink) {
+      return;
+    }
+
+    setLinkBehavior(revealLink, revealLink.href);
+
+    button.addEventListener("click", () => {
+      if (item.classList.contains("is-active")) {
+        setRevealState(null);
+        item.classList.remove("is-just-opened");
         return;
       }
 
-      revealButtons.forEach((item) => item.classList.toggle("is-active", item === button));
-
-      revealKicker.textContent = content.kicker;
-      revealTitle.textContent = content.title;
-      revealCopy.textContent = content.copy;
-      revealLink.textContent = content.linkText;
-      revealLink.href = content.linkHref;
-      revealLink.classList.remove("is-hidden");
-      setLinkBehavior(revealLink, content.linkHref);
+      activateRevealItem(item);
     });
+
+    item.classList.remove("is-active", "is-just-opened");
+    button.setAttribute("aria-expanded", "false");
+    item.querySelector("[data-reveal-panel]")?.setAttribute("aria-hidden", "true");
   });
+}
+
+// 挙式日までの残り日数を、印のご案内にも表示します。
+function updateCeremonyCountdown() {
+  if (!ceremonyDays) {
+    return;
+  }
+
+  const targetDate = new Date(CEREMONY_DATE);
+  const now = new Date();
+  const diff = Math.max(targetDate.getTime() - now.getTime(), 0);
+  const remainingDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+  ceremonyDays.textContent = String(remainingDays);
 }
 
 // FORM_URL のまま押された場合だけ、差し替え忘れに気づけるようにします。
@@ -571,6 +600,7 @@ function initializeSite() {
   setupCurrentNav();
   setupRevealOrbs();
   setupPlaceholderLinks();
+  updateCeremonyCountdown();
   updateCountdown();
 
   window.addEventListener("resize", refreshOpenFaqHeight);
