@@ -1115,13 +1115,43 @@ body.is-opening-complete .site-header {
 }
 
 .brand {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.72rem;
   font-family: "Cormorant Garamond", "Noto Serif JP", serif;
   font-size: clamp(1.18rem, 1.9vw, 1.52rem);
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.055em;
   color: rgba(255, 248, 240, 0.96);
   text-decoration: none;
   white-space: nowrap;
+  text-shadow: 0 8px 22px rgba(49, 8, 18, 0.24);
+}
+
+.brand__line {
+  width: 36px;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 246, 231, 0.2), rgba(231, 200, 135, 0.92), rgba(255, 246, 231, 0.24));
+  box-shadow: 0 0 12px rgba(202, 164, 107, 0.3);
+}
+
+.brand__text {
+  position: relative;
+  display: inline-block;
+}
+
+.brand__text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.18rem;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 244, 223, 0), rgba(231, 200, 135, 0.54), rgba(255, 244, 223, 0));
+  opacity: 0.72;
 }
 
 .menu-toggle,
@@ -2098,8 +2128,13 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
     flex: 1 1 auto;
     min-width: 0;
     font-size: 1.08rem;
+    gap: 0.52rem;
     white-space: normal;
     line-height: 1.2;
+  }
+
+  .brand__line {
+    width: 24px;
   }
 
   .menu-toggle {
@@ -2197,22 +2232,6 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
   .site-main {
     display: flex;
     flex-direction: column;
-  }
-
-  #ceremony {
-    order: 1;
-  }
-
-  #rsvp {
-    order: 2;
-  }
-
-  #party {
-    order: 3;
-  }
-
-  #okinawa {
-    order: 4;
   }
 
   .content-section {
@@ -2390,6 +2409,10 @@ body.is-menu-open .menu-toggle span:nth-child(3) {
 
   .brand {
     font-size: 1rem;
+  }
+
+  .brand__line {
+    width: 18px;
   }
 
   .countdown {
