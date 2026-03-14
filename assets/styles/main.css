@@ -316,7 +316,7 @@ iframe {
     0 0 0 1px rgba(255, 255, 255, 0.58),
     0 36px 60px rgba(52, 24, 21, 0.16);
   isolation: isolate;
-  perspective: 1400px;
+  overflow: hidden;
 }
 
 .opening-stage__device::before {
@@ -403,7 +403,7 @@ iframe {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     0 14px 24px rgba(40, 7, 14, 0.18);
-  z-index: 3;
+  z-index: 6;
 }
 
 .curtain-stage__seam {
@@ -417,7 +417,7 @@ iframe {
   background:
     linear-gradient(180deg, rgba(255, 233, 193, 0.45), rgba(255, 255, 255, 0.06));
   box-shadow: 0 0 18px rgba(255, 233, 193, 0.14);
-  z-index: 3;
+  z-index: 5;
 }
 
 .invitation-preview {
@@ -435,9 +435,12 @@ iframe {
     inset 0 0 0 1px rgba(199, 164, 98, 0.18),
     inset 0 20px 44px rgba(255, 255, 255, 0.62);
   text-align: center;
-  opacity: 0.76;
-  transform: translateY(0.35rem) scale(0.97);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(0.6rem) scale(0.985);
+  transition:
+    opacity 0.72s ease 0.18s,
+    transform 0.9s cubic-bezier(0.22, 0.82, 0.22, 1) 0.18s;
 }
 
 .invitation-preview__meta {
@@ -466,25 +469,57 @@ iframe {
   position: absolute;
   top: 0.95rem;
   bottom: 0.95rem;
-  width: calc(54% - 0.45rem);
+  width: calc(50% + 1rem);
   overflow: hidden;
   box-shadow: var(--shadow-curtain);
   z-index: 4;
-  backface-visibility: hidden;
+  transition:
+    transform 1.55s cubic-bezier(0.22, 0.86, 0.24, 1),
+    opacity 0.55s ease;
+  will-change: transform;
 }
 
 .curtain-panel--left {
   left: 0.82rem;
-  border-radius: 1.55rem 1rem 1.8rem 1.3rem;
-  clip-path: polygon(0 0, 100% 0, 96% 100%, 0 100%);
-  transform-origin: left center;
+  border-radius: 1.55rem 0.8rem 1.75rem 1.28rem;
+  transform: translateX(0);
 }
 
 .curtain-panel--right {
   right: 0.82rem;
-  border-radius: 1rem 1.55rem 1.3rem 1.8rem;
-  clip-path: polygon(4% 0, 100% 0, 100% 100%, 0 100%);
-  transform-origin: right center;
+  border-radius: 0.8rem 1.55rem 1.28rem 1.75rem;
+  transform: translateX(0);
+}
+
+.curtain-panel::before,
+.curtain-panel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1.2rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.curtain-panel--left::before {
+  right: 0;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.22));
+}
+
+.curtain-panel--right::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.22), transparent);
+}
+
+.curtain-panel--left::after {
+  left: -0.5rem;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent);
+}
+
+.curtain-panel--right::after {
+  right: -0.5rem;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08));
 }
 
 .curtain-panel__cloth {
@@ -532,34 +567,39 @@ iframe {
   animation: fabricBreathe 4.6s ease-in-out infinite;
 }
 
-.curtain-stage.is-opening .curtain-panel--left {
-  animation: curtainLeftOpen 2.2s cubic-bezier(0.22, 0.9, 0.22, 1) forwards;
-}
-
-.curtain-stage.is-opening .curtain-panel--right {
-  animation: curtainRightOpen 2.2s cubic-bezier(0.22, 0.9, 0.22, 1) forwards;
-}
-
-.curtain-stage.is-opening .curtain-stage__seam {
-  animation: seamFade 1.6s ease forwards;
-}
-
-.curtain-stage.is-opening .invitation-preview {
-  animation: inviteBloom 1.4s ease 0.45s forwards;
-}
-
+.curtain-stage.is-opening .curtain-panel--left,
 .curtain-stage.is-open .curtain-panel--left {
-  transform: translate3d(-90%, 0, -80px) rotateY(34deg) skewY(-6deg) scaleX(0.84);
+  transform: translateX(-92%);
 }
 
+.curtain-stage.is-opening .curtain-panel--right,
 .curtain-stage.is-open .curtain-panel--right {
-  transform: translate3d(90%, 0, -80px) rotateY(-34deg) skewY(6deg) scaleX(0.84);
+  transform: translateX(92%);
+}
+
+.curtain-stage.is-opening .curtain-panel--left .curtain-panel__cloth {
+  animation:
+    fabricBreathe 4.6s ease-in-out infinite,
+    clothPullLeft 1.55s cubic-bezier(0.22, 0.86, 0.24, 1) both;
+}
+
+.curtain-stage.is-opening .curtain-panel--right .curtain-panel__cloth {
+  animation:
+    fabricBreathe 4.6s ease-in-out infinite,
+    clothPullRight 1.55s cubic-bezier(0.22, 0.86, 0.24, 1) both;
 }
 
 .curtain-stage.is-open .curtain-stage__seam {
   opacity: 0;
 }
 
+.curtain-stage.is-opening .curtain-stage__seam,
+.curtain-stage.is-open .curtain-stage__seam {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.curtain-stage.is-opening .invitation-preview,
 .curtain-stage.is-open .invitation-preview {
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -997,80 +1037,39 @@ iframe {
   }
 }
 
-@keyframes curtainLeftOpen {
+@keyframes clothPullLeft {
   0% {
-    transform: translate3d(0, 0, 0) rotateY(0) skewY(0) scaleX(1);
+    transform: translateX(0) scaleX(1);
   }
 
-  18% {
-    transform: translate3d(-3%, 0, 0) rotateY(2deg) skewY(-0.8deg) scaleX(1.01);
+  26% {
+    transform: translateX(-2%) scaleX(1.02);
   }
 
-  48% {
-    transform: translate3d(-42%, 0, -24px) rotateY(10deg) skewY(-3deg) scaleX(0.98);
-  }
-
-  78% {
-    transform: translate3d(-70%, 0, -58px) rotateY(22deg) skewY(-5deg) scaleX(0.89);
-  }
-
-  90% {
-    transform: translate3d(-83%, 0, -78px) rotateY(32deg) skewY(-6deg) scaleX(0.84);
+  62% {
+    transform: translateX(-4%) scaleX(0.98);
   }
 
   100% {
-    transform: translate3d(-90%, 0, -80px) rotateY(34deg) skewY(-6deg) scaleX(0.84);
+    transform: translateX(-7%) scaleX(0.96);
   }
 }
 
-@keyframes curtainRightOpen {
+@keyframes clothPullRight {
   0% {
-    transform: translate3d(0, 0, 0) rotateY(0) skewY(0) scaleX(1);
+    transform: translateX(0) scaleX(1);
   }
 
-  18% {
-    transform: translate3d(3%, 0, 0) rotateY(-2deg) skewY(0.8deg) scaleX(1.01);
+  26% {
+    transform: translateX(2%) scaleX(1.02);
   }
 
-  48% {
-    transform: translate3d(42%, 0, -24px) rotateY(-10deg) skewY(3deg) scaleX(0.98);
-  }
-
-  78% {
-    transform: translate3d(70%, 0, -58px) rotateY(-22deg) skewY(5deg) scaleX(0.89);
-  }
-
-  90% {
-    transform: translate3d(83%, 0, -78px) rotateY(-32deg) skewY(6deg) scaleX(0.84);
+  62% {
+    transform: translateX(4%) scaleX(0.98);
   }
 
   100% {
-    transform: translate3d(90%, 0, -80px) rotateY(-34deg) skewY(6deg) scaleX(0.84);
-  }
-}
-
-@keyframes seamFade {
-  0%,
-  28% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes inviteBloom {
-  0% {
-    opacity: 0.76;
-    transform: translateY(0.35rem) scale(0.97);
-    filter: blur(2px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+    transform: translateX(7%) scaleX(0.96);
   }
 }
 

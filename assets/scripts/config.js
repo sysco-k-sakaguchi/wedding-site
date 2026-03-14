@@ -51,9 +51,9 @@ export const EXPERIENCE_CONFIG = {
 };
 
 export const EXPERIENCE_SETTINGS = {
-  curtainIntroDelay: 700,
-  curtainOpenDuration: 2200,
-  curtainRevealDelay: 180,
+  curtainIntroDelay: 650,
+  curtainOpenDuration: 1550,
+  curtainRevealDelay: 120,
   scratchCompleteRatio: 0.08,
   scratchBrushSize: 34,
   scratchGestureDistance: 28,
