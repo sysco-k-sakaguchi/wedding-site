@@ -6,7 +6,7 @@
   <title>Digital Wedding Invitation</title>
   <meta
     name="description"
-    content="幕を開き、日付を明かし、式の日が近づくのを感じる体験型デジタル招待状です。"
+    content="幕がひらき、日付が明かされ、結婚式の日が少しずつ近づいていく体験型のデジタル招待状です。"
   >
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,16 +24,16 @@
   </noscript>
 
   <!--
-    固定ナビは、カーテンが開いたあとにだけ表示します。
-    体験フローを壊さないよう、最初から常時見せない構成にしています。
+    固定ナビは、日付を明かしたあとにだけ表示します。
+    最初から見せすぎず、体験を邪魔しないようにしています。
   -->
   <header class="floating-nav" data-floating-nav hidden>
-    <a class="floating-nav__brand" href="#opening">
+    <a class="floating-nav__brand" href="#opening" aria-label="ページ先頭へ戻る">
       <span class="floating-nav__monogram">MH</span>
       <span class="floating-nav__copy">Digital Invitation</span>
     </a>
 
-    <nav class="floating-nav__links" aria-label="招待状の進行">
+    <nav class="floating-nav__links" aria-label="招待状の主要セクション">
       <a href="#invitation">Invitation</a>
       <a href="#countdown">Date</a>
       <a href="#details">Details</a>
@@ -42,98 +42,116 @@
   </header>
 
   <main class="story">
-    <!-- Step 01: オープニングとカーテン演出 -->
+    <!--
+      オープニングは短く、自動で気持ちよく終わることを優先しています。
+      ユーザーに操作を要求せず、幕がひらいて招待状が見える流れを作ります。
+    -->
     <section class="scene scene--opening" id="opening">
       <div class="scene__inner scene__inner--opening">
         <div class="opening-copy" data-reveal>
-          <p class="scene__eyebrow">Step 01 / Open</p>
+          <p class="section-label">Digital Wedding Invitation</p>
           <h1>
-            幕をひらいて、
-            <span>招待状を受け取る。</span>
+            幕がひらく、
+            <span>その先にある招待状。</span>
           </h1>
           <p class="scene__lead">
-            これは情報を並べるサイトではなく、
-            指先で少しずつ明かしていく体験型のデジタル招待状です。
+            ご案内を一度に並べるのではなく、
+            ひとつずつ静かに明かしていく体験として設計しています。
           </p>
         </div>
 
-        <div class="curtain-stage" data-curtain-stage>
+        <div class="opening-stage" data-reveal>
           <div
-            class="curtain-stage__frame"
-            data-curtain-frame
-            aria-label="カーテンを開く演出エリア"
+            class="opening-stage__device curtain-stage"
+            data-curtain-stage
+            aria-label="オープニング演出"
           >
+            <div class="curtain-stage__spotlight" aria-hidden="true"></div>
+            <div class="curtain-stage__valance" aria-hidden="true"></div>
+            <div class="curtain-stage__seam" aria-hidden="true"></div>
+
             <article class="invitation-preview" aria-hidden="true">
               <p class="invitation-preview__eyebrow">Wedding Invitation</p>
+              <p class="invitation-preview__meta" data-preview-location>Kyoto Ceremony</p>
               <h2 class="invitation-preview__names" data-couple-names>Masato &amp; Haruka</h2>
-              <p class="invitation-preview__teaser">Open the curtain to begin</p>
+              <p class="invitation-preview__teaser">
+                A quiet prelude to our wedding day
+              </p>
             </article>
 
-            <div class="curtain-panel curtain-panel--left" aria-hidden="true"></div>
-            <div class="curtain-panel curtain-panel--right" aria-hidden="true"></div>
-            <div class="curtain-stage__glow" aria-hidden="true"></div>
+            <div class="curtain-panel curtain-panel--left" aria-hidden="true">
+              <div class="curtain-panel__cloth"></div>
+            </div>
 
-            <button
-              class="curtain-stage__handle"
-              type="button"
-              data-curtain-handle
-              aria-label="カーテンを開く"
-            >
-              <span></span>
-              <span></span>
-            </button>
+            <div class="curtain-panel curtain-panel--right" aria-hidden="true">
+              <div class="curtain-panel__cloth"></div>
+            </div>
           </div>
 
-          <p class="curtain-stage__hint" data-curtain-hint>
-            中央を指で左右へ動かして、カーテンを開いてください。
+          <p class="opening-stage__caption" data-curtain-caption>
+            まもなく、短いオープニングが始まります。
           </p>
 
-          <button class="ghost-button" type="button" data-curtain-skip>
-            演出をスキップして開く
-          </button>
+          <p class="opening-stage__scroll" data-curtain-scroll hidden>
+            Scroll to continue
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- Step 02: 招待状本体とスクラッチ演出 -->
+    <!--
+      カーテンのあとに、招待状本体を見せます。
+      ここでは名前とメッセージをしっかり中央に置き、紙の招待状らしい静けさを優先します。
+    -->
     <section class="scene scene--invitation is-locked" id="invitation" hidden>
       <div class="scene__inner scene__inner--narrow">
         <article class="invitation-card" data-reveal>
-          <p class="invitation-card__eyebrow">Wedding Invitation</p>
+          <p class="section-label">Invitation</p>
           <p class="invitation-card__subline">Together with our families</p>
           <h2 class="invitation-card__names" data-couple-names>Masato &amp; Haruka</h2>
           <p class="invitation-card__message" data-invitation-message>
             このたび私たちは結婚式を挙げることとなりました。
             大切な一日に、ぜひお立ち会いいただけましたら幸いです。
           </p>
-          <p class="invitation-card__note">
-            まずは、この日のことをひとつだけ。
-            金色のシールをこすって、日付を明かしてください。
-          </p>
+
+          <div class="invitation-card__divider" aria-hidden="true"></div>
 
           <div class="scratch-panel" data-scratch-root>
             <div class="scratch-panel__copy">
-              <p class="scene__eyebrow">Step 02 / Reveal</p>
-              <h3>Scratch to discover the date</h3>
+              <p class="section-label">Save the Date</p>
+              <h3>金のシールに、そっと触れてください。</h3>
               <p>
-                スマホでやさしくこすると、
-                隠れていた日付が紙の招待状のように現れます。
+                軽くなぞるか、やさしくタップするだけで、
+                日付が紙の招待状のように静かに現れます。
               </p>
             </div>
 
             <div class="scratch-panel__seal-wrap">
-              <div class="scratch-seal" data-scratch-seal aria-live="polite">
-                <div class="scratch-seal__date" data-scratch-result>
-                  <span data-date-year>2026</span>
-                  <strong data-date-day>10.12</strong>
-                  <small data-date-weekday>Monday</small>
+              <div class="scratch-seal-shell">
+                <div
+                  class="scratch-seal"
+                  data-scratch-seal
+                  role="button"
+                  tabindex="0"
+                  aria-label="日付を明かす金のシール"
+                  aria-describedby="scratch-caption"
+                >
+                  <div class="scratch-seal__date" data-scratch-result aria-live="polite">
+                    <span data-date-year>2026</span>
+                    <strong data-date-day>10.12</strong>
+                    <small data-date-weekday>Monday</small>
+                  </div>
+                  <canvas class="scratch-seal__canvas" data-scratch-canvas></canvas>
+                  <span class="scratch-seal__gloss" aria-hidden="true"></span>
+                  <span class="scratch-seal__instruction" aria-hidden="true">
+                    Touch or trace
+                  </span>
                 </div>
-                <canvas class="scratch-seal__canvas" data-scratch-canvas></canvas>
               </div>
 
-              <button class="text-button" type="button" data-scratch-reveal>
-                こすれない場合はタップで開く
-              </button>
+              <p class="scratch-panel__caption" id="scratch-caption">
+                軽くなぞるか、ワンタップで日付が開きます。
+              </p>
 
               <p class="scratch-panel__status" data-scratch-status aria-live="polite">
                 まだ日付は隠れています。
@@ -144,17 +162,37 @@
       </div>
     </section>
 
-    <!-- Step 03: 日付公開後に現れるカウントダウン -->
+    <!--
+      日付が明かされたあとに、必要な情報を簡潔に先に見せます。
+      先に「いつ・どこで」を理解できるようにしてから、詳細へつなげます。
+    -->
     <section class="scene scene--countdown is-locked" id="countdown" hidden>
       <div class="scene__inner scene__inner--narrow">
         <div class="section-heading" data-reveal>
-          <p class="scene__eyebrow">Step 03 / Anticipate</p>
-          <h2>式の日が近づいていく時間</h2>
+          <p class="section-label">Essential Details</p>
+          <h2>大切な情報を、まずはシンプルに。</h2>
           <p>
-            日付が明かされたあとに、
-            あと何日でその日が来るのかを静かに感じられるセクションです。
+            日付のあとに、日時と場所を簡潔に整理し、
+            そのうえで結婚式までの時間を感じられる流れにしています。
           </p>
         </div>
+
+        <article class="essentials-card" data-reveal>
+          <div class="essentials-card__grid">
+            <div class="essential-item">
+              <small>Date</small>
+              <strong data-date-display>2026年10月12日(月)</strong>
+            </div>
+            <div class="essential-item">
+              <small>Time</small>
+              <strong data-wedding-time>11:30 挙式開始</strong>
+            </div>
+            <div class="essential-item">
+              <small>Venue</small>
+              <strong data-venue-name>京都・梨木神社</strong>
+            </div>
+          </div>
+        </article>
 
         <article class="countdown-board" data-reveal data-countdown-root>
           <div class="countdown-board__header">
@@ -182,21 +220,24 @@
           </div>
 
           <p class="countdown-board__message" data-countdown-message>
-            その日まで、ゆっくりご準備ください。
+            その日まで、どうぞゆっくりご準備ください。
           </p>
         </article>
       </div>
     </section>
 
-    <!-- Step 04: 会場情報、地図、当日スケジュール -->
+    <!--
+      ここでは実用情報をカード単位で整理します。
+      会場、地図、当日の流れをそれぞれ役割分けして、読みやすくしています。
+    -->
     <section class="scene scene--details is-locked" id="details" hidden>
       <div class="scene__inner">
         <div class="section-heading" data-reveal>
-          <p class="scene__eyebrow">Step 04 / Gather</p>
+          <p class="section-label">Details</p>
           <h2>当日のご案内</h2>
           <p>
-            ここからは情報を一気に並べるのではなく、
-            会場、アクセス、当日の流れをカードごとに整理して見せます。
+            迷わず準備できるように、
+            会場情報、アクセス、当日の流れを静かに読み進められる形に整えています。
           </p>
         </div>
 
@@ -209,6 +250,10 @@
               <div>
                 <dt>Date</dt>
                 <dd data-date-display>2026年10月12日(月)</dd>
+              </div>
+              <div>
+                <dt>Time</dt>
+                <dd data-wedding-time>11:30 挙式開始</dd>
               </div>
               <div>
                 <dt>Address</dt>
@@ -252,23 +297,26 @@
           <h3>当日の流れ</h3>
 
           <!--
-            スケジュールは JS 側で配列から描画します。
-            時間や説明文の更新場所をひとつにまとめるためです。
+            スケジュールは JS 側の配列から生成します。
+            内容の変更箇所をひとつにまとめて、あとから追いやすくしています。
           -->
           <ol class="timeline-list" data-schedule-list></ol>
         </article>
       </div>
     </section>
 
-    <!-- Step 05: 外部の RSVP 導線だけを置く -->
+    <!--
+      出欠回答は外部ページへ遷移します。
+      このサイト内でフォームは持たず、世界観を保ったまま導線だけを置きます。
+    -->
     <section class="scene scene--rsvp is-locked" id="rsvp" hidden>
       <div class="scene__inner scene__inner--narrow">
         <article class="rsvp-card" data-reveal>
-          <p class="scene__eyebrow">Step 05 / Respond</p>
+          <p class="section-label">RSVP</p>
           <h2>ご出欠のご回答</h2>
           <p>
-            このサイト内にフォームは置かず、
-            専用の外部ページへ移動してご回答いただく構成にしています。
+            ご回答は専用の外部ページで承っております。
+            下のボタンより、ご都合のよいタイミングでお進みください。
           </p>
 
           <div class="rsvp-card__actions">

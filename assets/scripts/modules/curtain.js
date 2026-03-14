@@ -1,25 +1,49 @@
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-export function setupCurtain({ threshold = 0.82, onComplete } = {}) {
+export function setupCurtain({
+  introDelay = 700,
+  openDuration = 2200,
+  revealDelay = 180,
+  onComplete
+} = {}) {
   const stage = document.querySelector("[data-curtain-stage]");
-  const frame = document.querySelector("[data-curtain-frame]");
-  const handle = document.querySelector("[data-curtain-handle]");
-  const hint = document.querySelector("[data-curtain-hint]");
-  const skipButton = document.querySelector("[data-curtain-skip]");
+  const caption = document.querySelector("[data-curtain-caption]");
+  const scrollHint = document.querySelector("[data-curtain-scroll]");
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (!stage || !frame || !handle) {
+  if (!stage) {
     return;
   }
 
-  let progress = 0;
   let completed = false;
-  let session = null;
+  const timers = [];
 
-  function applyProgress(nextProgress) {
-    progress = clamp(nextProgress, 0, 1);
-    stage.style.setProperty("--curtain-progress", progress.toFixed(3));
+  function queueTimer(callback, delay) {
+    const timerId = window.setTimeout(callback, delay);
+    timers.push(timerId);
+  }
+
+  function clearTimers() {
+    timers.forEach((timerId) => {
+      window.clearTimeout(timerId);
+    });
+    timers.length = 0;
+  }
+
+  function updateCaption(text) {
+    if (caption) {
+      caption.textContent = text;
+    }
+  }
+
+  function showScrollHint() {
+    if (!scrollHint) {
+      return;
+    }
+
+    scrollHint.hidden = false;
+
+    window.requestAnimationFrame(() => {
+      scrollHint.classList.add("is-visible");
+    });
   }
 
   function finishCurtain() {
@@ -28,86 +52,45 @@ export function setupCurtain({ threshold = 0.82, onComplete } = {}) {
     }
 
     completed = true;
-    applyProgress(1);
+    clearTimers();
+    stage.classList.remove("is-waiting", "is-opening");
     stage.classList.add("is-open");
-
-    if (hint) {
-      hint.textContent = "招待状を開きました。";
-    }
-
+    updateCaption("招待状が開きました。続きを下へスクロールしてご覧ください。");
+    showScrollHint();
     onComplete?.();
   }
 
-  function resetCurtain() {
-    session = null;
+  function startSequence() {
+    stage.classList.add("is-waiting");
+    updateCaption("短いオープニングのあとに、招待状が現れます。");
 
-    if (completed) {
+    if (prefersReducedMotion) {
+      queueTimer(finishCurtain, 200);
       return;
     }
 
-    applyProgress(0);
+    queueTimer(() => {
+      stage.classList.add("is-opening");
+      updateCaption("幕がひらいています。");
+    }, introDelay);
 
-    if (hint) {
-      hint.textContent = "中央を指で左右へ動かして、カーテンを開いてください。";
-    }
+    queueTimer(() => {
+      updateCaption("招待状が見えてきました。");
+    }, introDelay + openDuration * 0.72);
+
+    queueTimer(finishCurtain, introDelay + openDuration + revealDelay);
   }
 
-  function startDrag(event) {
-    if (completed) {
-      return;
-    }
-
-    session = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY
-    };
-
-    frame.setPointerCapture(event.pointerId);
-
-    if (hint) {
-      hint.textContent = "そのまま横へスワイプして開いてください。";
-    }
-  }
-
-  function moveDrag(event) {
-    if (!session || session.pointerId !== event.pointerId || completed) {
-      return;
-    }
-
-    const deltaX = Math.abs(event.clientX - session.startX);
-    const deltaY = Math.abs(event.clientY - session.startY);
-
-    if (deltaY > deltaX * 1.25) {
-      return;
-    }
-
-    const maxDistance = frame.clientWidth * 0.34;
-    const nextProgress = deltaX / maxDistance;
-
-    applyProgress(nextProgress);
-  }
-
-  function endDrag(event) {
-    if (!session || session.pointerId !== event.pointerId) {
-      return;
-    }
-
-    frame.releasePointerCapture(event.pointerId);
-
-    if (progress >= threshold) {
+  // 触れた場合だけ、演出をすぐ終えて次へ進める保険を残しています。
+  stage.addEventListener("click", () => {
+    if (!completed) {
       finishCurtain();
-      return;
     }
+  });
 
-    resetCurtain();
-  }
+  window.requestAnimationFrame(startSequence);
 
-  frame.addEventListener("pointerdown", startDrag);
-  frame.addEventListener("pointermove", moveDrag);
-  frame.addEventListener("pointerup", endDrag);
-  frame.addEventListener("pointercancel", resetCurtain);
-
-  handle.addEventListener("click", finishCurtain);
-  skipButton?.addEventListener("click", finishCurtain);
+  return {
+    finish: finishCurtain
+  };
 }

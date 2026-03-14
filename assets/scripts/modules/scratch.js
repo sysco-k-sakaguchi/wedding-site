@@ -1,34 +1,86 @@
 function drawScratchSurface(context, width, height) {
   const gradient = context.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, "#f3deb2");
-  gradient.addColorStop(0.5, "#c9a45f");
-  gradient.addColorStop(1, "#8a6426");
+  gradient.addColorStop(0, "#f5e2b6");
+  gradient.addColorStop(0.4, "#cea760");
+  gradient.addColorStop(0.72, "#a27834");
+  gradient.addColorStop(1, "#7f5a22");
 
   context.clearRect(0, 0, width, height);
   context.fillStyle = gradient;
   context.fillRect(0, 0, width, height);
 
-  for (let index = 0; index < 16; index += 1) {
-    const radius = width * (0.34 + (index % 4) * 0.035);
-    context.strokeStyle = `rgba(255, 255, 255, ${0.1 + (index % 3) * 0.05})`;
-    context.lineWidth = 1.2;
+  for (let index = 0; index < 15; index += 1) {
+    context.strokeStyle = `rgba(255, 255, 255, ${0.05 + (index % 4) * 0.03})`;
+    context.lineWidth = 1;
     context.beginPath();
-    context.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
+    context.arc(width / 2, height / 2, width * (0.18 + index * 0.026), 0, Math.PI * 2);
     context.stroke();
   }
 
-  for (let index = 0; index < 90; index += 1) {
-    context.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.18})`;
+  for (let index = 0; index < 140; index += 1) {
+    context.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.16})`;
     context.beginPath();
-    context.arc(Math.random() * width, Math.random() * height, Math.random() * 2.2, 0, Math.PI * 2);
+    context.arc(Math.random() * width, Math.random() * height, Math.random() * 1.8, 0, Math.PI * 2);
     context.fill();
   }
 }
 
-export function setupScratch({ completeRatio = 0.42, brushSize = 22, onReveal } = {}) {
+function getPointFromEvent(event, canvas) {
+  const rect = canvas.getBoundingClientRect();
+
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  };
+}
+
+function eraseCircle(context, point, size) {
+  context.save();
+  context.globalCompositeOperation = "destination-out";
+  context.beginPath();
+  context.arc(point.x, point.y, size, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
+}
+
+function eraseStroke(context, from, to, size) {
+  context.save();
+  context.globalCompositeOperation = "destination-out";
+  context.lineCap = "round";
+  context.lineJoin = "round";
+  context.lineWidth = size * 2;
+  context.beginPath();
+  context.moveTo(from.x, from.y);
+  context.lineTo(to.x, to.y);
+  context.stroke();
+  context.restore();
+}
+
+function getClearedRatio(context, canvas) {
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  let transparentPixels = 0;
+  let sampledPixels = 0;
+
+  for (let index = 3; index < pixels.length; index += 40) {
+    sampledPixels += 1;
+
+    if (pixels[index] === 0) {
+      transparentPixels += 1;
+    }
+  }
+
+  return transparentPixels / sampledPixels;
+}
+
+export function setupScratch({
+  completeRatio = 0.08,
+  brushSize = 34,
+  gestureDistance = 28,
+  revealDelay = 260,
+  onReveal
+} = {}) {
   const seal = document.querySelector("[data-scratch-seal]");
   const canvas = document.querySelector("[data-scratch-canvas]");
-  const fallbackButton = document.querySelector("[data-scratch-reveal]");
   const status = document.querySelector("[data-scratch-status]");
 
   if (!seal || !canvas) {
@@ -42,8 +94,11 @@ export function setupScratch({ completeRatio = 0.42, brushSize = 22, onReveal } 
   }
 
   let drawing = false;
+  let queued = false;
   let revealed = false;
+  let travelled = 0;
   let sampleCounter = 0;
+  let lastPoint = null;
 
   function revealDate() {
     if (revealed) {
@@ -51,18 +106,31 @@ export function setupScratch({ completeRatio = 0.42, brushSize = 22, onReveal } 
     }
 
     revealed = true;
+    queued = false;
+    seal.classList.remove("is-clearing");
     seal.classList.add("is-revealed");
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     if (status) {
-      status.textContent = "日付が明かされました。続けて詳細をご覧ください。";
-    }
-
-    if (fallbackButton) {
-      fallbackButton.hidden = true;
+      status.textContent = "日付が明かされました。続けてご案内をご覧ください。";
     }
 
     onReveal?.();
+  }
+
+  function queueReveal() {
+    if (revealed || queued) {
+      return;
+    }
+
+    queued = true;
+    seal.classList.add("is-clearing");
+
+    if (status) {
+      status.textContent = "金のシールがほどけて、日付が現れます。";
+    }
+
+    window.setTimeout(revealDate, revealDelay);
   }
 
   function resizeCanvas() {
@@ -87,84 +155,93 @@ export function setupScratch({ completeRatio = 0.42, brushSize = 22, onReveal } 
     }
   }
 
-  function scratchAt(clientX, clientY) {
-    const rect = canvas.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
-    context.save();
-    context.globalCompositeOperation = "destination-out";
-    context.beginPath();
-    context.arc(x, y, brushSize, 0, Math.PI * 2);
-    context.fill();
-    context.restore();
-  }
-
-  function getScratchedRatio() {
-    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-    let transparentPixels = 0;
-    let sampledPixels = 0;
-
-    for (let index = 3; index < pixels.length; index += 32) {
-      sampledPixels += 1;
-
-      if (pixels[index] === 0) {
-        transparentPixels += 1;
-      }
-    }
-
-    return transparentPixels / sampledPixels;
-  }
-
   function handlePointerDown(event) {
     if (revealed) {
       return;
     }
 
     drawing = true;
-    canvas.setPointerCapture(event.pointerId);
-    scratchAt(event.clientX, event.clientY);
+    travelled = 0;
+    sampleCounter = 0;
+    lastPoint = getPointFromEvent(event, canvas);
+    eraseCircle(context, lastPoint, brushSize * 0.72);
+
+    if (seal.setPointerCapture) {
+      seal.setPointerCapture(event.pointerId);
+    }
 
     if (status) {
-      status.textContent = "そのまま指で円をこするように動かしてください。";
+      status.textContent = "軽くなぞるか、そのまま離してください。";
     }
   }
 
   function handlePointerMove(event) {
-    if (!drawing || revealed) {
+    if (!drawing || !lastPoint || revealed) {
       return;
     }
 
-    scratchAt(event.clientX, event.clientY);
-    sampleCounter += 1;
+    const point = getPointFromEvent(event, canvas);
+    const distance = Math.hypot(point.x - lastPoint.x, point.y - lastPoint.y);
 
-    if (sampleCounter % 8 === 0 && getScratchedRatio() >= completeRatio) {
-      revealDate();
+    if (distance === 0) {
+      return;
+    }
+
+    travelled += distance;
+    sampleCounter += 1;
+    eraseStroke(context, lastPoint, point, brushSize);
+    lastPoint = point;
+
+    if (travelled >= gestureDistance) {
+      queueReveal();
+      return;
+    }
+
+    if (sampleCounter % 2 === 0 && getClearedRatio(context, canvas) >= completeRatio) {
+      queueReveal();
     }
   }
 
   function handlePointerUp(event) {
     drawing = false;
+    lastPoint = null;
 
-    if (canvas.hasPointerCapture(event.pointerId)) {
-      canvas.releasePointerCapture(event.pointerId);
+    if (seal.hasPointerCapture?.(event.pointerId)) {
+      seal.releasePointerCapture(event.pointerId);
     }
 
-    if (!revealed && getScratchedRatio() >= completeRatio) {
-      revealDate();
+    if (!revealed) {
+      queueReveal();
+    }
+  }
+
+  function handleKeyDown(event) {
+    if (revealed) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      queueReveal();
     }
   }
 
   resizeCanvas();
 
-  canvas.addEventListener("pointerdown", handlePointerDown);
-  canvas.addEventListener("pointermove", handlePointerMove);
-  canvas.addEventListener("pointerup", handlePointerUp);
-  canvas.addEventListener("pointercancel", () => {
+  seal.addEventListener("pointerdown", handlePointerDown);
+  seal.addEventListener("pointermove", handlePointerMove);
+  seal.addEventListener("pointerup", handlePointerUp);
+  seal.addEventListener("pointercancel", () => {
     drawing = false;
+    lastPoint = null;
+  });
+  seal.addEventListener("keydown", handleKeyDown);
+  seal.addEventListener("click", () => {
+    if (!revealed) {
+      queueReveal();
+    }
   });
 
-  fallbackButton?.addEventListener("click", revealDate);
   window.addEventListener("resize", resizeCanvas);
 
   return {
