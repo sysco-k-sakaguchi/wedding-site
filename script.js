@@ -5,7 +5,6 @@ const confettiRoot = document.querySelector("[data-confetti]");
 const menuToggle = document.querySelector("[data-menu-toggle]");
 const mobileNav = document.querySelector("[data-mobile-nav]");
 const menuClose = document.querySelector("[data-menu-close]");
-const headerCompare = document.querySelector("[data-header-compare]");
 const fadeItems = document.querySelectorAll(".fade-up");
 const faqItems = document.querySelectorAll(".faq-item");
 const countdown = document.querySelector("[data-countdown]");
@@ -43,7 +42,8 @@ const openingTimeline = {
 };
 
 function shouldUseCompactNav() {
-  return mobileNavBreakpoint.matches || Boolean(headerCompare);
+  // 本番ヘッダーは比較モックの有無に関係なく、同じコンパクトナビで扱います。
+  return true;
 }
 
 // 通常セクションのふわっと表示は、サイト本体が見え始めてから動かします。
@@ -261,10 +261,6 @@ function setupMobileNav() {
 
     closeMobileNav();
   });
-
-  if ("addEventListener" in mobileNavBreakpoint) {
-    mobileNavBreakpoint.addEventListener("change", syncMobileNav);
-  }
 
   syncMobileNav();
 }

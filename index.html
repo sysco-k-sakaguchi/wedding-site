@@ -110,92 +110,124 @@
     <div class="ambient ambient-right" aria-hidden="true"></div>
     <div class="ambient ambient-bottom" aria-hidden="true"></div>
 
-    <header class="site-header" data-header-compare>
-      <div class="header-compare">
-        <!-- Pattern A / 本番用: 実際に動くタイトルバーはこのブロックです -->
-        <section class="header-compare__item header-compare__item--production">
-          <div class="header-bar header-bar--pattern-a">
-            <a class="brand brand--pattern-a" href="#top">
-              <span class="brand__line" aria-hidden="true"></span>
-              <span class="brand__text">Masato and Haruka Wedding</span>
-            </a>
+    <!-- 本番用タイトルバーです。比較モックを外したあとも、この header はそのまま使えます。 -->
+    <header class="site-header">
+      <div class="site-header__inner">
+        <div class="header-bar header-bar--pattern-a header-bar--live">
+          <a class="brand brand--pattern-a" href="#top">
+            <span class="brand__line" aria-hidden="true"></span>
+            <span class="brand__text">Masato and Haruka Wedding</span>
+          </a>
 
-            <button
-              class="menu-toggle"
-              type="button"
-              aria-expanded="false"
-              aria-controls="site-nav"
-              aria-label="メニューを開く"
-              data-menu-toggle
-            >
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
+          <button
+            class="menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="site-nav"
+            aria-label="メニューを開く"
+            data-menu-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
 
-            <nav
-              class="site-nav"
-              id="site-nav"
-              aria-label="ページ内ナビゲーション"
-              data-mobile-nav
-            >
-              <div class="site-nav__header">
-                <p class="site-nav__title">Menu</p>
-                <button
-                  class="site-nav__close"
-                  type="button"
-                  aria-label="メニューを閉じる"
-                  data-menu-close
-                >
-                  ×
-                </button>
-              </div>
-
-              <div class="site-nav__links">
-                <a href="#top">トップ</a>
-                <a href="#okinawa">沖縄編</a>
-                <a href="#ceremony">挙式編</a>
-                <a href="#rsvp">出欠</a>
-                <a href="#party">パーティ編</a>
-              </div>
-            </nav>
-          </div>
-          <p class="header-font-label">Antro Vectra</p>
-        </section>
-
-        <!-- Pattern B / 比較用ダミー: 不要になったらこの section ごと削除してください -->
-        <section class="header-compare__item header-compare__item--dummy header-compare__item--removable">
-          <div class="header-bar header-bar--pattern-b">
-            <div class="compare-brand compare-brand--pattern-b">
-              <span class="compare-brand__mark" aria-hidden="true"></span>
-              <span class="compare-brand__text">Masato and Haruka Wedding</span>
+          <nav
+            class="site-nav"
+            id="site-nav"
+            aria-label="ページ内ナビゲーション"
+            data-mobile-nav
+          >
+            <div class="site-nav__header">
+              <p class="site-nav__title">Menu</p>
+              <button
+                class="site-nav__close"
+                type="button"
+                aria-label="メニューを閉じる"
+                data-menu-close
+              >
+                ×
+              </button>
             </div>
-            <span class="compare-toggle compare-toggle--pattern-b" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-          </div>
-          <p class="header-font-label">BALQIS</p>
-        </section>
 
-        <!-- Pattern C / 比較用ダミー: 不要になったらこの section ごと削除してください -->
-        <section class="header-compare__item header-compare__item--dummy header-compare__item--removable">
-          <div class="header-bar header-bar--pattern-c">
-            <div class="compare-brand compare-brand--pattern-c">
-              <span class="compare-brand__badge" aria-hidden="true">MH</span>
-              <span class="compare-brand__text">Masato and Haruka Wedding</span>
+            <div class="site-nav__links">
+              <a href="#top">トップ</a>
+              <a href="#okinawa">沖縄編</a>
+              <a href="#ceremony">挙式編</a>
+              <a href="#rsvp">出欠</a>
+              <a href="#party">パーティ編</a>
             </div>
-            <span class="compare-toggle compare-toggle--pattern-c" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-          </div>
-          <p class="header-font-label">Cafgone</p>
-        </section>
+          </nav>
+        </div>
       </div>
     </header>
+
+    <!--
+      比較表示中のみ使う独立セクションです。
+      本番採用後は、この section.comparison-preview を丸ごと削除しても本文レイアウトは崩れません。
+    -->
+    <section class="comparison-preview" aria-labelledby="comparison-preview-title">
+      <div class="comparison-preview__panel">
+        <div class="comparison-preview__intro fade-up">
+          <p class="comparison-preview__eyebrow">Title Bar Comparison</p>
+          <h2 class="comparison-preview__title" id="comparison-preview-title">タイトルバー比較モック</h2>
+          <p class="comparison-preview__copy">
+            1つ目を本番候補として整え、2つ目と3つ目は比較確認用のダミーとして独立配置しています。
+          </p>
+        </div>
+
+        <div class="comparison-preview__stack">
+          <article class="comparison-card comparison-card--production fade-up">
+            <div class="header-bar header-bar--pattern-a header-bar--preview">
+              <div class="brand brand--pattern-a brand--preview" aria-hidden="true">
+                <span class="brand__line"></span>
+                <span class="brand__text">Masato and Haruka Wedding</span>
+              </div>
+              <span class="compare-toggle compare-toggle--pattern-a" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            </div>
+            <p class="header-font-label">Antro Vectra</p>
+          </article>
+
+          <!-- Dummy Pattern B Start / 比較用ダミー: 不要になったらこの article ごと削除してください -->
+          <article class="comparison-card comparison-card--dummy fade-up">
+            <div class="header-bar header-bar--pattern-b header-bar--preview">
+              <div class="compare-brand compare-brand--pattern-b" aria-hidden="true">
+                <span class="compare-brand__mark"></span>
+                <span class="compare-brand__text">Masato and Haruka Wedding</span>
+              </div>
+              <span class="compare-toggle compare-toggle--pattern-b" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            </div>
+            <p class="header-font-label">BALQIS</p>
+          </article>
+          <!-- Dummy Pattern B End -->
+
+          <!-- Dummy Pattern C Start / 比較用ダミー: 不要になったらこの article ごと削除してください -->
+          <article class="comparison-card comparison-card--dummy fade-up">
+            <div class="header-bar header-bar--pattern-c header-bar--preview">
+              <div class="compare-brand compare-brand--pattern-c" aria-hidden="true">
+                <span class="compare-brand__badge">MH</span>
+                <span class="compare-brand__text">Masato and Haruka Wedding</span>
+              </div>
+              <span class="compare-toggle compare-toggle--pattern-c" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            </div>
+            <p class="header-font-label">Cafgone</p>
+          </article>
+          <!-- Dummy Pattern C End -->
+        </div>
+      </div>
+    </section>
 
     <main class="site-main">
       <!--
