@@ -5,6 +5,7 @@ const confettiRoot = document.querySelector("[data-confetti]");
 const menuToggle = document.querySelector("[data-menu-toggle]");
 const mobileNav = document.querySelector("[data-mobile-nav]");
 const menuClose = document.querySelector("[data-menu-close]");
+const headerCompare = document.querySelector("[data-header-compare]");
 const fadeItems = document.querySelectorAll(".fade-up");
 const faqItems = document.querySelectorAll(".faq-item");
 const countdown = document.querySelector("[data-countdown]");
@@ -40,6 +41,10 @@ const openingTimeline = {
   completeDelay: 4700,
   overlayRemoveDelay: 900
 };
+
+function shouldUseCompactNav() {
+  return mobileNavBreakpoint.matches || Boolean(headerCompare);
+}
 
 // 通常セクションのふわっと表示は、サイト本体が見え始めてから動かします。
 function startSiteMotion() {
@@ -173,15 +178,15 @@ function closeMobileNav() {
   }
 
   mobileNav.classList.remove("is-open");
-  mobileNav.hidden = mobileNavBreakpoint.matches;
+  mobileNav.hidden = shouldUseCompactNav();
   menuToggle.setAttribute("aria-expanded", "false");
   menuToggle.setAttribute("aria-label", "メニューを開く");
   body.classList.remove("is-menu-open");
-  mobileNav.setAttribute("aria-hidden", String(mobileNavBreakpoint.matches));
+  mobileNav.setAttribute("aria-hidden", String(shouldUseCompactNav()));
 }
 
 function openMobileNav() {
-  if (!mobileNav || !menuToggle || !mobileNavBreakpoint.matches) {
+  if (!mobileNav || !menuToggle || !shouldUseCompactNav()) {
     return;
   }
 
@@ -200,7 +205,7 @@ function setupMobileNav() {
   }
 
   const syncMobileNav = () => {
-    if (!mobileNavBreakpoint.matches) {
+    if (!shouldUseCompactNav()) {
       closeMobileNav();
       mobileNav.hidden = false;
       mobileNav.removeAttribute("aria-hidden");
@@ -227,7 +232,7 @@ function setupMobileNav() {
 
   navLinks.forEach((link) => {
     link.addEventListener("click", () => {
-      if (mobileNavBreakpoint.matches) {
+      if (shouldUseCompactNav()) {
         closeMobileNav();
       }
     });
@@ -240,7 +245,7 @@ function setupMobileNav() {
   });
 
   document.addEventListener("click", (event) => {
-    if (!mobileNavBreakpoint.matches || !mobileNav.classList.contains("is-open")) {
+    if (!shouldUseCompactNav() || !mobileNav.classList.contains("is-open")) {
       return;
     }
 
