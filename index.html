@@ -3,718 +3,291 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Masato and Haruka Wedding</title>
+  <title>Digital Wedding Invitation</title>
   <meta
     name="description"
-    content="Masato and Haruka Wedding の招待・紹介用ワンページサイトです。"
+    content="幕を開き、日付を明かし、式の日が近づくのを感じる体験型デジタル招待状です。"
   >
-
-  <!-- 英字タイトル用と日本語本文用のフォントです -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+JP:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Shippori+Mincho+B1:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   >
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="assets/styles/main.css">
 </head>
-<body class="is-opening-pending">
+<body>
+  <noscript>
+    <div class="noscript-note">
+      この招待状は JavaScript を使って演出を表示しています。ブラウザ設定で JavaScript を有効にしてご覧ください。
+    </div>
+  </noscript>
+
   <!--
-    最初の導入演出です。
-    サイト本体とは分けて、fixed のオーバーレイとして一度だけ再生します。
+    固定ナビは、カーテンが開いたあとにだけ表示します。
+    体験フローを壊さないよう、最初から常時見せない構成にしています。
   -->
-  <div class="opening-overlay" data-opening-overlay>
-    <div class="opening-overlay__backdrop" aria-hidden="true"></div>
-    <div class="opening-overlay__glow opening-overlay__glow--left" aria-hidden="true"></div>
-    <div class="opening-overlay__glow opening-overlay__glow--right" aria-hidden="true"></div>
+  <header class="floating-nav" data-floating-nav hidden>
+    <a class="floating-nav__brand" href="#opening">
+      <span class="floating-nav__monogram">MH</span>
+      <span class="floating-nav__copy">Digital Invitation</span>
+    </a>
 
-    <div class="opening-curtain" aria-hidden="true">
-      <div class="opening-curtain__panel opening-curtain__panel--left"></div>
-      <div class="opening-curtain__panel opening-curtain__panel--right"></div>
-      <div class="opening-curtain__center-line"></div>
-    </div>
+    <nav class="floating-nav__links" aria-label="招待状の進行">
+      <a href="#invitation">Invitation</a>
+      <a href="#countdown">Date</a>
+      <a href="#details">Details</a>
+      <a href="#rsvp">RSVP</a>
+    </nav>
+  </header>
 
-    <div class="opening-intro">
-      <p class="opening-intro__eyebrow">Masato and Haruka Wedding</p>
-      <h1 class="opening-intro__title">
-        <span>幕が開くと、</span>
-        <span>はじまる一日。</span>
-      </h1>
-      <p class="opening-intro__copy">
-        最初に一度だけ、静かな幕開けの演出が流れます。
-      </p>
-      <p class="opening-intro__hint">まもなく幕開けの演出が始まります。</p>
-    </div>
+  <main class="story">
+    <!-- Step 01: オープニングとカーテン演出 -->
+    <section class="scene scene--opening" id="opening">
+      <div class="scene__inner scene__inner--opening">
+        <div class="opening-copy" data-reveal>
+          <p class="scene__eyebrow">Step 01 / Open</p>
+          <h1>
+            幕をひらいて、
+            <span>招待状を受け取る。</span>
+          </h1>
+          <p class="scene__lead">
+            これは情報を並べるサイトではなく、
+            指先で少しずつ明かしていく体験型のデジタル招待状です。
+          </p>
+        </div>
 
-    <div class="opening-flash" aria-hidden="true"></div>
-    <div class="celebration-burst" data-confetti aria-hidden="true"></div>
-  </div>
+        <div class="curtain-stage" data-curtain-stage>
+          <div
+            class="curtain-stage__frame"
+            data-curtain-frame
+            aria-label="カーテンを開く演出エリア"
+          >
+            <article class="invitation-preview" aria-hidden="true">
+              <p class="invitation-preview__eyebrow">Wedding Invitation</p>
+              <h2 class="invitation-preview__names" data-couple-names>Masato &amp; Haruka</h2>
+              <p class="invitation-preview__teaser">Open the curtain to begin</p>
+            </article>
 
-  <section class="opening-scene" id="top">
-    <div class="opening-stage">
-      <div class="opening-stage__backdrop" aria-hidden="true"></div>
-      <div class="opening-stage__glow opening-stage__glow--left" aria-hidden="true"></div>
-      <div class="opening-stage__glow opening-stage__glow--right" aria-hidden="true"></div>
+            <div class="curtain-panel curtain-panel--left" aria-hidden="true"></div>
+            <div class="curtain-panel curtain-panel--right" aria-hidden="true"></div>
+            <div class="curtain-stage__glow" aria-hidden="true"></div>
 
-      <!--
-        幕の奥にあるトップビジュアルです。
-        写真がまだ無い間も雰囲気が伝わるよう、プレースホルダー付きにしています。
-      -->
-      <div class="opening-hero">
-        <div class="opening-hero__copy">
-          <p class="eyebrow">Masato and Haruka Wedding</p>
-          <h2>終わらないミニマルパーティー</h2>
-          <p class="opening-hero__lead">
-            まずはお日にち、会場、ご出欠の入り口をご確認ください。
-            そのあとに、当日の流れやアクセス、写真共有のご案内を
-            順にご覧いただける構成にしています。
+            <button
+              class="curtain-stage__handle"
+              type="button"
+              data-curtain-handle
+              aria-label="カーテンを開く"
+            >
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+
+          <p class="curtain-stage__hint" data-curtain-hint>
+            中央を指で左右へ動かして、カーテンを開いてください。
           </p>
 
-          <!-- 日付と場所を更新する場合は、この2つの文言を変更してください -->
-          <div class="hero-meta">
-            <div class="hero-meta__item">
-              <small class="hero-meta__label">Date</small>
-              <strong class="hero-meta__value">2026年10月12日(月)</strong>
-            </div>
-            <div class="hero-meta__item">
-              <small class="hero-meta__label">Place</small>
-              <strong class="hero-meta__value">京都・梨木神社</strong>
-            </div>
-          </div>
-
-          <div class="hero-actions">
-            <a class="button" href="#rsvp">出欠回答はこちら</a>
-            <a class="button button-secondary" href="#ceremony">挙式のご案内</a>
-          </div>
-        </div>
-
-        <div class="opening-hero__visual">
-          <div class="hero-visual__frame">
-            <!-- トップ写真は style.css 内の .hero-photo background-image を差し替えて使います -->
-            <div class="hero-photo">
-              <span class="hero-photo__badge">Coming Soon</span>
-              <div class="hero-photo__copy">
-                <p>Kyoto Ceremony</p>
-                <strong>Masato and Haruka</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <div class="page-shell">
-    <div class="ambient ambient-left" aria-hidden="true"></div>
-    <div class="ambient ambient-right" aria-hidden="true"></div>
-    <div class="ambient ambient-bottom" aria-hidden="true"></div>
-
-    <!-- 本番用タイトルバーです。比較モックを外したあとも、この header はそのまま使えます。 -->
-    <header class="site-header">
-      <div class="site-header__inner">
-        <div class="header-bar header-bar--pattern-a header-bar--live">
-          <a class="brand brand--pattern-a" href="#top">
-            <span class="brand__line" aria-hidden="true"></span>
-            <span class="brand__text">Masato and Haruka Wedding</span>
-          </a>
-
-          <button
-            class="menu-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="site-nav"
-            aria-label="メニューを開く"
-            data-menu-toggle
-          >
-            <span></span>
-            <span></span>
-            <span></span>
+          <button class="ghost-button" type="button" data-curtain-skip>
+            演出をスキップして開く
           </button>
-
-          <nav
-            class="site-nav"
-            id="site-nav"
-            aria-label="ページ内ナビゲーション"
-            data-mobile-nav
-          >
-            <div class="site-nav__header">
-              <p class="site-nav__title">Menu</p>
-              <button
-                class="site-nav__close"
-                type="button"
-                aria-label="メニューを閉じる"
-                data-menu-close
-              >
-                ×
-              </button>
-            </div>
-
-            <div class="site-nav__links">
-              <a href="#top">トップ</a>
-              <a href="#okinawa">沖縄編</a>
-              <a href="#ceremony">挙式編</a>
-              <a href="#rsvp">出欠</a>
-              <a href="#party">パーティ編</a>
-            </div>
-          </nav>
-        </div>
-      </div>
-    </header>
-
-    <!--
-      比較表示中のみ使う独立セクションです。
-      本番採用後は、この section.comparison-preview を丸ごと削除しても本文レイアウトは崩れません。
-    -->
-    <section class="comparison-preview" aria-labelledby="comparison-preview-title">
-      <div class="comparison-preview__panel">
-        <div class="comparison-preview__intro fade-up">
-          <p class="comparison-preview__eyebrow">Title Bar Comparison</p>
-          <h2 class="comparison-preview__title" id="comparison-preview-title">タイトルバー比較モック</h2>
-          <p class="comparison-preview__copy">
-            1つ目を本番候補として整え、2つ目と3つ目は比較確認用のダミーとして独立配置しています。
-          </p>
-        </div>
-
-        <div class="comparison-preview__stack">
-          <article class="comparison-card comparison-card--production fade-up">
-            <div class="header-bar header-bar--pattern-a header-bar--preview">
-              <div class="brand brand--pattern-a brand--preview" aria-hidden="true">
-                <span class="brand__line"></span>
-                <span class="brand__text">Masato and Haruka Wedding</span>
-              </div>
-              <span class="compare-toggle compare-toggle--pattern-a" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </div>
-            <p class="header-font-label">Antro Vectra</p>
-          </article>
-
-          <!-- Dummy Pattern B Start / 比較用ダミー: 不要になったらこの article ごと削除してください -->
-          <article class="comparison-card comparison-card--dummy fade-up">
-            <div class="header-bar header-bar--pattern-b header-bar--preview">
-              <div class="compare-brand compare-brand--pattern-b" aria-hidden="true">
-                <span class="compare-brand__mark"></span>
-                <span class="compare-brand__text">Masato and Haruka Wedding</span>
-              </div>
-              <span class="compare-toggle compare-toggle--pattern-b" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </div>
-            <p class="header-font-label">BALQIS</p>
-          </article>
-          <!-- Dummy Pattern B End -->
-
-          <!-- Dummy Pattern C Start / 比較用ダミー: 不要になったらこの article ごと削除してください -->
-          <article class="comparison-card comparison-card--dummy fade-up">
-            <div class="header-bar header-bar--pattern-c header-bar--preview">
-              <div class="compare-brand compare-brand--pattern-c" aria-hidden="true">
-                <span class="compare-brand__badge">MH</span>
-                <span class="compare-brand__text">Masato and Haruka Wedding</span>
-              </div>
-              <span class="compare-toggle compare-toggle--pattern-c" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </div>
-            <p class="header-font-label">Cafgone</p>
-          </article>
-          <!-- Dummy Pattern C End -->
         </div>
       </div>
     </section>
 
-    <main class="site-main">
-      <!--
-        Concept は独立した章としては表示せず、
-        トップのコピーや各セクションの説明文に世界観を溶け込ませています。
-        キーワード:
-        - 終わらないミニマルパーティー
-        - 伝統も、今も
-        - 幸せの連鎖
-      -->
+    <!-- Step 02: 招待状本体とスクラッチ演出 -->
+    <section class="scene scene--invitation is-locked" id="invitation" hidden>
+      <div class="scene__inner scene__inner--narrow">
+        <article class="invitation-card" data-reveal>
+          <p class="invitation-card__eyebrow">Wedding Invitation</p>
+          <p class="invitation-card__subline">Together with our families</p>
+          <h2 class="invitation-card__names" data-couple-names>Masato &amp; Haruka</h2>
+          <p class="invitation-card__message" data-invitation-message>
+            このたび私たちは結婚式を挙げることとなりました。
+            大切な一日に、ぜひお立ち会いいただけましたら幸いです。
+          </p>
+          <p class="invitation-card__note">
+            まずは、この日のことをひとつだけ。
+            金色のシールをこすって、日付を明かしてください。
+          </p>
 
-      <section class="content-section" id="okinawa">
-        <div class="section-inner">
-          <div class="section-heading fade-up">
-            <div>
-              <p class="section-kicker">Okinawa Story</p>
-              <h2>沖縄編</h2>
-            </div>
-            <p class="section-copy">
-              ここでは前撮りのお写真や、その日の空気感が伝わるエピソードを
-              ご覧いただけるように整えていきます。
-            </p>
-          </div>
-
-          <div class="split-layout">
-            <!-- 沖縄写真は style.css 内の .image-card-okinawa background-image を差し替えて使います -->
-            <article class="card image-card image-card-okinawa fade-up">
-              <span class="chip">Coming Soon</span>
-            </article>
-
-            <article class="card text-card fade-up">
-              <p class="card-label">Pre Wedding Photos</p>
-              <h3>沖縄での前撮り写真を、ゆったりご覧いただけます</h3>
+          <div class="scratch-panel" data-scratch-root>
+            <div class="scratch-panel__copy">
+              <p class="scene__eyebrow">Step 02 / Reveal</p>
+              <h3>Scratch to discover the date</h3>
               <p>
-                景色や光のやわらかさまで感じられるよう、
-                写真を大きく見ていただけるレイアウトでまとめていきます。
+                スマホでやさしくこすると、
+                隠れていた日付が紙の招待状のように現れます。
               </p>
-              <p class="muted">
-                写真の準備が整い次第、こちらに掲載いたします。
+            </div>
+
+            <div class="scratch-panel__seal-wrap">
+              <div class="scratch-seal" data-scratch-seal aria-live="polite">
+                <div class="scratch-seal__date" data-scratch-result>
+                  <span data-date-year>2026</span>
+                  <strong data-date-day>10.12</strong>
+                  <small data-date-weekday>Monday</small>
+                </div>
+                <canvas class="scratch-seal__canvas" data-scratch-canvas></canvas>
+              </div>
+
+              <button class="text-button" type="button" data-scratch-reveal>
+                こすれない場合はタップで開く
+              </button>
+
+              <p class="scratch-panel__status" data-scratch-status aria-live="polite">
+                まだ日付は隠れています。
               </p>
-            </article>
+            </div>
           </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Step 03: 日付公開後に現れるカウントダウン -->
+    <section class="scene scene--countdown is-locked" id="countdown" hidden>
+      <div class="scene__inner scene__inner--narrow">
+        <div class="section-heading" data-reveal>
+          <p class="scene__eyebrow">Step 03 / Anticipate</p>
+          <h2>式の日が近づいていく時間</h2>
+          <p>
+            日付が明かされたあとに、
+            あと何日でその日が来るのかを静かに感じられるセクションです。
+          </p>
         </div>
-      </section>
 
-      <section class="content-section section-soft" id="ceremony">
-        <div class="section-inner">
-          <div class="section-heading fade-up">
-            <div>
-              <p class="section-kicker">Wedding Ceremony</p>
-              <h2>挙式編</h2>
+        <article class="countdown-board" data-reveal data-countdown-root>
+          <div class="countdown-board__header">
+            <p class="countdown-board__label">Wedding Countdown</p>
+            <p class="countdown-board__date" data-date-display>2026年10月12日(月)</p>
+          </div>
+
+          <div class="countdown-grid">
+            <div class="countdown-cell">
+              <span data-countdown-days>--</span>
+              <small>Days</small>
             </div>
-            <p class="section-copy">
-              このセクションでは、神社婚らしい落ち着きと見やすさを大切にしながら、
-              会場や当日の流れ、出欠の入り口をひとまとまりで確認いただけるようにしています。
-            </p>
+            <div class="countdown-cell">
+              <span data-countdown-hours>--</span>
+              <small>Hours</small>
+            </div>
+            <div class="countdown-cell">
+              <span data-countdown-minutes>--</span>
+              <small>Minutes</small>
+            </div>
+            <div class="countdown-cell">
+              <span data-countdown-seconds>--</span>
+              <small>Seconds</small>
+            </div>
           </div>
 
-          <div class="ceremony-overview">
-            <article class="card ceremony-info fade-up">
-              <p class="card-label">Ceremony Information</p>
-              <h3>京都・梨木神社</h3>
-              <p class="card-lead">
-                お日にち、場所、アクセスを最初に分かりやすくご案内します。
-              </p>
+          <p class="countdown-board__message" data-countdown-message>
+            その日まで、ゆっくりご準備ください。
+          </p>
+        </article>
+      </div>
+    </section>
 
-              <div class="detail-list">
-                <div class="detail-row">
-                  <span>お日にち</span>
-                  <strong>2026年10月12日(月)</strong>
-                </div>
-                <div class="detail-row">
-                  <span>会場</span>
-                  <strong>京都・梨木神社</strong>
-                </div>
-                <div class="detail-row">
-                  <span>住所</span>
-                  <strong>京都市上京区染殿町680</strong>
-                </div>
-                <div class="detail-row">
-                  <span>アクセス</span>
-                  <strong>市バス「府立医大病院前」より徒歩約3分</strong>
-                </div>
-              </div>
+    <!-- Step 04: 会場情報、地図、当日スケジュール -->
+    <section class="scene scene--details is-locked" id="details" hidden>
+      <div class="scene__inner">
+        <div class="section-heading" data-reveal>
+          <p class="scene__eyebrow">Step 04 / Gather</p>
+          <h2>当日のご案内</h2>
+          <p>
+            ここからは情報を一気に並べるのではなく、
+            会場、アクセス、当日の流れをカードごとに整理して見せます。
+          </p>
+        </div>
 
-              <div class="button-row">
-                <a
-                  class="button"
-                  href="https://www.google.com/maps/search/?api=1&query=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Googleマップを開く
-                </a>
-                <a class="button button-secondary" href="#rsvp">出欠回答はこちら</a>
-              </div>
-            </article>
+        <div class="detail-grid">
+          <article class="detail-card" data-reveal>
+            <p class="detail-card__label">Venue</p>
+            <h3 data-venue-name>京都・梨木神社</h3>
 
-            <article class="card ceremony-schedule fade-up">
-              <p class="card-label">Schedule</p>
-              <h3>当日の流れ</h3>
-              <p class="card-lead">
-                受付時間や挙式開始時間など、当日の流れをここにまとめてご案内します。
-              </p>
-
-              <div class="timeline">
-                <div class="timeline-item">
-                  <span class="timeline-time">1</span>
-                  <div>
-                    <h4>受付</h4>
-                    <p>開始時間の詳細は、正式なご案内の際にお知らせいたします。</p>
-                  </div>
-                </div>
-
-                <div class="timeline-item">
-                  <span class="timeline-time">2</span>
-                  <div>
-                    <h4>挙式</h4>
-                    <p>ご移動やお集まりの目安も含めて、分かりやすくお伝えします。</p>
-                  </div>
-                </div>
-
-                <div class="timeline-item">
-                  <span class="timeline-time">3</span>
-                  <div>
-                    <h4>ご歓談・お写真</h4>
-                    <p>落ち着いてお過ごしいただけるひとときをご案内いたします。</p>
-                  </div>
-                </div>
-
-                <div class="timeline-item">
-                  <span class="timeline-time">4</span>
-                  <div>
-                    <h4>お開き</h4>
-                    <p>お帰りの流れや、お見送りの目安も分かりやすくご案内いたします。</p>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </div>
-
-          <article class="card ceremony-map-card fade-up">
-            <div class="ceremony-map-card__header">
+            <dl class="detail-list">
               <div>
-                <p class="card-label">Venue Map</p>
-                <h3>会場の地図</h3>
+                <dt>Date</dt>
+                <dd data-date-display>2026年10月12日(月)</dd>
               </div>
-              <p class="card-support">
-                地図アプリへそのまま進めるように、会場名とアクセスの目安をまとめています。
-              </p>
-            </div>
+              <div>
+                <dt>Address</dt>
+                <dd data-venue-address>京都府京都市上京区染殿町680</dd>
+              </div>
+              <div>
+                <dt>Access</dt>
+                <dd data-venue-access>
+                  京阪「出町柳駅」より徒歩約15分 / 市バス「府立医大病院前」より徒歩約3分
+                </dd>
+              </div>
+            </dl>
 
-            <div class="map-facts">
-              <div class="map-facts__item">
-                <span>会場</span>
-                <strong>梨木神社</strong>
-              </div>
-              <div class="map-facts__item">
-                <span>住所</span>
-                <strong>京都市上京区染殿町680</strong>
-              </div>
-              <div class="map-facts__item">
-                <span>アクセス</span>
-                <strong>京阪「神宮丸太町駅」徒歩約15分 / 市バス「府立医大病院前」徒歩約3分</strong>
-              </div>
-            </div>
-
-            <div class="button-row ceremony-map-card__actions">
-              <a
-                class="button"
-                href="https://www.google.com/maps/search/?api=1&query=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Googleマップを見る
-              </a>
-            </div>
-
-            <div class="map-embed">
-              <!-- 会場が変わる場合は、この iframe の src を新しい地図URLに差し替えてください -->
-              <iframe
-                title="梨木神社の地図"
-                src="https://maps.google.com/maps?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&z=16&output=embed"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                allowfullscreen
-              ></iframe>
-            </div>
+            <p class="detail-card__note" data-venue-note>
+              到着後は境内のご案内に沿って受付までお進みください。
+            </p>
           </article>
 
-          <div class="ceremony-detail-grid">
-            <article class="card reveal-card fade-up">
-              <p class="card-label">Invitation Seal</p>
-              <h3>印をひらく</h3>
-              <p class="card-lead">
-                封の印をそっとひらくように、気になるご案内をお選びください。
-              </p>
-              <p class="reveal-card__hint">気になる封をひらくと、そのすぐ下にご案内が現れます。</p>
+          <article class="detail-card detail-card--map" data-reveal>
+            <p class="detail-card__label">Map</p>
+            <h3>アクセスマップ</h3>
 
-              <div class="reveal-grid">
-                <article class="reveal-item" data-reveal-item="date">
-                  <button
-                    class="reveal-orb"
-                    type="button"
-                    data-reveal-key="date"
-                    aria-expanded="false"
-                    aria-controls="reveal-panel-date"
-                  >
-                    <span class="orb-label">Date</span>
-                    <span class="orb-sub">日付</span>
-                  </button>
-
-                  <div class="reveal-panel" id="reveal-panel-date" data-reveal-panel aria-hidden="true">
-                    <p class="reveal-panel__kicker">Date</p>
-                    <h4 class="reveal-panel__title">2026年10月12日（月）</h4>
-                    <div class="reveal-panel__meta">
-                      <span>式まであと</span>
-                      <strong><span data-ceremony-days>--</span>日</strong>
-                    </div>
-                    <p class="reveal-panel__copy" data-reveal-copy>
-                      お日にちや受付時間など、当日に必要な日時情報をこちらでご案内します。
-                    </p>
-                    <a
-                      class="button button-ghost"
-                      data-reveal-link
-                      data-placeholder-link
-                      href="#ceremony"
-                    >
-                      挙式編を見る
-                    </a>
-                  </div>
-                </article>
-
-                <article class="reveal-item" data-reveal-item="venue">
-                  <button
-                    class="reveal-orb"
-                    type="button"
-                    data-reveal-key="venue"
-                    aria-expanded="false"
-                    aria-controls="reveal-panel-venue"
-                  >
-                    <span class="orb-label">Place</span>
-                    <span class="orb-sub">場所</span>
-                  </button>
-
-                  <div class="reveal-panel" id="reveal-panel-venue" data-reveal-panel aria-hidden="true">
-                    <p class="reveal-panel__kicker">Place</p>
-                    <h4 class="reveal-panel__title">京都・梨木神社</h4>
-                    <p class="reveal-panel__copy" data-reveal-copy>
-                      会場の場所やアクセスの目安をこちらにまとめています。
-                    </p>
-                    <a
-                      class="button button-ghost"
-                      data-reveal-link
-                      data-placeholder-link
-                      href="https://www.google.com/maps/search/?api=1&query=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD"
-                    >
-                      Googleマップを開く
-                    </a>
-                  </div>
-                </article>
-
-                <article class="reveal-item" data-reveal-item="rsvp">
-                  <button
-                    class="reveal-orb"
-                    type="button"
-                    data-reveal-key="rsvp"
-                    aria-expanded="false"
-                    aria-controls="reveal-panel-rsvp"
-                  >
-                    <span class="orb-label">RSVP</span>
-                    <span class="orb-sub">出欠</span>
-                  </button>
-
-                  <div class="reveal-panel" id="reveal-panel-rsvp" data-reveal-panel aria-hidden="true">
-                    <p class="reveal-panel__kicker">RSVP</p>
-                    <h4 class="reveal-panel__title">出欠はこちら</h4>
-                    <p class="reveal-panel__copy" data-reveal-copy>
-                      こちらから外部フォームへ進み、ご出欠をご回答いただけます。
-                    </p>
-                    <a
-                      class="button button-ghost"
-                      data-reveal-link
-                      data-placeholder-link
-                      href="FORM_URL"
-                    >
-                      出欠回答はこちら
-                    </a>
-                  </div>
-                </article>
-              </div>
-            </article>
-
-            <article class="card ceremony-support-card fade-up">
-              <p class="card-label">Guide</p>
-              <h3>共有とご質問</h3>
-              <p class="card-lead">
-                写真の共有方法や、当日に向けたよくある質問を
-                この場所でまとめてご覧いただけるようにしています。
-              </p>
-
-              <div class="support-panels">
-                <section class="support-panel support-panel--share">
-                  <h4>写真の共有</h4>
-                  <p>
-                    当日のお写真をお送りいただく方法は、
-                    共有先が整い次第こちらでご案内いたします。
-                  </p>
-                  <p class="support-note">共有先の準備が整いましたら、こちらにリンクを掲載いたします。</p>
-                </section>
-
-                <section class="support-panel support-panel--faq">
-                  <h4>よくある質問</h4>
-                  <div class="faq-list">
-                    <article class="faq-item">
-                      <button class="faq-question" type="button" aria-expanded="false">
-                        <span>服装について</span>
-                        <span class="faq-icon" aria-hidden="true">＋</span>
-                      </button>
-                      <div class="faq-answer">
-                        <p>
-                          当日の服装については、正式なご案内の際に
-                          あらためてお知らせいたします。
-                        </p>
-                      </div>
-                    </article>
-
-                    <article class="faq-item">
-                      <button class="faq-question" type="button" aria-expanded="false">
-                        <span>受付時間について</span>
-                        <span class="faq-icon" aria-hidden="true">＋</span>
-                      </button>
-                      <div class="faq-answer">
-                        <p>
-                          受付開始時間などの詳細は、正式なご案内の際にあらためてお知らせいたします。
-                        </p>
-                      </div>
-                    </article>
-
-                    <article class="faq-item">
-                      <button class="faq-question" type="button" aria-expanded="false">
-                        <span>写真の共有について</span>
-                        <span class="faq-icon" aria-hidden="true">＋</span>
-                      </button>
-                      <div class="faq-answer">
-                        <p>
-                          共有先が整い次第、このページから分かりやすくご案内いたします。
-                        </p>
-                      </div>
-                    </article>
-
-                    <article class="faq-item">
-                      <button class="faq-question" type="button" aria-expanded="false">
-                        <span>遅刻・ご欠席について</span>
-                        <span class="faq-icon" aria-hidden="true">＋</span>
-                      </button>
-                      <div class="faq-answer">
-                        <p>
-                          ご都合が変わった場合は、分かり次第ご連絡いただけますと幸いです。ご案内の際に連絡方法も掲載いたします。
-                        </p>
-                      </div>
-                    </article>
-
-                    <article class="faq-item">
-                      <button class="faq-question" type="button" aria-expanded="false">
-                        <span>ご祝儀について</span>
-                        <span class="faq-icon" aria-hidden="true">＋</span>
-                      </button>
-                      <div class="faq-answer">
-                        <p>
-                          当日のご案内にあわせて、失礼のないよう分かりやすくご説明できる形で掲載いたします。
-                        </p>
-                      </div>
-                    </article>
-                  </div>
-                </section>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="content-section" id="rsvp">
-        <div class="section-inner">
-          <div class="section-heading fade-up">
-            <div>
-              <p class="section-kicker">RSVP</p>
-              <h2>ご出欠のご案内</h2>
+            <div class="map-frame">
+              <iframe
+                title="会場地図"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src=""
+                data-map-embed
+              ></iframe>
             </div>
-            <p class="section-copy">
-              ここから外部フォームへ進み、ご出欠をご回答いただけます。
+
+            <a class="secondary-button" href="#" target="_blank" rel="noopener noreferrer" data-map-link>
+              地図を大きく見る
+            </a>
+          </article>
+        </div>
+
+        <article class="timeline-card" data-reveal>
+          <p class="detail-card__label">Schedule</p>
+          <h3>当日の流れ</h3>
+
+          <!--
+            スケジュールは JS 側で配列から描画します。
+            時間や説明文の更新場所をひとつにまとめるためです。
+          -->
+          <ol class="timeline-list" data-schedule-list></ol>
+        </article>
+      </div>
+    </section>
+
+    <!-- Step 05: 外部の RSVP 導線だけを置く -->
+    <section class="scene scene--rsvp is-locked" id="rsvp" hidden>
+      <div class="scene__inner scene__inner--narrow">
+        <article class="rsvp-card" data-reveal>
+          <p class="scene__eyebrow">Step 05 / Respond</p>
+          <h2>ご出欠のご回答</h2>
+          <p>
+            このサイト内にフォームは置かず、
+            専用の外部ページへ移動してご回答いただく構成にしています。
+          </p>
+
+          <div class="rsvp-card__actions">
+            <a class="primary-button" href="FORM_URL" target="_blank" rel="noopener noreferrer" data-rsvp-link>
+              出欠回答はこちら
+            </a>
+            <p class="rsvp-card__caption">
+              回答期限:
+              <span data-rsvp-deadline>2026年8月31日(月)</span>
+            </p>
+            <p class="rsvp-card__caption">
+              URL の差し替えは `assets/scripts/config.js` の `rsvpUrl` を変更してください。
             </p>
           </div>
+        </article>
+      </div>
+    </section>
+  </main>
 
-          <div class="rsvp-grid">
-            <article class="card rsvp-primary-card fade-up">
-              <p class="card-label">Response</p>
-              <h3>出欠回答はこちら</h3>
-              <p>
-                下のボタンより、回答フォームへお進みください。
-                実際のご回答は Google フォームなどの外部フォームで受け付けます。
-              </p>
-
-              <div class="button-row">
-                <!--
-                  FORM_URL を GoogleフォームやLINE案内URLに差し替えて使ってください。
-                -->
-                <a
-                  class="button"
-                  href="FORM_URL"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-placeholder-link
-                >
-                  出欠回答はこちら
-                </a>
-              </div>
-            </article>
-
-            <article class="card rsvp-support-card fade-up">
-              <p class="card-label">Information</p>
-              <h3>回答前にご確認いただく内容</h3>
-              <ul class="guide-list">
-                <li>ご回答期限の目安</li>
-                <li>アレルギーやご同伴に関するご相談</li>
-                <li>回答内容を変更したい場合のご連絡方法</li>
-              </ul>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="content-section section-soft" id="party">
-        <div class="section-inner">
-          <div class="section-heading fade-up">
-            <div>
-              <p class="section-kicker">After Party</p>
-              <h2>パーティ編</h2>
-            </div>
-            <p class="section-copy">
-              友人向けのパーティ情報も、同じサイトの中で続けてご覧いただけるようにしています。
-            </p>
-          </div>
-
-          <div class="party-layout">
-            <article class="card fade-up">
-              <p class="card-label">Save the Date</p>
-              <h3>2026 / 11 / 29</h3>
-              <p>
-                詳細が整いましたら、こちらでもご案内いたします。
-              </p>
-
-              <div class="countdown" data-countdown="2026-11-29T18:00:00+09:00">
-                <div class="countdown-item">
-                  <span data-days>--</span>
-                  <small>Days</small>
-                </div>
-                <div class="countdown-item">
-                  <span data-hours>--</span>
-                  <small>Hours</small>
-                </div>
-                <div class="countdown-item">
-                  <span data-minutes>--</span>
-                  <small>Minutes</small>
-                </div>
-              </div>
-            </article>
-
-            <article class="card party-card fade-up">
-              <p class="card-label">Message</p>
-              <h3>Happy moments continue</h3>
-              <p>
-                挙式のあとも、気軽に集まって話して笑えるひとときとして、
-                あらためてご案内できればと思っています。
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <p>Masato and Haruka Wedding</p>
-      <small>Thank you for celebrating with us.</small>
-    </footer>
-  </div>
-
-  <script src="script.js"></script>
+  <script type="module" src="assets/scripts/app.js"></script>
 </body>
 </html>
