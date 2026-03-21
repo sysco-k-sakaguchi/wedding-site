@@ -15,9 +15,10 @@ function easeOutCubic(value) {
 }
 
 export function setupCurtain({
-  introDelay = 900,
-  openDuration = 2100,
-  revealDelay = 220,
+  introDelay = 1500,
+  preludeDuration = 760,
+  openDuration = 2550,
+  revealDelay = 320,
   onComplete
 } = {}) {
   const stage = document.querySelector("[data-curtain-stage]");
@@ -62,7 +63,7 @@ export function setupCurtain({
     window.clearTimeout(autoStartTimer);
     window.cancelAnimationFrame(animationFrameId);
 
-    stage.classList.remove("is-opening");
+    stage.classList.remove("is-anticipating", "is-opening");
     stage.classList.add("is-open");
     stage.style.setProperty("--press", "0");
 
@@ -81,40 +82,28 @@ export function setupCurtain({
     }, revealDelay);
   }
 
-  function playSequence() {
-    if (started || completed) {
-      return;
-    }
-
-    started = true;
-    window.clearTimeout(autoStartTimer);
-
-    if (prefersReducedMotion) {
-      updateCaption("招待状を表示します。");
-      finishCurtain();
-      return;
-    }
-
+  function runOpening() {
+    stage.classList.remove("is-anticipating");
     stage.classList.add("is-opening");
-    updateCaption("幕がほどけて、招待状が現れます。");
+    updateCaption("幕がゆっくりほどけ、招待状が現れます。");
 
     const startTime = performance.now();
     let highlightedReveal = false;
 
     function settleMotion() {
       const settleStart = performance.now();
-      const settleDuration = 760;
+      const settleDuration = 920;
 
       function settleFrame(now) {
         const progress = clamp((now - settleStart) / settleDuration);
-        const residue = Math.sin(progress * Math.PI * 2.4) * Math.pow(1 - progress, 2.1) * 0.05;
+        const residue = Math.sin(progress * Math.PI * 2.2) * Math.pow(1 - progress, 2.2) * 0.05;
 
         applyState({
           open: 1,
           reveal: 1,
           glow: 1,
           leftSway: residue,
-          rightSway: -residue * 0.9
+          rightSway: -residue * 0.92
         });
 
         if (progress < 1) {
@@ -131,20 +120,20 @@ export function setupCurtain({
     function step(now) {
       const progress = clamp((now - startTime) / openDuration);
       const open = easeInOutCubic(progress);
-      const reveal = easeOutCubic(clamp((progress - 0.18) / 0.82));
-      const resonance = Math.sin(progress * Math.PI * 5.2) * Math.pow(1 - progress, 1.5) * 0.095;
+      const reveal = easeOutCubic(clamp((progress - 0.24) / 0.76));
+      const resonance = Math.sin(progress * Math.PI * 4.4) * Math.pow(1 - progress, 1.7) * 0.085;
 
       applyState({
         open,
         reveal,
-        glow: 0.32 + reveal * 0.68,
+        glow: 0.34 + reveal * 0.66,
         leftSway: resonance,
-        rightSway: -resonance * 0.88
+        rightSway: -resonance * 0.9
       });
 
-      if (!highlightedReveal && progress > 0.58) {
+      if (!highlightedReveal && progress > 0.62) {
         highlightedReveal = true;
-        updateCaption("もうすぐ、招待状が届きます。");
+        updateCaption("その先に、招待状が静かに現れます。");
       }
 
       if (progress < 1) {
@@ -158,23 +147,55 @@ export function setupCurtain({
     animationFrameId = window.requestAnimationFrame(step);
   }
 
+  function startSequence({ manual = false } = {}) {
+    if (started || completed) {
+      return;
+    }
+
+    started = true;
+    window.clearTimeout(autoStartTimer);
+
+    if (prefersReducedMotion) {
+      updateCaption("招待状を表示します。");
+      finishCurtain();
+      return;
+    }
+
+    stage.classList.add("is-anticipating");
+    updateCaption(manual ? "静けさのあと、幕がほどけます。" : "まもなく、幕が静かにほどけます。");
+
+    const preludeStart = performance.now();
+
+    function preludeStep(now) {
+      const progress = clamp((now - preludeStart) / preludeDuration);
+      const hush = Math.sin(progress * Math.PI) * 0.018;
+      const glow = 0.26 + Math.sin(progress * Math.PI) * 0.1;
+
+      applyState({
+        open: 0,
+        reveal: 0,
+        glow,
+        leftSway: hush,
+        rightSway: -hush
+      });
+
+      if (progress < 1) {
+        animationFrameId = window.requestAnimationFrame(preludeStep);
+        return;
+      }
+
+      runOpening();
+    }
+
+    animationFrameId = window.requestAnimationFrame(preludeStep);
+  }
+
   function setPressedState(isPressed) {
-    if (completed) {
+    if (completed || started) {
       return;
     }
 
     stage.style.setProperty("--press", isPressed ? "1" : "0");
-  }
-
-  function handleActivate() {
-    if (!started) {
-      playSequence();
-      return;
-    }
-
-    if (!completed) {
-      finishCurtain();
-    }
   }
 
   stage.addEventListener("pointerdown", () => {
@@ -187,26 +208,29 @@ export function setupCurtain({
     });
   });
 
-  stage.addEventListener("click", handleActivate);
+  stage.addEventListener("click", () => {
+    startSequence({ manual: true });
+  });
+
   stage.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      handleActivate();
+      startSequence({ manual: true });
     }
   });
 
   applyState({
     open: 0,
     reveal: 0,
-    glow: 0.32,
+    glow: 0.28,
     leftSway: 0,
     rightSway: 0
   });
 
-  updateCaption(prefersReducedMotion ? "タップで招待状を表示します。" : "指先を添えると、幕がほどけます。");
+  updateCaption(prefersReducedMotion ? "タップで招待状を表示します。" : "静かに、お待ちください。");
 
   autoStartTimer = window.setTimeout(() => {
-    playSequence();
+    startSequence();
   }, introDelay);
 
   return {

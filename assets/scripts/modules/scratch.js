@@ -50,7 +50,7 @@ function drawScratchSurface(context, width, height) {
 
   for (let index = 0; index < 220; index += 1) {
     const alpha = 0.04 + Math.random() * 0.12;
-    const radius = 0.4 + Math.random() * 1.8;
+    const radius = 0.4 + Math.random() * 1.6;
 
     context.fillStyle = `rgba(255, 250, 237, ${alpha})`;
     context.beginPath();
@@ -80,10 +80,10 @@ function eraseStamp(context, point, size) {
   context.save();
   context.globalCompositeOperation = "destination-out";
 
-  for (let index = 0; index < 4; index += 1) {
-    const radius = size * (0.55 + Math.random() * 0.3);
-    const offsetX = (Math.random() - 0.5) * size * 0.55;
-    const offsetY = (Math.random() - 0.5) * size * 0.55;
+  for (let index = 0; index < 3; index += 1) {
+    const radius = size * (0.56 + Math.random() * 0.26);
+    const offsetX = (Math.random() - 0.5) * size * 0.45;
+    const offsetY = (Math.random() - 0.5) * size * 0.45;
 
     context.beginPath();
     context.arc(point.x + offsetX, point.y + offsetY, radius, 0, Math.PI * 2);
@@ -116,7 +116,7 @@ function getClearedRatio(context, canvas) {
   let transparentPixels = 0;
   let sampledPixels = 0;
 
-  for (let index = 3; index < pixels.length; index += 64) {
+  for (let index = 3; index < pixels.length; index += 96) {
     sampledPixels += 1;
 
     if (pixels[index] === 0) {
@@ -151,10 +151,10 @@ function resetTilt(seal) {
 }
 
 export function setupScratch({
-  completeRatio = 0.16,
-  brushSize = 24,
-  gestureDistance = 42,
-  revealDelay = 300,
+  completeRatio = 0.22,
+  brushSize = 18,
+  gestureDistance = 200,
+  revealDelay = 420,
   onReveal
 } = {}) {
   const seal = document.querySelector("[data-scratch-seal]");
@@ -175,10 +175,37 @@ export function setupScratch({
   let drawing = false;
   let revealed = false;
   let queued = false;
-  let travelled = 0;
+  let totalDistance = 0;
   let sampleCounter = 0;
+  let clearedRatio = 0;
   let lastPoint = null;
-  let sweepFrameId = 0;
+
+  function refreshStatus(force = false) {
+    if (!status || revealed) {
+      return;
+    }
+
+    const distanceProgress = Math.min(totalDistance / gestureDistance, 1);
+    const scratchProgress = Math.min(clearedRatio / completeRatio, 1);
+    const progress = Math.max(distanceProgress, scratchProgress);
+
+    if (force || progress < 0.2) {
+      status.textContent = "まだ封印されています。円を描くように削ってください。";
+      return;
+    }
+
+    if (progress < 0.52) {
+      status.textContent = "封印が少しずつほどけています。もう少し削ってください。";
+      return;
+    }
+
+    if (progress < 0.9) {
+      status.textContent = "あと少しで日付が現れます。ゆっくり削ってください。";
+      return;
+    }
+
+    status.textContent = "封印がほどけかけています。最後まで削ってください。";
+  }
 
   function revealDate() {
     if (revealed) {
@@ -187,8 +214,6 @@ export function setupScratch({
 
     revealed = true;
     queued = false;
-    window.cancelAnimationFrame(sweepFrameId);
-
     seal.classList.remove("is-pressed");
     seal.classList.add("is-revealed");
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -209,10 +234,31 @@ export function setupScratch({
     queued = true;
 
     if (status) {
-      status.textContent = "封印がほどけています。";
+      status.textContent = "封印がほどけ、日付が現れます。";
     }
 
-    window.setTimeout(revealDate, revealDelay);
+    window.setTimeout(revealDate, prefersReducedMotion ? 0 : revealDelay);
+  }
+
+  function updateClearedRatio() {
+    clearedRatio = getClearedRatio(context, canvas);
+  }
+
+  function checkReveal({ force = false } = {}) {
+    if (revealed || queued) {
+      return;
+    }
+
+    if (force || sampleCounter % 8 === 0) {
+      updateClearedRatio();
+    }
+
+    if (totalDistance >= gestureDistance && clearedRatio >= completeRatio) {
+      queueReveal();
+      return;
+    }
+
+    refreshStatus();
   }
 
   function resizeCanvas() {
@@ -234,43 +280,12 @@ export function setupScratch({
 
     if (revealed) {
       context.clearRect(0, 0, rect.width, rect.height);
+    } else {
+      totalDistance = 0;
+      sampleCounter = 0;
+      clearedRatio = 0;
+      refreshStatus(true);
     }
-  }
-
-  function playTapSweep(origin) {
-    if (revealed || queued) {
-      return;
-    }
-
-    const rect = seal.getBoundingClientRect();
-    const anchor = origin ?? {
-      x: rect.width * 0.44,
-      y: rect.height * 0.46
-    };
-    const radius = rect.width * 0.16;
-    let frame = 0;
-    const totalFrames = 8;
-
-    function step() {
-      const progress = frame / totalFrames;
-      const angle = -Math.PI * 0.92 + progress * Math.PI * 0.7;
-      const point = {
-        x: anchor.x + Math.cos(angle) * radius,
-        y: anchor.y + Math.sin(angle) * radius * 0.68
-      };
-
-      eraseStamp(context, point, brushSize * 1.08);
-
-      if (frame < totalFrames) {
-        frame += 1;
-        sweepFrameId = window.requestAnimationFrame(step);
-        return;
-      }
-
-      queueReveal();
-    }
-
-    sweepFrameId = window.requestAnimationFrame(step);
   }
 
   function handlePointerDown(event) {
@@ -279,26 +294,22 @@ export function setupScratch({
     }
 
     event.preventDefault();
+    drawing = true;
+    lastPoint = getPointFromEvent(event, canvas);
     seal.classList.add("is-pressed");
 
-    if (prefersReducedMotion) {
-      queueReveal();
-      return;
-    }
+    eraseStamp(context, lastPoint, brushSize * 0.72);
 
-    drawing = true;
-    travelled = 0;
-    sampleCounter = 0;
-    lastPoint = getPointFromEvent(event, canvas);
-    setTilt(seal, lastPoint, seal.getBoundingClientRect());
-    eraseStamp(context, lastPoint, brushSize * 0.8);
+    if (!prefersReducedMotion) {
+      setTilt(seal, lastPoint, seal.getBoundingClientRect());
+    }
 
     if (seal.setPointerCapture) {
       seal.setPointerCapture(event.pointerId);
     }
 
     if (status) {
-      status.textContent = "そのまま、やさしくなぞってください。";
+      status.textContent = "封印をゆっくり削ってください。";
     }
   }
 
@@ -316,21 +327,17 @@ export function setupScratch({
       return;
     }
 
-    travelled += distance;
+    totalDistance += distance;
     sampleCounter += 1;
+
     eraseStroke(context, lastPoint, point, brushSize);
     lastPoint = point;
 
-    setTilt(seal, point, seal.getBoundingClientRect());
-
-    if (travelled >= gestureDistance) {
-      queueReveal();
-      return;
+    if (!prefersReducedMotion) {
+      setTilt(seal, point, seal.getBoundingClientRect());
     }
 
-    if (sampleCounter % 3 === 0 && getClearedRatio(context, canvas) >= completeRatio) {
-      queueReveal();
-    }
+    checkReveal();
   }
 
   function handlePointerUp(event) {
@@ -339,24 +346,15 @@ export function setupScratch({
     }
 
     drawing = false;
+    lastPoint = null;
     seal.classList.remove("is-pressed");
+    resetTilt(seal);
 
     if (revealed || queued) {
-      lastPoint = null;
-      resetTilt(seal);
       return;
     }
 
-    const releasePoint = lastPoint ?? getPointFromEvent(event, canvas);
-    lastPoint = null;
-
-    if (travelled < 12) {
-      playTapSweep(releasePoint);
-    } else if (getClearedRatio(context, canvas) >= completeRatio * 0.55) {
-      queueReveal();
-    }
-
-    resetTilt(seal);
+    checkReveal({ force: true });
   }
 
   function handlePointerCancel(event) {
@@ -368,6 +366,7 @@ export function setupScratch({
     lastPoint = null;
     seal.classList.remove("is-pressed");
     resetTilt(seal);
+    refreshStatus();
   }
 
   function handleKeyDown(event) {

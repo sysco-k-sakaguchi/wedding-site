@@ -32,7 +32,7 @@ export function setupCountdown(config) {
     const daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
     root.classList.remove("is-today");
-    label.textContent = "Wedding day まであと";
+    label.textContent = "その日まであと";
     days.textContent = String(daysRemaining);
     unit.textContent = "日";
   }

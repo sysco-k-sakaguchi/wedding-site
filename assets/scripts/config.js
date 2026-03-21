@@ -21,7 +21,7 @@ export const EXPERIENCE_CONFIG = {
     access: "京阪「出町柳駅」より徒歩約15分 / 市バス「府立医大病院前」より徒歩約3分",
     note: "到着後は境内のご案内に沿って受付までお進みください。"
   },
-  mapEmbedUrl: "https://www.google.com/maps?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&output=embed",
+  mapEmbedUrl: "https://maps.google.com/maps?hl=ja&q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&z=16&output=embed",
   mapExternalUrl: "https://maps.google.com/?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD",
   rsvpUrl: PLACEHOLDER_URL,
   rsvpDeadline: "2026年8月31日(月)",
@@ -50,11 +50,13 @@ export const EXPERIENCE_CONFIG = {
 };
 
 export const EXPERIENCE_SETTINGS = {
-  curtainIntroDelay: 900,
-  curtainOpenDuration: 2100,
-  curtainRevealDelay: 240,
-  scratchCompleteRatio: 0.16,
-  scratchBrushSize: 24,
-  scratchGestureDistance: 42,
-  scratchRevealDelay: 300
+  curtainIntroDelay: 1500,
+  curtainPreludeDuration: 760,
+  curtainOpenDuration: 2550,
+  curtainRevealDelay: 320,
+  curtainScrollDelay: 620,
+  scratchCompleteRatio: 0.22,
+  scratchBrushSize: 18,
+  scratchGestureDistance: 200,
+  scratchRevealDelay: 420
 };
