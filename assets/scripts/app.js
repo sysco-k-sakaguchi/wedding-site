@@ -5,15 +5,13 @@ import { setupScratch } from "./modules/scratch.js";
 import { setupCountdown } from "./modules/countdown.js";
 import { setupRevealObserver } from "./modules/reveal.js";
 
-// app.js は全体の進行管理だけを担当し、
-// 個別演出の中身は modules 配下へ分けています。
-const floatingNav = document.querySelector("[data-floating-nav]");
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const invitationSection = document.querySelector("#invitation");
-const countdownSection = document.querySelector("#countdown");
 const detailsSection = document.querySelector("#details");
 const rsvpSection = document.querySelector("#rsvp");
+const datePanel = document.querySelector("[data-date-panel]");
+const scrollWhisper = document.querySelector("[data-scroll-whisper]");
 
-// hidden で隠していた次のシーンを表示します。
 function unlockSection(section) {
   if (!section) {
     return;
@@ -21,19 +19,32 @@ function unlockSection(section) {
 
   if (section.hidden) {
     section.hidden = false;
-    section.classList.remove("is-locked");
   }
+
+  section.classList.remove("is-locked");
 }
 
-function showFloatingNav() {
-  if (!floatingNav || !floatingNav.hidden) {
+function revealDatePanel() {
+  if (!datePanel || !datePanel.hidden) {
     return;
   }
 
-  floatingNav.hidden = false;
+  datePanel.hidden = false;
 
   window.requestAnimationFrame(() => {
-    floatingNav.classList.add("is-visible");
+    datePanel.classList.add("is-visible");
+  });
+}
+
+function revealScrollWhisper() {
+  if (!scrollWhisper || !scrollWhisper.hidden) {
+    return;
+  }
+
+  scrollWhisper.hidden = false;
+
+  window.requestAnimationFrame(() => {
+    scrollWhisper.classList.add("is-visible");
   });
 }
 
@@ -46,18 +57,21 @@ function initializeExperience() {
   const revealController = setupRevealObserver();
   revealController.observeAll(document.querySelectorAll(".scene:not([hidden]) [data-reveal]"));
 
+  setupCountdown(EXPERIENCE_CONFIG);
+
   const scratchController = setupScratch({
     completeRatio: EXPERIENCE_SETTINGS.scratchCompleteRatio,
     brushSize: EXPERIENCE_SETTINGS.scratchBrushSize,
     gestureDistance: EXPERIENCE_SETTINGS.scratchGestureDistance,
     revealDelay: EXPERIENCE_SETTINGS.scratchRevealDelay,
     onReveal: () => {
-      showFloatingNav();
-      unlockSection(countdownSection);
+      document.body.classList.add("is-revealed");
+      revealDatePanel();
+      revealScrollWhisper();
+
       unlockSection(detailsSection);
       unlockSection(rsvpSection);
 
-      revealController.observeAll(countdownSection?.querySelectorAll("[data-reveal]") ?? []);
       revealController.observeAll(detailsSection?.querySelectorAll("[data-reveal]") ?? []);
       revealController.observeAll(rsvpSection?.querySelectorAll("[data-reveal]") ?? []);
     }
@@ -68,20 +82,22 @@ function initializeExperience() {
     openDuration: EXPERIENCE_SETTINGS.curtainOpenDuration,
     revealDelay: EXPERIENCE_SETTINGS.curtainRevealDelay,
     onComplete: () => {
+      document.body.classList.add("is-opened");
       unlockSection(invitationSection);
       revealController.observeAll(invitationSection?.querySelectorAll("[data-reveal]") ?? []);
 
       window.requestAnimationFrame(() => {
         scratchController?.refresh?.();
       });
+
+      window.setTimeout(() => {
+        invitationSection?.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "start"
+        });
+      }, prefersReducedMotion ? 0 : 260);
     }
   });
-
-  window.requestAnimationFrame(() => {
-    scratchController?.refresh?.();
-  });
-
-  setupCountdown(EXPERIENCE_CONFIG);
 }
 
 initializeExperience();

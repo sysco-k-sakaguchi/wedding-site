@@ -5,10 +5,9 @@ export const PLACEHOLDER_URL = "FORM_URL";
 
 export const EXPERIENCE_CONFIG = {
   coupleNames: "Masato & Haruka",
-  previewLocation: "Kyoto Ceremony",
   invitationMessage:
     "このたび私たちは結婚式を挙げることとなりました。大切な一日に、ぜひお立ち会いいただけましたら幸いです。",
-  weddingDateIso: "2026-10-12T12:30:00+09:00",
+  weddingDateIso: "2026-10-12T11:30:00+09:00",
   weddingDateDisplay: "2026年10月12日(月)",
   weddingTimeDisplay: "11:30 挙式開始",
   dateReveal: {
@@ -51,11 +50,11 @@ export const EXPERIENCE_CONFIG = {
 };
 
 export const EXPERIENCE_SETTINGS = {
-  curtainIntroDelay: 650,
-  curtainOpenDuration: 1550,
-  curtainRevealDelay: 120,
-  scratchCompleteRatio: 0.08,
-  scratchBrushSize: 34,
-  scratchGestureDistance: 28,
-  scratchRevealDelay: 260
+  curtainIntroDelay: 900,
+  curtainOpenDuration: 2100,
+  curtainRevealDelay: 240,
+  scratchCompleteRatio: 0.16,
+  scratchBrushSize: 24,
+  scratchGestureDistance: 42,
+  scratchRevealDelay: 300
 };

@@ -33,7 +33,6 @@ function renderSchedule(scheduleItems = []) {
 
 export function bindContent(config) {
   fillText("[data-couple-names]", config.coupleNames);
-  fillText("[data-preview-location]", config.previewLocation);
   fillText("[data-invitation-message]", config.invitationMessage);
   fillText("[data-date-display]", config.weddingDateDisplay);
   fillText("[data-wedding-time]", config.weddingTimeDisplay);
