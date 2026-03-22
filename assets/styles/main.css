@@ -224,6 +224,10 @@ iframe {
 .prologue {
   position: relative;
   min-height: 100svh;
+  grid-template-areas:
+    "copy"
+    "stage"
+    "caption";
   padding:
     calc(env(safe-area-inset-top, 0px) + 1.8rem)
     0
@@ -257,6 +261,7 @@ iframe {
 .prologue__copy {
   position: relative;
   z-index: 2;
+  grid-area: copy;
   width: min(calc(100% - 2rem), 23rem);
   text-align: center;
   color: rgba(255, 247, 236, 0.92);
@@ -314,6 +319,7 @@ iframe {
   --right-sway: 0;
   --press: 0;
   position: relative;
+  grid-area: stage;
   z-index: 1;
   width: min(calc(100% - 1.5rem), 24rem);
   aspect-ratio: 0.76;
@@ -696,6 +702,7 @@ iframe {
 
 .prologue__caption {
   position: relative;
+  grid-area: caption;
   z-index: 2;
   letter-spacing: 0.08em;
   opacity: 0.88;
@@ -1739,6 +1746,175 @@ iframe {
 
   .details-shell {
     padding: 2rem;
+  }
+}
+
+@media (min-width: 1180px) {
+  .scene {
+    padding: 6.6rem 0 7.8rem;
+  }
+
+  .prologue {
+    grid-template-columns: minmax(18rem, 35rem) minmax(23rem, 32rem);
+    grid-template-areas:
+      "copy stage"
+      "copy caption";
+    align-content: center;
+    justify-content: center;
+    column-gap: clamp(3rem, 6vw, 6.5rem);
+    row-gap: 1.15rem;
+    padding-inline: 2.75rem;
+  }
+
+  .prologue__copy {
+    width: min(100%, 34rem);
+    text-align: left;
+    align-self: center;
+  }
+
+  .prologue__copy h1 {
+    font-size: clamp(4rem, 5vw, 5.45rem);
+    line-height: 1.05;
+    letter-spacing: 0;
+  }
+
+  .prologue__lead {
+    max-width: 20rem;
+    margin: 1.1rem 0 0;
+  }
+
+  .prologue__script {
+    margin-top: 1.25rem;
+    font-size: clamp(2rem, 3vw, 3rem);
+  }
+
+  .curtain-stage {
+    width: min(100%, 31rem);
+    justify-self: center;
+  }
+
+  .prologue__caption {
+    width: min(100%, 28rem);
+    justify-self: center;
+    text-align: center;
+  }
+
+  .invitation-scene .scene__frame--narrow {
+    width: min(calc(100% - 4rem), 58rem);
+  }
+
+  .invitation-sheet {
+    padding: 3.3rem 3.2rem;
+  }
+
+  .invitation-sheet__message {
+    max-width: 31rem;
+  }
+
+  .invitation-sheet__details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chapters-scene .scene__frame--narrow,
+  .chapter-scene .scene__frame--narrow {
+    width: min(calc(100% - 4rem), 72rem);
+  }
+
+  .chapter-hub {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .chapter-link {
+    min-height: 14rem;
+    padding: 1.5rem 1.45rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .chapter-link__date {
+    margin-bottom: 0.75rem;
+    font-size: 0.86rem;
+  }
+
+  .chapter-link strong,
+  .chapter-sheet h2 {
+    font-size: clamp(3rem, 4.2vw, 4.7rem);
+  }
+
+  .chapter-sheet {
+    padding: 2.6rem 2.4rem;
+  }
+
+  .chapter-sheet--ceremony {
+    padding: 2.7rem 2.5rem 2.4rem;
+  }
+
+  .chapter-sheet--ceremony .eyebrow,
+  .chapter-sheet--ceremony .chapter-sheet__date,
+  .chapter-sheet--ceremony h2 {
+    text-align: center;
+  }
+
+  .chapter-sheet__date {
+    margin-bottom: 0.8rem;
+  }
+
+  .chapter-facts--ceremony {
+    margin-top: 1.7rem;
+    gap: 1rem;
+  }
+
+  .chapter-fact,
+  .chapter-feature,
+  .chapter-panel {
+    padding: 1.2rem 1.15rem;
+  }
+
+  .ceremony-layout {
+    grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+    gap: 1.2rem;
+    margin-top: 1.25rem;
+  }
+
+  .chapter-mini-map {
+    aspect-ratio: 16 / 10;
+  }
+
+  .chapter-feature--wide {
+    margin-top: 1.15rem;
+  }
+
+  .chapter-actions {
+    grid-template-columns: repeat(2, minmax(13rem, 17rem));
+    justify-content: center;
+    margin-top: 1.4rem;
+  }
+
+  .secondary-link,
+  .primary-link {
+    margin-top: 0;
+    min-height: 3.55rem;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chapter-link:hover,
+  .secondary-link:hover,
+  .primary-link:hover {
+    transform: translateY(-0.16rem);
+  }
+
+  .chapter-link:hover {
+    box-shadow: 0 34px 84px rgba(40, 20, 18, 0.18);
+  }
+
+  .secondary-link:hover,
+  .primary-link:hover {
+    box-shadow:
+      0 22px 38px rgba(94, 19, 36, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
 }
 
