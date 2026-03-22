@@ -112,19 +112,36 @@ function eraseStroke(context, from, to, size) {
 }
 
 function getClearedRatio(context, canvas) {
-  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-  let transparentPixels = 0;
+  const width = canvas.width;
+  const height = canvas.height;
+  const pixels = context.getImageData(0, 0, width, height).data;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const radius = Math.min(width, height) * 0.46;
+  const radiusSquared = radius * radius;
+  const step = Math.max(4, Math.round(Math.min(width, height) / 76));
+  const alphaThreshold = 96;
+  let clearedPixels = 0;
   let sampledPixels = 0;
 
-  for (let index = 3; index < pixels.length; index += 96) {
-    sampledPixels += 1;
+  for (let y = 0; y < height; y += step) {
+    for (let x = 0; x < width; x += step) {
+      const offsetX = x - centerX;
+      const offsetY = y - centerY;
 
-    if (pixels[index] === 0) {
-      transparentPixels += 1;
+      if (offsetX * offsetX + offsetY * offsetY > radiusSquared) {
+        continue;
+      }
+
+      sampledPixels += 1;
+
+      if (pixels[(y * width + x) * 4 + 3] <= alphaThreshold) {
+        clearedPixels += 1;
+      }
     }
   }
 
-  return transparentPixels / sampledPixels;
+  return sampledPixels === 0 ? 0 : clearedPixels / sampledPixels;
 }
 
 function setTilt(seal, point, bounds) {
@@ -151,7 +168,7 @@ function resetTilt(seal) {
 }
 
 export function setupScratch({
-  completeRatio = 0.5,
+  completeRatio = 0.46,
   brushSize = 18,
   gestureDistance = 170,
   revealDelay = 360,
@@ -179,6 +196,13 @@ export function setupScratch({
   let sampleCounter = 0;
   let clearedRatio = 0;
   let lastPoint = null;
+  const assistRatio = Math.max(completeRatio - 0.06, completeRatio * 0.86);
+
+  function setProgressState(progress) {
+    seal.style.setProperty("--scratch-progress", progress.toFixed(4));
+    seal.classList.toggle("is-nearing", progress >= 0.72 && !revealed && !queued);
+    seal.classList.toggle("is-ready", progress >= 0.9 && !revealed && !queued);
+  }
 
   function getProgress() {
     const distanceProgress = Math.min(totalDistance / gestureDistance, 1);
@@ -187,7 +211,7 @@ export function setupScratch({
     return {
       distanceProgress,
       scratchProgress,
-      combinedProgress: Math.min(scratchProgress * 0.78 + distanceProgress * 0.22, 1)
+      combinedProgress: Math.min(scratchProgress * 0.84 + distanceProgress * 0.16, 1)
     };
   }
 
@@ -198,22 +222,29 @@ export function setupScratch({
 
     const { combinedProgress } = getProgress();
 
+    setProgressState(combinedProgress);
+
     if (force || combinedProgress < 0.18) {
       status.textContent = "まだ封印されています。円を描くように削ってください。";
       return;
     }
 
-    if (combinedProgress < 0.5) {
+    if (combinedProgress < 0.46) {
       status.textContent = "封印が少しずつほどけています。もう少し削ってください。";
       return;
     }
 
-    if (combinedProgress < 0.82) {
-      status.textContent = "あと少しで日付が現れます。ゆっくり削ってください。";
+    if (combinedProgress < 0.78) {
+      status.textContent = "半分ほど封印がほどけています。続けて削ってください。";
       return;
     }
 
-    status.textContent = "封印がほどけかけています。最後まで削ってください。";
+    if (combinedProgress < 0.94) {
+      status.textContent = "あと少しで日付が現れます。最後をやさしく削ってください。";
+      return;
+    }
+
+    status.textContent = "まもなく日付が現れます。";
   }
 
   function revealDate() {
@@ -223,10 +254,11 @@ export function setupScratch({
 
     revealed = true;
     queued = false;
-    seal.classList.remove("is-pressed");
+    seal.classList.remove("is-pressed", "is-nearing", "is-ready", "is-releasing");
     seal.classList.add("is-revealed");
     context.clearRect(0, 0, canvas.width, canvas.height);
     resetTilt(seal);
+    setProgressState(1);
 
     if (status) {
       status.textContent = "封印がほどけ、日付が現れました。";
@@ -241,6 +273,9 @@ export function setupScratch({
     }
 
     queued = true;
+    seal.classList.remove("is-nearing", "is-ready");
+    seal.classList.add("is-releasing");
+    setProgressState(1);
 
     if (status) {
       status.textContent = "封印がほどけ、日付が現れます。";
@@ -258,16 +293,16 @@ export function setupScratch({
       return;
     }
 
-    if (force || sampleCounter % 6 === 0) {
+    if (force || sampleCounter % 4 === 0) {
       updateClearedRatio();
     }
 
-    const { scratchProgress, combinedProgress } = getProgress();
+    const { distanceProgress, combinedProgress } = getProgress();
+    const clearByArea = clearedRatio >= completeRatio;
+    const clearByAssist = clearedRatio >= assistRatio && distanceProgress >= 0.62;
+    const clearByNearFinish = force && clearedRatio >= assistRatio - 0.02 && combinedProgress >= 0.92;
 
-    if (
-      scratchProgress >= 1 ||
-      (combinedProgress >= 1 && clearedRatio >= completeRatio * 0.7)
-    ) {
+    if (clearByArea || clearByAssist || clearByNearFinish) {
       queueReveal();
       return;
     }
@@ -298,6 +333,8 @@ export function setupScratch({
       totalDistance = 0;
       sampleCounter = 0;
       clearedRatio = 0;
+      seal.classList.remove("is-nearing", "is-ready", "is-releasing");
+      setProgressState(0);
       refreshStatus(true);
     }
   }
@@ -313,6 +350,8 @@ export function setupScratch({
     seal.classList.add("is-pressed");
 
     eraseStamp(context, lastPoint, brushSize * 0.72);
+    sampleCounter += 1;
+    checkReveal({ force: true });
 
     if (!prefersReducedMotion) {
       setTilt(seal, lastPoint, seal.getBoundingClientRect());
@@ -395,6 +434,7 @@ export function setupScratch({
   }
 
   resizeCanvas();
+  setProgressState(0);
 
   seal.addEventListener("pointerdown", handlePointerDown);
   seal.addEventListener("pointermove", handlePointerMove);
