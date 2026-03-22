@@ -50,13 +50,13 @@ export const EXPERIENCE_CONFIG = {
 };
 
 export const EXPERIENCE_SETTINGS = {
-  curtainIntroDelay: 1500,
-  curtainPreludeDuration: 760,
-  curtainOpenDuration: 2550,
-  curtainRevealDelay: 320,
-  curtainScrollDelay: 620,
-  scratchCompleteRatio: 0.22,
+  curtainIntroDelay: 1750,
+  curtainPreludeDuration: 1040,
+  curtainOpenDuration: 2920,
+  curtainRevealDelay: 440,
+  curtainScrollDelay: 840,
+  scratchCompleteRatio: 0.5,
   scratchBrushSize: 18,
-  scratchGestureDistance: 200,
-  scratchRevealDelay: 420
+  scratchGestureDistance: 170,
+  scratchRevealDelay: 360
 };

@@ -1,4 +1,26 @@
+@font-face {
+  font-family: "Balqis";
+  src: url("../fonts/Balqis.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Antro Vectra";
+  src: url("../fonts/AntroVectra.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cafgone";
+  src: url("../fonts/Cafgone.ttf") format("truetype");
+  font-display: swap;
+}
+
 :root {
+  --font-ja: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-display: "Cafgone", "Cormorant Garamond", "Times New Roman", serif;
+  --font-script: "Balqis", "Snell Roundhand", "Apple Chancery", cursive;
+  --font-signature: "Antro Vectra", "Snell Roundhand", "Apple Chancery", cursive;
   --ink: #2f2421;
   --ink-soft: rgba(47, 36, 33, 0.72);
   --ink-faint: rgba(47, 36, 33, 0.5);
@@ -37,7 +59,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-family: var(--font-ja);
   color: var(--ink);
   line-height: 1.82;
   text-rendering: optimizeLegibility;
@@ -135,9 +157,10 @@ iframe {
 .date-ritual__eyebrow,
 .detail-card__label {
   margin: 0 0 0.8rem;
+  font-family: var(--font-display);
   font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(198, 164, 108, 0.9);
 }
@@ -151,10 +174,10 @@ iframe {
 .scene-heading h2,
 .closing-card h2 {
   margin: 0 0 0.8rem;
-  font-family: "Cormorant Garamond", serif;
-  font-size: clamp(2.45rem, 9vw, 3.8rem);
+  font-family: var(--font-ja);
+  font-size: clamp(2.3rem, 8.6vw, 3.55rem);
   font-weight: 600;
-  line-height: 0.96;
+  line-height: 1.08;
   text-wrap: balance;
 }
 
@@ -244,6 +267,9 @@ iframe {
   --curtain-open: 0;
   --curtain-reveal: 0;
   --curtain-glow: 0.32;
+  --curtain-lift: 0;
+  --curtain-gather: 0;
+  --curtain-pinch: 0;
   --left-sway: 0;
   --right-sway: 0;
   --press: 0;
@@ -259,6 +285,7 @@ iframe {
   cursor: pointer;
   overflow: hidden;
   isolation: isolate;
+  perspective: 1400px;
   box-shadow: var(--shadow-stage);
   transform:
     translateY(calc(var(--press) * 0.18rem))
@@ -278,7 +305,9 @@ iframe {
 .curtain-stage__frame,
 .curtain-stage__backlight,
 .curtain-stage__invitation,
-.curtain-stage__rail {
+.curtain-stage__rail,
+.curtain-stage__valance,
+.curtain-stage__pinch {
   position: absolute;
 }
 
@@ -302,12 +331,24 @@ iframe {
     linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
 }
 
+.curtain-stage__arch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 239, 214, 0.12), transparent 28%),
+    linear-gradient(90deg, transparent 46%, rgba(255, 241, 210, 0.08) 50%, transparent 54%);
+  opacity: calc(0.5 - var(--curtain-open) * 0.34);
+}
+
 .curtain-stage__backlight {
-  inset: 14% 18% 22%;
-  border-radius: 46%;
+  inset: 12% 18% 20%;
+  border-radius: 46% 46% 42% 42%;
   background: rgba(255, 226, 174, 0.72);
-  filter: blur(48px);
-  transform: scale(calc(0.88 + var(--curtain-reveal) * 0.18));
+  filter: blur(56px);
+  transform:
+    translateY(calc((1 - var(--curtain-reveal)) * 1.15rem - var(--curtain-lift) * 0.25rem))
+    scale(calc(0.86 + var(--curtain-reveal) * 0.2));
   opacity: calc(0.08 + var(--curtain-glow) * 0.5);
 }
 
@@ -325,7 +366,7 @@ iframe {
   opacity: calc(0.06 + var(--curtain-reveal) * 0.96);
   filter: blur(calc((1 - var(--curtain-reveal)) * 8px));
   transform:
-    translateY(calc((1 - var(--curtain-reveal)) * 2.8rem))
+    translateY(calc((1 - var(--curtain-reveal)) * 3rem + (1 - var(--curtain-lift)) * 0.8rem))
     scale(calc(0.9 + var(--curtain-reveal) * 0.1));
 }
 
@@ -347,22 +388,29 @@ iframe {
 .curtain-stage__invitation-inner em {
   display: block;
   font-style: normal;
-  font-size: 0.74rem;
+}
+
+.curtain-stage__invitation-inner small {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .curtain-stage__invitation-inner strong {
   display: block;
-  margin: 0.7rem 0;
-  font-family: "Cormorant Garamond", serif;
-  font-size: clamp(2.2rem, 9vw, 3.55rem);
-  font-weight: 600;
-  line-height: 0.9;
+  margin: 0.82rem 0 0.58rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.38rem, 9.4vw, 3.85rem);
+  font-weight: 400;
+  line-height: 0.88;
 }
 
 .curtain-stage__invitation-inner em {
-  color: rgba(94, 19, 36, 0.66);
+  font-family: var(--font-script);
+  font-size: 1.28rem;
+  letter-spacing: 0.02em;
+  color: rgba(94, 19, 36, 0.72);
 }
 
 .curtain-stage__rail {
@@ -376,38 +424,127 @@ iframe {
   box-shadow:
     0 10px 18px rgba(0, 0, 0, 0.24),
     0 1px 0 rgba(255, 255, 255, 0.3) inset;
-  z-index: 6;
+  z-index: 8;
+}
+
+.curtain-stage__valance {
+  top: 1.05rem;
+  left: 1.1rem;
+  right: 1.1rem;
+  height: 24%;
+  z-index: 4;
+  border-radius: 1.8rem 1.8rem 3.2rem 3.2rem;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 231, 180, 0.18), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(38, 10, 18, 0.9), rgba(88, 16, 35, 0.92) 52%, rgba(58, 11, 25, 0.98));
+  clip-path: ellipse(72% 100% at 50% 0%);
+  opacity: calc(0.9 - var(--curtain-open) * 0.42);
+  transform:
+    translateY(calc(var(--curtain-lift) * -0.8rem))
+    scaleY(calc(1 - var(--curtain-open) * 0.08));
+  box-shadow:
+    inset 0 -1.5rem 2.2rem rgba(15, 5, 8, 0.36),
+    0 1rem 1.8rem rgba(5, 0, 2, 0.22);
+}
+
+.curtain-stage__valance::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.06) 0 7%,
+      rgba(0, 0, 0, 0.14) 7% 15%,
+      rgba(255, 255, 255, 0.05) 15% 23%
+    );
+  mix-blend-mode: soft-light;
+  opacity: 0.78;
+}
+
+.curtain-stage__pinch {
+  top: 1.04rem;
+  left: 50%;
+  width: 22%;
+  height: 28%;
+  z-index: 7;
+  border-radius: 0 0 46% 46%;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 233, 191, 0.24), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(111, 24, 43, 0.96), rgba(72, 14, 29, 0.98));
+  box-shadow:
+    inset 0 -1.2rem 1.7rem rgba(18, 7, 10, 0.24),
+    0 1rem 1.8rem rgba(8, 1, 4, 0.18);
+  opacity: calc(0.04 + var(--curtain-pinch) * 0.68 - var(--curtain-open) * 0.42);
+  transform:
+    translateX(-50%)
+    translateY(calc(-0.28rem - var(--curtain-lift) * 2rem - var(--curtain-pinch) * 0.42rem))
+    scaleX(calc(1 - var(--curtain-open) * 0.26))
+    scaleY(calc(1 - var(--curtain-open) * 0.5));
 }
 
 .curtain-panel {
   position: absolute;
-  top: 1.1rem;
+  top: 1.16rem;
   bottom: 0.9rem;
-  width: 57%;
+  width: 60%;
   overflow: hidden;
-  z-index: 5;
+  z-index: 6;
   box-shadow: 0 24px 40px rgba(0, 0, 0, 0.26);
   transform-style: preserve-3d;
+  filter: brightness(calc(0.94 + var(--curtain-gather) * 0.08));
 }
 
 .curtain-panel--left {
   left: 0.84rem;
-  border-radius: 1.7rem 0.9rem 1.5rem 1.45rem;
-  transform-origin: left center;
+  border-radius: 1.7rem 1rem 1.5rem 1.45rem;
+  transform-origin: 11% 0%;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(20% - var(--curtain-gather) * 11%),
+    93% calc(39% - var(--curtain-gather) * 14%),
+    97% calc(72% + var(--curtain-open) * 4%),
+    100% 100%,
+    0 100%
+  );
   transform:
-    translate3d(calc(var(--curtain-open) * -54%), calc(var(--curtain-open) * 0.5rem), calc(var(--curtain-open) * -4rem))
-    rotateY(calc(-6deg - var(--curtain-open) * 32deg))
-    skewY(calc(var(--left-sway) * 11deg));
+    translate3d(
+      calc(var(--curtain-open) * -50% - var(--curtain-lift) * 4%),
+      calc(var(--curtain-open) * -1.05rem - var(--curtain-lift) * 0.75rem),
+      calc(var(--curtain-open) * -3.6rem)
+    )
+    rotateY(calc(-4deg - var(--curtain-open) * 18deg))
+    rotateZ(calc(-0.8deg + var(--left-sway) * 9deg))
+    skewY(calc(var(--left-sway) * 9deg))
+    scaleX(calc(1 - var(--curtain-open) * 0.08));
 }
 
 .curtain-panel--right {
   right: 0.84rem;
-  border-radius: 0.9rem 1.7rem 1.45rem 1.5rem;
-  transform-origin: right center;
+  border-radius: 1rem 1.7rem 1.45rem 1.5rem;
+  transform-origin: 89% 0%;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    3% calc(72% + var(--curtain-open) * 4%),
+    7% calc(39% - var(--curtain-gather) * 14%),
+    0 calc(20% - var(--curtain-gather) * 11%)
+  );
   transform:
-    translate3d(calc(var(--curtain-open) * 54%), calc(var(--curtain-open) * 0.5rem), calc(var(--curtain-open) * -4rem))
-    rotateY(calc(6deg + var(--curtain-open) * 32deg))
-    skewY(calc(var(--right-sway) * 11deg));
+    translate3d(
+      calc(var(--curtain-open) * 50% + var(--curtain-lift) * 4%),
+      calc(var(--curtain-open) * -1.05rem - var(--curtain-lift) * 0.75rem),
+      calc(var(--curtain-open) * -3.6rem)
+    )
+    rotateY(calc(4deg + var(--curtain-open) * 18deg))
+    rotateZ(calc(0.8deg + var(--right-sway) * 9deg))
+    skewY(calc(var(--right-sway) * 9deg))
+    scaleX(calc(1 - var(--curtain-open) * 0.08));
 }
 
 .curtain-panel__body,
@@ -443,11 +580,11 @@ iframe {
     );
   background-position:
     0 0,
-    calc(var(--curtain-open) * 22px) 0,
-    calc(var(--curtain-open) * 32px) 0;
+    calc(var(--curtain-open) * 18px + var(--curtain-gather) * 8px) 0,
+    calc(var(--curtain-open) * 28px + var(--curtain-lift) * 10px) 0;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    inset 0 -40px 52px rgba(16, 5, 8, 0.32);
+    inset 0 -44px 56px rgba(16, 5, 8, 0.34);
 }
 
 .curtain-panel__body::before,
@@ -487,7 +624,7 @@ iframe {
       transparent 82%
     );
   opacity: calc(0.55 + var(--curtain-reveal) * 0.18);
-  transform: translateX(calc(var(--curtain-open) * 1rem));
+  transform: translateX(calc(var(--curtain-open) * 0.8rem + var(--curtain-gather) * 0.4rem));
   mix-blend-mode: screen;
 }
 
@@ -590,16 +727,20 @@ iframe {
 }
 
 .invitation-sheet__subline {
-  margin: 0;
+  max-width: 16rem;
+  margin: 0 auto;
+  font-family: var(--font-signature);
+  font-size: 1.28rem;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
   color: rgba(94, 19, 36, 0.72);
-  font-size: 0.95rem;
 }
 
 .invitation-sheet__names {
   margin: 1rem 0 1.15rem;
-  font-family: "Cormorant Garamond", serif;
-  font-size: clamp(3rem, 13vw, 5.4rem);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: clamp(2.85rem, 13vw, 5.2rem);
+  font-weight: 400;
   line-height: 0.88;
 }
 
@@ -625,7 +766,7 @@ iframe {
 
 .date-ritual__copy h3 {
   margin: 0 0 0.65rem;
-  font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-family: var(--font-ja);
   font-size: clamp(1.9rem, 7.6vw, 2.7rem);
   font-weight: 600;
   line-height: 1.16;
@@ -716,9 +857,9 @@ iframe {
 }
 
 .scratch-seal__date strong {
-  font-family: "Cormorant Garamond", serif;
-  font-size: clamp(3.2rem, 15vw, 4.7rem);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 14.2vw, 4.45rem);
+  font-weight: 400;
   line-height: 0.8;
 }
 
@@ -756,13 +897,13 @@ iframe {
   left: 50%;
   bottom: -0.25rem;
   z-index: 4;
-  padding: 0.4rem 0.7rem;
+  padding: 0.44rem 0.8rem;
   border-radius: 999px;
   background: rgba(20, 15, 17, 0.74);
   color: rgba(255, 249, 241, 0.8);
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: var(--font-script);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
   transform: translate(-50%, 100%);
   pointer-events: none;
 }
@@ -825,10 +966,11 @@ iframe {
 .summary-item small {
   display: block;
   margin-bottom: 0.25rem;
+  font-family: var(--font-display);
   color: rgba(94, 19, 36, 0.7);
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -848,8 +990,8 @@ iframe {
 .invitation-sheet__countdown strong {
   display: inline-block;
   margin: 0 0.3rem;
-  font-family: "Cormorant Garamond", serif;
-  font-size: 2.35rem;
+  font-family: var(--font-display);
+  font-size: 2.18rem;
   line-height: 0.9;
   color: var(--wine);
 }
@@ -893,10 +1035,10 @@ iframe {
 
 .detail-card h3 {
   margin: 0 0 0.8rem;
-  font-family: "Cormorant Garamond", serif;
-  font-size: clamp(1.95rem, 7vw, 2.8rem);
+  font-family: var(--font-ja);
+  font-size: clamp(2rem, 7vw, 2.95rem);
   font-weight: 600;
-  line-height: 0.98;
+  line-height: 1.08;
   text-wrap: balance;
 }
 
@@ -1018,9 +1160,9 @@ iframe {
   align-items: center;
   min-height: 2rem;
   padding-left: 1.65rem;
-  font-family: "Cormorant Garamond", serif;
-  font-size: 1.45rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
   color: var(--wine);
 }
 
@@ -1062,6 +1204,19 @@ iframe {
   max-width: 25rem;
   margin: 0 auto;
   color: rgba(255, 248, 241, 0.72);
+}
+
+.closing-card__signature {
+  margin-top: 1.15rem;
+  font-family: var(--font-signature);
+  font-size: clamp(1.5rem, 7vw, 2.2rem);
+  line-height: 1.08;
+  color: rgba(255, 233, 205, 0.84);
+}
+
+.closing-card__signature span {
+  display: inline-block;
+  margin-left: 0.12rem;
 }
 
 .primary-link {

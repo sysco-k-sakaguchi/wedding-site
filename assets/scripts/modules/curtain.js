@@ -14,11 +14,15 @@ function easeOutCubic(value) {
   return 1 - Math.pow(1 - value, 3);
 }
 
+function easeInOutSine(value) {
+  return -(Math.cos(Math.PI * value) - 1) / 2;
+}
+
 export function setupCurtain({
-  introDelay = 1500,
-  preludeDuration = 760,
-  openDuration = 2550,
-  revealDelay = 320,
+  introDelay = 1750,
+  preludeDuration = 1040,
+  openDuration = 2920,
+  revealDelay = 440,
   onComplete
 } = {}) {
   const stage = document.querySelector("[data-curtain-stage]");
@@ -45,13 +49,19 @@ export function setupCurtain({
     reveal = 0,
     glow = 0.32,
     leftSway = 0,
-    rightSway = 0
+    rightSway = 0,
+    lift = 0,
+    gather = 0,
+    pinch = 0
   }) {
     stage.style.setProperty("--curtain-open", open.toFixed(4));
     stage.style.setProperty("--curtain-reveal", reveal.toFixed(4));
     stage.style.setProperty("--curtain-glow", glow.toFixed(4));
     stage.style.setProperty("--left-sway", leftSway.toFixed(4));
     stage.style.setProperty("--right-sway", rightSway.toFixed(4));
+    stage.style.setProperty("--curtain-lift", lift.toFixed(4));
+    stage.style.setProperty("--curtain-gather", gather.toFixed(4));
+    stage.style.setProperty("--curtain-pinch", pinch.toFixed(4));
   }
 
   function finishCurtain() {
@@ -72,7 +82,10 @@ export function setupCurtain({
       reveal: 1,
       glow: 1,
       leftSway: 0,
-      rightSway: 0
+      rightSway: 0,
+      lift: 1,
+      gather: 1,
+      pinch: 0
     });
 
     updateCaption("招待状が静かに届きました。");
@@ -85,25 +98,29 @@ export function setupCurtain({
   function runOpening() {
     stage.classList.remove("is-anticipating");
     stage.classList.add("is-opening");
-    updateCaption("幕がゆっくりほどけ、招待状が現れます。");
+    updateCaption("中央から幕がほどけ、招待状が現れます。");
 
     const startTime = performance.now();
-    let highlightedReveal = false;
+    let updatedMid = false;
+    let updatedLate = false;
 
     function settleMotion() {
       const settleStart = performance.now();
-      const settleDuration = 920;
+      const settleDuration = 1080;
 
       function settleFrame(now) {
         const progress = clamp((now - settleStart) / settleDuration);
-        const residue = Math.sin(progress * Math.PI * 2.2) * Math.pow(1 - progress, 2.2) * 0.05;
+        const residue = Math.sin(progress * Math.PI * 2.15) * Math.pow(1 - progress, 2.25) * 0.038;
 
         applyState({
           open: 1,
           reveal: 1,
           glow: 1,
           leftSway: residue,
-          rightSway: -residue * 0.92
+          rightSway: -residue * 0.88,
+          lift: 1,
+          gather: 1,
+          pinch: (1 - progress) * 0.1
         });
 
         if (progress < 1) {
@@ -120,20 +137,32 @@ export function setupCurtain({
     function step(now) {
       const progress = clamp((now - startTime) / openDuration);
       const open = easeInOutCubic(progress);
-      const reveal = easeOutCubic(clamp((progress - 0.24) / 0.76));
-      const resonance = Math.sin(progress * Math.PI * 4.4) * Math.pow(1 - progress, 1.7) * 0.085;
+      const reveal = easeOutCubic(clamp((progress - 0.18) / 0.82));
+      const lift = easeOutCubic(clamp((progress - 0.06) / 0.94));
+      const gather = clamp(0.22 + easeOutCubic(clamp((progress - 0.02) / 0.98)) * 0.78);
+      const pinch = clamp(Math.sin(progress * Math.PI) * 0.72 + (1 - open) * 0.26);
+      const resonance = Math.sin(progress * Math.PI * 4.1) * Math.pow(1 - progress, 1.9) * 0.06;
+      const drag = Math.sin(progress * Math.PI * 1.18) * 0.018;
 
       applyState({
         open,
         reveal,
-        glow: 0.34 + reveal * 0.66,
-        leftSway: resonance,
-        rightSway: -resonance * 0.9
+        glow: 0.3 + reveal * 0.68,
+        leftSway: resonance - drag,
+        rightSway: -resonance - drag * 0.8,
+        lift,
+        gather,
+        pinch
       });
 
-      if (!highlightedReveal && progress > 0.62) {
-        highlightedReveal = true;
-        updateCaption("その先に、招待状が静かに現れます。");
+      if (!updatedMid && progress > 0.24) {
+        updatedMid = true;
+        updateCaption("中央に力がかかり、幕がゆっくりほどけていきます。");
+      }
+
+      if (!updatedLate && progress > 0.7) {
+        updatedLate = true;
+        updateCaption("幕の奥から、招待状が静かに現れます。");
       }
 
       if (progress < 1) {
@@ -162,21 +191,28 @@ export function setupCurtain({
     }
 
     stage.classList.add("is-anticipating");
-    updateCaption(manual ? "静けさのあと、幕がほどけます。" : "まもなく、幕が静かにほどけます。");
+    updateCaption(
+      manual
+        ? "静けさのあと、中央から幕がほどけます。"
+        : "静けさのなかで、幕にそっと力がかかります。"
+    );
 
     const preludeStart = performance.now();
 
     function preludeStep(now) {
       const progress = clamp((now - preludeStart) / preludeDuration);
-      const hush = Math.sin(progress * Math.PI) * 0.018;
-      const glow = 0.26 + Math.sin(progress * Math.PI) * 0.1;
+      const pulse = easeInOutSine(progress);
+      const hush = Math.sin(progress * Math.PI * 1.3) * Math.pow(1 - progress * 0.18, 1.15) * 0.018;
 
       applyState({
         open: 0,
         reveal: 0,
-        glow,
+        glow: 0.24 + Math.sin(progress * Math.PI) * 0.12,
         leftSway: hush,
-        rightSway: -hush
+        rightSway: -hush,
+        lift: pulse * 0.16,
+        gather: pulse * 0.42,
+        pinch: Math.sin(progress * Math.PI) * 0.72
       });
 
       if (progress < 1) {
@@ -224,7 +260,10 @@ export function setupCurtain({
     reveal: 0,
     glow: 0.28,
     leftSway: 0,
-    rightSway: 0
+    rightSway: 0,
+    lift: 0,
+    gather: 0,
+    pinch: 0
   });
 
   updateCaption(prefersReducedMotion ? "タップで招待状を表示します。" : "静かに、お待ちください。");

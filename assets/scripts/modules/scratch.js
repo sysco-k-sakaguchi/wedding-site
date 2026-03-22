@@ -151,10 +151,10 @@ function resetTilt(seal) {
 }
 
 export function setupScratch({
-  completeRatio = 0.22,
+  completeRatio = 0.5,
   brushSize = 18,
-  gestureDistance = 200,
-  revealDelay = 420,
+  gestureDistance = 170,
+  revealDelay = 360,
   onReveal
 } = {}) {
   const seal = document.querySelector("[data-scratch-seal]");
@@ -180,26 +180,35 @@ export function setupScratch({
   let clearedRatio = 0;
   let lastPoint = null;
 
+  function getProgress() {
+    const distanceProgress = Math.min(totalDistance / gestureDistance, 1);
+    const scratchProgress = Math.min(clearedRatio / completeRatio, 1);
+
+    return {
+      distanceProgress,
+      scratchProgress,
+      combinedProgress: Math.min(scratchProgress * 0.78 + distanceProgress * 0.22, 1)
+    };
+  }
+
   function refreshStatus(force = false) {
     if (!status || revealed) {
       return;
     }
 
-    const distanceProgress = Math.min(totalDistance / gestureDistance, 1);
-    const scratchProgress = Math.min(clearedRatio / completeRatio, 1);
-    const progress = Math.max(distanceProgress, scratchProgress);
+    const { combinedProgress } = getProgress();
 
-    if (force || progress < 0.2) {
+    if (force || combinedProgress < 0.18) {
       status.textContent = "まだ封印されています。円を描くように削ってください。";
       return;
     }
 
-    if (progress < 0.52) {
+    if (combinedProgress < 0.5) {
       status.textContent = "封印が少しずつほどけています。もう少し削ってください。";
       return;
     }
 
-    if (progress < 0.9) {
+    if (combinedProgress < 0.82) {
       status.textContent = "あと少しで日付が現れます。ゆっくり削ってください。";
       return;
     }
@@ -249,11 +258,16 @@ export function setupScratch({
       return;
     }
 
-    if (force || sampleCounter % 8 === 0) {
+    if (force || sampleCounter % 6 === 0) {
       updateClearedRatio();
     }
 
-    if (totalDistance >= gestureDistance && clearedRatio >= completeRatio) {
+    const { scratchProgress, combinedProgress } = getProgress();
+
+    if (
+      scratchProgress >= 1 ||
+      (combinedProgress >= 1 && clearedRatio >= completeRatio * 0.7)
+    ) {
       queueReveal();
       return;
     }
