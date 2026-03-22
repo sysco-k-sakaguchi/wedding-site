@@ -1177,13 +1177,27 @@ iframe {
 
 .chapter-link__eyebrow {
   display: block;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.3rem;
   font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(198, 164, 108, 0.92);
+}
+
+.chapter-link__date,
+.chapter-sheet__date {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgba(94, 19, 36, 0.58);
+}
+
+.chapter-link__date {
+  margin-bottom: 0.55rem;
 }
 
 .chapter-link strong,
@@ -1224,12 +1238,8 @@ iframe {
   text-align: center;
 }
 
-.chapter-sheet__single {
-  margin: 1.3rem 0 0;
-  font-family: var(--font-display);
-  font-size: 1.55rem;
-  line-height: 1.15;
-  color: rgba(94, 19, 36, 0.72);
+.chapter-sheet__date {
+  margin: -0.1rem 0 0.55rem;
 }
 
 .chapter-facts {

@@ -44,8 +44,10 @@ export function bindContent(config) {
   fillText("[data-venue-access]", config.venue.access);
   fillText("[data-venue-note]", config.venue.note);
   fillText("[data-rsvp-deadline]", config.rsvpDeadline);
-  fillText("[data-okinawa-note]", config.okinawaNote);
-  fillText("[data-party-venue-name]", config.partyVenue?.name ?? "");
+  fillText("[data-okinawa-date]", config.chapters?.okinawa?.date ?? "");
+  fillText("[data-ceremony-date]", config.chapters?.ceremony?.date ?? "");
+  fillText("[data-friends-party-date]", config.chapters?.friendsParty?.date ?? "");
+  fillText("[data-friends-party-note]", config.chapters?.friendsParty?.note ?? "");
 
   const mapEmbed = document.querySelector("[data-map-embed]");
   const mapLinks = document.querySelectorAll("[data-map-link]");

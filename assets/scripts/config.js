@@ -20,9 +20,17 @@ export const EXPERIENCE_CONFIG = {
     access: "京阪「出町柳駅」より徒歩約15分 / 市バス「府立医大病院前」より徒歩約3分",
     note: "到着後は境内のご案内に沿って受付までお進みください。"
   },
-  okinawaNote: "8月公開予定",
-  partyVenue: {
-    name: "二次会会場は追ってご案内します"
+  chapters: {
+    okinawa: {
+      date: "7月○日"
+    },
+    ceremony: {
+      date: "10月12日"
+    },
+    friendsParty: {
+      date: "11月29日",
+      note: "結婚式後の会食とは別日にひらく、友人との集まり"
+    }
   },
   mapEmbedUrl: "https://maps.google.com/maps?hl=ja&q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&z=16&output=embed",
   mapExternalUrl: "https://maps.google.com/?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD",
