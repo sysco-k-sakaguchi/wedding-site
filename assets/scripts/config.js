@@ -5,8 +5,7 @@ export const PLACEHOLDER_URL = "FORM_URL";
 
 export const EXPERIENCE_CONFIG = {
   coupleNames: "Masato & Haruka",
-  invitationMessage:
-    "このたび私たちは結婚式を挙げることとなりました。大切な一日に、ぜひお立ち会いいただけましたら幸いです。",
+  invitationMessage: "どうぞお越しください。",
   weddingDateIso: "2026-10-12T11:30:00+09:00",
   weddingDateDisplay: "2026年10月12日(月)",
   weddingTimeDisplay: "11:30 挙式開始",
@@ -20,6 +19,10 @@ export const EXPERIENCE_CONFIG = {
     address: "京都府京都市上京区染殿町680",
     access: "京阪「出町柳駅」より徒歩約15分 / 市バス「府立医大病院前」より徒歩約3分",
     note: "到着後は境内のご案内に沿って受付までお進みください。"
+  },
+  okinawaNote: "8月公開予定",
+  partyVenue: {
+    name: "二次会会場は追ってご案内します"
   },
   mapEmbedUrl: "https://maps.google.com/maps?hl=ja&q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&z=16&output=embed",
   mapExternalUrl: "https://maps.google.com/?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD",

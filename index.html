@@ -88,18 +88,13 @@
           <p class="eyebrow">Wedding Invitation</p>
           <p class="invitation-sheet__subline">Together with our families</p>
           <h2 class="invitation-sheet__names" data-couple-names>Masato &amp; Haruka</h2>
-          <p class="invitation-sheet__message" data-invitation-message>
-            このたび私たちは結婚式を挙げることとなりました。
-            大切な一日に、ぜひお立ち会いいただけましたら幸いです。
-          </p>
+          <p class="invitation-sheet__message" data-invitation-message>どうぞお越しください。</p>
 
           <div class="date-ritual" data-scratch-root>
             <div class="date-ritual__copy">
               <p class="date-ritual__eyebrow">Save the Date</p>
               <h3>金の封印を、ゆっくり削ってください。</h3>
-              <p>
-                指先で円を描くように、少しずつ封印をほどいてください。
-              </p>
+              <p>円をなぞるように、静かにほどいてください。</p>
             </div>
 
             <div class="date-ritual__seal-area">
@@ -129,133 +124,91 @@
           </div>
 
           <div class="invitation-sheet__details" data-date-panel hidden>
-            <div class="invitation-sheet__details-grid">
-              <div class="detail-chip">
-                <small>Date</small>
-                <strong data-date-display>2026年10月12日(月)</strong>
-              </div>
-              <div class="detail-chip">
-                <small>Ceremony</small>
-                <strong data-wedding-time>11:30 挙式開始</strong>
-              </div>
-              <div class="detail-chip">
-                <small>Venue</small>
-                <strong data-venue-name>京都・梨木神社</strong>
-              </div>
+            <div class="invitation-sheet__facts">
+              <p class="invitation-sheet__fact" data-date-display>2026年10月12日(月)</p>
+              <p class="invitation-sheet__fact" data-venue-name>京都・梨木神社</p>
             </div>
-
-            <p class="invitation-sheet__countdown" data-countdown-root>
-              <span data-countdown-label>その日まであと</span>
-              <strong data-countdown-days>--</strong>
-              <span data-countdown-unit>日</span>
-            </p>
-
-            <p class="invitation-sheet__afterword">
-              どうぞその日まで、静かに楽しみにしていただけましたら幸いです。
-            </p>
+            <p class="invitation-sheet__chapter-cue">沖縄編 / 挙式編 / パーティ編</p>
           </div>
 
           <p class="scroll-whisper" data-scroll-whisper hidden>
-            下へ進むと、会場と当日のご案内が続きます。
+            下へ進むと、3つの編がひらきます。
           </p>
         </article>
       </div>
     </section>
 
-    <section class="scene details-scene is-locked" id="details" hidden>
-      <div class="scene__frame">
-        <div class="details-shell">
-          <div class="scene-heading" data-reveal>
-            <p class="eyebrow">Information</p>
-            <h2>当日のご案内</h2>
-            <p>会場・お時間・当日の流れを、やわらかな余白の中に整えました。</p>
-          </div>
-
-          <div class="details-layout">
-            <article class="detail-card detail-card--summary" data-reveal>
-              <div class="summary-grid">
-                <div class="summary-item">
-                  <small>Date</small>
-                  <strong data-date-display>2026年10月12日(月)</strong>
-                </div>
-                <div class="summary-item">
-                  <small>Time</small>
-                  <strong data-wedding-time>11:30 挙式開始</strong>
-                </div>
-                <div class="summary-item">
-                  <small>Venue</small>
-                  <strong data-venue-name>京都・梨木神社</strong>
-                </div>
-                <div class="summary-item">
-                  <small>RSVP</small>
-                  <strong data-rsvp-deadline>2026年8月31日(月)</strong>
-                </div>
-              </div>
-            </article>
-
-            <article class="detail-card" data-reveal>
-              <p class="detail-card__label">Venue</p>
-              <h3 data-venue-name>京都・梨木神社</h3>
-              <p class="detail-card__lead" data-venue-address>京都府京都市上京区染殿町680</p>
-              <p class="detail-card__body" data-venue-access>
-                京阪「出町柳駅」より徒歩約15分 / 市バス「府立医大病院前」より徒歩約3分
-              </p>
-              <p class="detail-card__footnote" data-venue-note>
-                到着後は境内のご案内に沿って受付までお進みください。
-              </p>
-            </article>
-
-            <article class="detail-card detail-card--map" data-reveal>
-              <p class="detail-card__label">Map</p>
-              <h3>アクセスマップ</h3>
-
-              <div class="map-frame">
-                <iframe
-                  title="会場地図"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  src=""
-                  data-map-embed
-                ></iframe>
-              </div>
-
-              <a class="secondary-link" href="#" target="_blank" rel="noopener noreferrer" data-map-link>
-                Google Maps で開く
-              </a>
-            </article>
-
-            <article class="detail-card detail-card--timeline" data-reveal>
-              <p class="detail-card__label">Schedule</p>
-              <h3>当日の流れ</h3>
-              <ol class="timeline-list" data-schedule-list></ol>
-            </article>
-          </div>
-        </div>
+    <section class="scene chapters-scene is-locked" id="chapters" hidden aria-label="3つの編">
+      <div class="scene__frame scene__frame--narrow">
+        <nav class="chapter-hub" aria-label="各編への入り口">
+          <a class="chapter-link" href="#okinawa" data-reveal>
+            <span class="chapter-link__eyebrow">Okinawa</span>
+            <strong>沖縄編</strong>
+          </a>
+          <a class="chapter-link" href="#ceremony" data-reveal>
+            <span class="chapter-link__eyebrow">Wedding Ceremony</span>
+            <strong>挙式編</strong>
+          </a>
+          <a class="chapter-link" href="#party" data-reveal>
+            <span class="chapter-link__eyebrow">After Party</span>
+            <strong>パーティ編</strong>
+          </a>
+        </nav>
       </div>
     </section>
 
-    <section class="scene closing-scene is-locked" id="rsvp" hidden>
+    <section class="scene chapter-scene is-locked" id="okinawa" hidden>
       <div class="scene__frame scene__frame--narrow">
-        <article class="closing-card" data-reveal>
-          <p class="eyebrow">RSVP</p>
-          <h2>ご出欠のご回答</h2>
-          <p>
-            ご回答は専用フォームより承っております。
-            落ち着いたタイミングでお進みください。
-          </p>
+        <article class="chapter-sheet" data-reveal>
+          <p class="eyebrow">Okinawa</p>
+          <h2>沖縄編</h2>
+          <p class="chapter-sheet__single" data-okinawa-note>8月公開予定</p>
+        </article>
+      </div>
+    </section>
 
-          <p class="closing-card__signature">
-            With gratitude,
-            <span data-couple-names>Masato &amp; Haruka</span>
-          </p>
+    <section class="scene chapter-scene is-locked" id="ceremony" hidden>
+      <div class="scene__frame scene__frame--narrow">
+        <article class="chapter-sheet chapter-sheet--ceremony" data-reveal>
+          <p class="eyebrow">Wedding Ceremony</p>
+          <h2>挙式編</h2>
 
-          <a class="primary-link" href="FORM_URL" target="_blank" rel="noopener noreferrer" data-rsvp-link>
-            出欠回答フォームへ進む
-          </a>
+          <div class="chapter-facts">
+            <div class="chapter-fact">
+              <small>Date</small>
+              <strong data-date-display>2026年10月12日(月)</strong>
+            </div>
+            <div class="chapter-fact">
+              <small>Time</small>
+              <strong data-wedding-time>11:30 挙式開始</strong>
+            </div>
+            <div class="chapter-fact">
+              <small>Venue</small>
+              <strong data-venue-name>京都・梨木神社</strong>
+            </div>
+          </div>
 
-          <p class="closing-card__caption">
-            回答期限 <span data-rsvp-deadline>2026年8月31日(月)</span>
-          </p>
+          <div class="chapter-actions">
+            <a class="secondary-link" href="#" target="_blank" rel="noopener noreferrer" data-map-link>
+              Google Maps
+            </a>
+            <a class="primary-link" href="FORM_URL" target="_blank" rel="noopener noreferrer" data-rsvp-link>
+              RSVP
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="scene chapter-scene is-locked" id="party" hidden>
+      <div class="scene__frame scene__frame--narrow">
+        <article class="chapter-sheet" data-reveal>
+          <p class="eyebrow">After Party</p>
+          <h2>パーティ編</h2>
+          <div class="chapter-feature">
+            <small>After Party Venue</small>
+            <strong data-party-venue-name>二次会会場は追ってご案内します</strong>
+          </div>
         </article>
       </div>
     </section>

@@ -44,39 +44,43 @@ export function bindContent(config) {
   fillText("[data-venue-access]", config.venue.access);
   fillText("[data-venue-note]", config.venue.note);
   fillText("[data-rsvp-deadline]", config.rsvpDeadline);
+  fillText("[data-okinawa-note]", config.okinawaNote);
+  fillText("[data-party-venue-name]", config.partyVenue?.name ?? "");
 
   const mapEmbed = document.querySelector("[data-map-embed]");
-  const mapLink = document.querySelector("[data-map-link]");
-  const rsvpLink = document.querySelector("[data-rsvp-link]");
+  const mapLinks = document.querySelectorAll("[data-map-link]");
+  const rsvpLinks = document.querySelectorAll("[data-rsvp-link]");
 
   if (mapEmbed) {
     mapEmbed.src = config.mapEmbedUrl;
   }
 
-  if (mapLink) {
-    mapLink.href = config.mapExternalUrl;
-  }
+  mapLinks.forEach((link) => {
+    link.href = config.mapExternalUrl;
+  });
 
-  if (rsvpLink) {
-    rsvpLink.href = config.rsvpUrl;
-  }
+  rsvpLinks.forEach((link) => {
+    link.href = config.rsvpUrl;
+  });
 
   renderSchedule(config.schedule);
 }
 
 export function setupPlaceholderLinks({ placeholderValue }) {
-  const rsvpLink = document.querySelector("[data-rsvp-link]");
+  const rsvpLinks = document.querySelectorAll("[data-rsvp-link]");
 
-  if (!rsvpLink) {
+  if (!rsvpLinks.length) {
     return;
   }
 
-  rsvpLink.addEventListener("click", (event) => {
-    if (rsvpLink.getAttribute("href") !== placeholderValue) {
-      return;
-    }
+  rsvpLinks.forEach((rsvpLink) => {
+    rsvpLink.addEventListener("click", (event) => {
+      if (rsvpLink.getAttribute("href") !== placeholderValue) {
+        return;
+      }
 
-    event.preventDefault();
-    window.alert("RSVP の URL はまだ仮設定です。assets/scripts/config.js の rsvpUrl を差し替えてください。");
+      event.preventDefault();
+      window.alert("RSVP の URL はまだ仮設定です。assets/scripts/config.js の rsvpUrl を差し替えてください。");
+    });
   });
 }

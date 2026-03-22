@@ -2,15 +2,17 @@ import { EXPERIENCE_CONFIG, EXPERIENCE_SETTINGS, PLACEHOLDER_URL } from "./confi
 import { bindContent, setupPlaceholderLinks } from "./modules/content.js";
 import { setupCurtain } from "./modules/curtain.js";
 import { setupScratch } from "./modules/scratch.js";
-import { setupCountdown } from "./modules/countdown.js";
 import { setupRevealObserver } from "./modules/reveal.js";
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const invitationSection = document.querySelector("#invitation");
-const detailsSection = document.querySelector("#details");
-const rsvpSection = document.querySelector("#rsvp");
+const chaptersSection = document.querySelector("#chapters");
+const okinawaSection = document.querySelector("#okinawa");
+const ceremonySection = document.querySelector("#ceremony");
+const partySection = document.querySelector("#party");
 const datePanel = document.querySelector("[data-date-panel]");
 const scrollWhisper = document.querySelector("[data-scroll-whisper]");
+const postScratchSections = [chaptersSection, okinawaSection, ceremonySection, partySection].filter(Boolean);
 
 function unlockSection(section) {
   if (!section) {
@@ -57,8 +59,6 @@ function initializeExperience() {
   const revealController = setupRevealObserver();
   revealController.observeAll(document.querySelectorAll(".scene:not([hidden]) [data-reveal]"));
 
-  setupCountdown(EXPERIENCE_CONFIG);
-
   const scratchController = setupScratch({
     completeRatio: EXPERIENCE_SETTINGS.scratchCompleteRatio,
     brushSize: EXPERIENCE_SETTINGS.scratchBrushSize,
@@ -69,11 +69,10 @@ function initializeExperience() {
       revealDatePanel();
       revealScrollWhisper();
 
-      unlockSection(detailsSection);
-      unlockSection(rsvpSection);
-
-      revealController.observeAll(detailsSection?.querySelectorAll("[data-reveal]") ?? []);
-      revealController.observeAll(rsvpSection?.querySelectorAll("[data-reveal]") ?? []);
+      postScratchSections.forEach((section) => {
+        unlockSection(section);
+        revealController.observeAll(section.querySelectorAll("[data-reveal]"));
+      });
     }
   });
 
