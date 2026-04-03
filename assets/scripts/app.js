@@ -10,9 +10,10 @@ const chaptersSection = document.querySelector("#chapters");
 const okinawaSection = document.querySelector("#okinawa");
 const ceremonySection = document.querySelector("#ceremony");
 const partySection = document.querySelector("#party");
+const footerSection = document.querySelector(".site-footer");
 const datePanel = document.querySelector("[data-date-panel]");
 const scrollWhisper = document.querySelector("[data-scroll-whisper]");
-const postScratchSections = [chaptersSection, okinawaSection, ceremonySection, partySection].filter(Boolean);
+const postScratchSections = [chaptersSection, okinawaSection, ceremonySection, partySection, footerSection].filter(Boolean);
 
 function unlockSection(section) {
   if (!section) {

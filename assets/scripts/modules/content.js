@@ -47,6 +47,7 @@ export function bindContent(config) {
   fillText("[data-venue-note]", config.venue.note);
   fillText("[data-rsvp-deadline]", config.rsvpDeadline);
   fillText("[data-dining-name]", config.dining?.name ?? "");
+  fillText("[data-dining-note]", config.dining?.note ?? "");
   fillText("[data-photo-share-note]", config.photoShareNote ?? "");
   fillText("[data-okinawa-date]", config.chapters?.okinawa?.date ?? "");
   fillText("[data-okinawa-note]", config.chapters?.okinawa?.note ?? "");
@@ -54,6 +55,7 @@ export function bindContent(config) {
   fillText("[data-ceremony-note]", config.chapters?.ceremony?.note ?? "");
   fillText("[data-friends-party-date]", config.chapters?.friendsParty?.date ?? "");
   fillText("[data-friends-party-note]", config.chapters?.friendsParty?.note ?? "");
+  fillText("[data-closing-message]", config.closingMessage ?? "");
   fillText("[data-credit-prefix]", config.footerCredit?.prefix ?? "");
   fillText("[data-credit-name]", config.footerCredit?.name ?? "");
 

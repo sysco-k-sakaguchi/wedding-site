@@ -5,7 +5,7 @@ export const PLACEHOLDER_URL = "FORM_URL";
 
 export const EXPERIENCE_CONFIG = {
   coupleNames: "Masato & Haruka",
-  invitationMessage: "どうぞお越しください。",
+  invitationMessage: "どうぞお越しいただけましたら幸いです。",
   weddingDateIso: "2026-10-12T11:30:00+09:00",
   weddingDateDisplay: "2026年10月12日(月)",
   weddingTimeDisplay: "11:30 挙式開始",
@@ -21,20 +21,21 @@ export const EXPERIENCE_CONFIG = {
     note: "到着後は境内のご案内に沿って受付までお進みください。"
   },
   dining: {
-    name: "イタリアンダニエルズルーチェ"
+    name: "イタリアンダニエルズルーチェ",
+    note: "挙式後、会場を移して会食を予定しております。"
   },
   chapters: {
     okinawa: {
       date: "7月○日",
-      note: "旅のはじまり"
+      note: "旅の予定は整い次第ご案内します"
     },
     ceremony: {
       date: "10月12日",
-      note: "京都で迎える本番の一日"
+      note: "挙式と会食についてご案内します"
     },
     friendsParty: {
       date: "11月29日",
-      note: "結婚式とは別日にひらく、友人との集まり"
+      note: "友人の皆さまと別日にご一緒する会です"
     }
   },
   photoShareNote: "写真共有は挙式後にご案内します",
@@ -43,9 +44,10 @@ export const EXPERIENCE_CONFIG = {
   rsvpUrl: PLACEHOLDER_URL,
   rsvpDeadline: "2026年8月31日(月)",
   footerCredit: {
-    prefix: "Presented by",
-    name: "坂口ケイジ"
+    prefix: "Invitation design",
+    name: "Keiichi Sakaguchi"
   },
+  closingMessage: "皆さまにお会いできる日を、心より楽しみにしております。",
   schedule: [
     {
       time: "11:00",
@@ -71,13 +73,13 @@ export const EXPERIENCE_CONFIG = {
 };
 
 export const EXPERIENCE_SETTINGS = {
-  curtainIntroDelay: 960,
-  curtainPreludeDuration: 760,
-  curtainOpenDuration: 2320,
-  curtainRevealDelay: 280,
-  curtainScrollDelay: 620,
+  curtainIntroDelay: 320,
+  curtainPreludeDuration: 420,
+  curtainOpenDuration: 1600,
+  curtainRevealDelay: 220,
+  curtainScrollDelay: 340,
   scratchCompleteRatio: 0.42,
   scratchBrushSize: 20,
   scratchGestureDistance: 155,
-  scratchRevealDelay: 260
+  scratchRevealDelay: 220
 };
