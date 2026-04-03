@@ -31,10 +31,10 @@
       <div class="prologue__copy">
         <p class="eyebrow">Digital Wedding Invitation</p>
         <h1 id="opening-title">
-          静かに幕がひらき、
-          <span>一枚の招待状が届きます。</span>
+          <span>静かな幕開けの先に、</span>
+          <span>一枚の招待状を。</span>
         </h1>
-        <p class="prologue__lead">幕がひらくまで、少しだけお待ちください。</p>
+        <p class="prologue__names" data-couple-names>Masato &amp; Haruka</p>
         <p class="prologue__script">for our wedding celebration</p>
       </div>
 
@@ -46,13 +46,14 @@
         aria-label="幕をひらいて招待状を見る"
       >
         <span class="curtain-stage__backlight" aria-hidden="true"></span>
+        <span class="curtain-stage__spotlight" aria-hidden="true"></span>
         <span class="curtain-stage__arch" aria-hidden="true"></span>
 
         <span class="curtain-stage__invitation" aria-hidden="true">
           <span class="curtain-stage__invitation-inner">
             <small>Together with our families</small>
             <strong data-couple-names>Masato &amp; Haruka</strong>
-            <em>An invitation awaits</em>
+            <em>Wedding Invitation</em>
           </span>
         </span>
 
@@ -72,11 +73,12 @@
           <span class="curtain-panel__hem"></span>
         </span>
 
+        <span class="curtain-stage__floor" aria-hidden="true"></span>
         <span class="curtain-stage__frame" aria-hidden="true"></span>
       </button>
 
       <p class="prologue__caption" id="opening-caption" data-curtain-caption>
-        静かに、お待ちください
+        しばらくすると、幕がひらきます。
       </p>
     </section>
 
@@ -90,11 +92,12 @@
           <h2 class="invitation-sheet__names" data-couple-names>Masato &amp; Haruka</h2>
           <p class="invitation-sheet__message" data-invitation-message>どうぞお越しください。</p>
 
+          <div class="invitation-sheet__divider" aria-hidden="true"></div>
+
           <div class="date-ritual" data-scratch-root>
             <div class="date-ritual__copy">
-              <p class="date-ritual__eyebrow">Save the Date</p>
-              <h3>金の封印を、ゆっくり削ってください。</h3>
-              <p>円をなぞるように、静かにほどいてください。</p>
+              <p class="date-ritual__eyebrow">Sealed Date</p>
+              <h3>金の封印をほどく。</h3>
             </div>
 
             <div class="date-ritual__seal-area">
@@ -114,47 +117,60 @@
                 </span>
                 <canvas class="scratch-seal__canvas" data-scratch-canvas></canvas>
                 <span class="scratch-seal__foil-edge" aria-hidden="true"></span>
-                <span class="scratch-seal__instruction" aria-hidden="true">Gently trace</span>
               </button>
 
               <p class="date-ritual__status" id="scratch-caption" data-scratch-status aria-live="polite">
-                まだ封印されています。円を描くように削ってください。
+                封印をほどいてください。
               </p>
             </div>
           </div>
 
           <div class="invitation-sheet__details" data-date-panel hidden>
             <div class="invitation-sheet__facts">
-              <p class="invitation-sheet__fact" data-date-display>2026年10月12日(月)</p>
-              <p class="invitation-sheet__fact" data-venue-name>京都・梨木神社</p>
+              <div class="invitation-sheet__fact">
+                <small>Date</small>
+                <strong data-date-display>2026年10月12日(月)</strong>
+              </div>
+              <div class="invitation-sheet__fact">
+                <small>Venue</small>
+                <strong data-venue-name>京都・梨木神社</strong>
+              </div>
             </div>
-            <p class="invitation-sheet__chapter-cue">沖縄編 / 挙式編 / 友人の集い編</p>
-          </div>
 
-          <p class="scroll-whisper" data-scroll-whisper hidden>
-            下へ進むと、3つの編がひらきます。
-          </p>
+            <p class="invitation-sheet__chapter-cue">three scenes for our celebration</p>
+          </div>
         </article>
       </div>
     </section>
 
     <section class="scene chapters-scene is-locked" id="chapters" hidden aria-label="3つの編">
       <div class="scene__frame scene__frame--narrow">
+        <div class="scene-heading" data-reveal>
+          <p class="eyebrow">Three Chapters</p>
+          <h2>この先に、三つの一日。</h2>
+          <p>旅のはじまり、挙式、そして友人の集いへ。</p>
+        </div>
+
         <nav class="chapter-hub" aria-label="各編への入り口">
-          <a class="chapter-link" href="#okinawa" data-reveal>
-            <span class="chapter-link__eyebrow">Okinawa</span>
+          <a class="chapter-link chapter-link--okinawa" href="#okinawa" data-reveal>
+            <span class="chapter-link__eyebrow">Okinawa Story</span>
             <span class="chapter-link__date" data-okinawa-date>7月○日</span>
             <strong>沖縄編</strong>
+            <span class="chapter-link__note" data-okinawa-note>旅のはじまり</span>
           </a>
-          <a class="chapter-link" href="#ceremony" data-reveal>
+
+          <a class="chapter-link chapter-link--ceremony" href="#ceremony" data-reveal>
             <span class="chapter-link__eyebrow">Wedding Ceremony</span>
             <span class="chapter-link__date" data-ceremony-date>10月12日</span>
             <strong>挙式編</strong>
+            <span class="chapter-link__note" data-ceremony-note>京都で迎える本番の一日</span>
           </a>
-          <a class="chapter-link" href="#party" data-reveal>
-            <span class="chapter-link__eyebrow">Friends Party</span>
+
+          <a class="chapter-link chapter-link--party" href="#party" data-reveal>
+            <span class="chapter-link__eyebrow">Friends Gathering</span>
             <span class="chapter-link__date" data-friends-party-date>11月29日</span>
             <strong>友人の集い編</strong>
+            <span class="chapter-link__note" data-friends-party-note>結婚式とは別日にひらく、友人との集まり</span>
           </a>
         </nav>
       </div>
@@ -162,10 +178,18 @@
 
     <section class="scene chapter-scene is-locked" id="okinawa" hidden>
       <div class="scene__frame scene__frame--narrow">
-        <article class="chapter-sheet" data-reveal>
-          <p class="eyebrow">Okinawa</p>
-          <p class="chapter-sheet__date" data-okinawa-date>7月○日</p>
-          <h2>沖縄編</h2>
+        <article class="chapter-sheet chapter-sheet--okinawa" data-reveal>
+          <div class="chapter-sheet__intro">
+            <p class="eyebrow">Okinawa Story</p>
+            <p class="chapter-sheet__date" data-okinawa-date>7月○日</p>
+            <h2>沖縄編</h2>
+            <p class="chapter-sheet__lead" data-okinawa-note>旅のはじまり</p>
+          </div>
+
+          <div class="chapter-feature chapter-feature--soft">
+            <small>Preview</small>
+            <strong>旅のしおりは整い次第、あらためてお届けします。</strong>
+          </div>
         </article>
       </div>
     </section>
@@ -173,9 +197,12 @@
     <section class="scene chapter-scene is-locked" id="ceremony" hidden>
       <div class="scene__frame scene__frame--narrow">
         <article class="chapter-sheet chapter-sheet--ceremony" data-reveal>
-          <p class="eyebrow">Wedding Ceremony</p>
-          <p class="chapter-sheet__date" data-ceremony-date>10月12日</p>
-          <h2>挙式編</h2>
+          <div class="chapter-sheet__intro chapter-sheet__intro--ceremony">
+            <p class="eyebrow">Wedding Ceremony</p>
+            <p class="chapter-sheet__date" data-ceremony-date>10月12日</p>
+            <h2>挙式編</h2>
+            <p class="chapter-sheet__lead" data-ceremony-note>京都で迎える本番の一日</p>
+          </div>
 
           <div class="chapter-facts chapter-facts--ceremony">
             <div class="chapter-fact">
@@ -193,8 +220,10 @@
           </div>
 
           <div class="ceremony-layout">
-            <section class="chapter-panel">
-              <p class="chapter-panel__label">Map</p>
+            <section class="chapter-panel chapter-panel--map">
+              <p class="chapter-panel__label">Venue</p>
+              <strong class="chapter-panel__headline" data-venue-name>京都・梨木神社</strong>
+
               <div class="chapter-mini-map">
                 <iframe
                   title="挙式会場地図"
@@ -204,6 +233,11 @@
                   data-map-embed
                 ></iframe>
               </div>
+
+              <p class="chapter-panel__note" data-venue-address>京都府京都市上京区染殿町680</p>
+              <p class="chapter-panel__note chapter-panel__note--muted" data-venue-access>
+                京阪「出町柳駅」より徒歩約15分 / 市バス「府立医大病院前」より徒歩約3分
+              </p>
             </section>
 
             <section class="chapter-panel chapter-panel--schedule">
@@ -212,9 +246,16 @@
             </section>
           </div>
 
-          <div class="chapter-feature chapter-feature--wide">
-            <small>Photo Share</small>
-            <strong data-photo-share-note>写真共有は挙式後にご案内します</strong>
+          <div class="chapter-secondary-grid">
+            <div class="chapter-feature">
+              <small>Photo Share</small>
+              <strong data-photo-share-note>写真共有は挙式後にご案内します</strong>
+            </div>
+
+            <div class="chapter-feature">
+              <small>RSVP Deadline</small>
+              <strong data-rsvp-deadline>2026年8月31日(月)</strong>
+            </div>
           </div>
 
           <div class="chapter-actions">
@@ -231,17 +272,28 @@
 
     <section class="scene chapter-scene is-locked" id="party" hidden>
       <div class="scene__frame scene__frame--narrow">
-        <article class="chapter-sheet" data-reveal>
-          <p class="eyebrow">Friends Party</p>
-          <p class="chapter-sheet__date" data-friends-party-date>11月29日</p>
-          <h2>友人の集い編</h2>
-          <div class="chapter-feature">
-            <small>Friends Gathering</small>
-            <strong data-friends-party-note>結婚式後の会食とは別日にひらく、友人との集まり</strong>
+        <article class="chapter-sheet chapter-sheet--party" data-reveal>
+          <div class="chapter-sheet__intro">
+            <p class="eyebrow">Friends Gathering</p>
+            <p class="chapter-sheet__date" data-friends-party-date>11月29日</p>
+            <h2>友人の集い編</h2>
+            <p class="chapter-sheet__lead" data-friends-party-note>結婚式とは別日にひらく、友人との集まり</p>
+          </div>
+
+          <div class="chapter-feature chapter-feature--soft">
+            <small>After Celebration</small>
+            <strong>肩の力を抜いて集まる、ささやかな祝宴の時間です。</strong>
           </div>
         </article>
       </div>
     </section>
+
+    <footer class="site-footer">
+      <p class="site-footer__credit">
+        <span data-credit-prefix>Designed / Developed by</span>
+        <strong data-credit-name>坂口ケイジ</strong>
+      </p>
+    </footer>
   </main>
 
   <script type="module" src="assets/scripts/app.js"></script>

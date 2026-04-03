@@ -88,7 +88,7 @@ export function setupCurtain({
       pinch: 0
     });
 
-    updateCaption("招待状が静かに届きました。");
+    updateCaption("招待状が届きました。");
 
     window.setTimeout(() => {
       onComplete?.();
@@ -98,11 +98,9 @@ export function setupCurtain({
   function runOpening() {
     stage.classList.remove("is-anticipating");
     stage.classList.add("is-opening");
-    updateCaption("中央から幕がほどけ、招待状が現れます。");
+    updateCaption("幕がひらいています。");
 
     const startTime = performance.now();
-    let updatedMid = false;
-    let updatedLate = false;
 
     function settleMotion() {
       const settleStart = performance.now();
@@ -155,16 +153,6 @@ export function setupCurtain({
         pinch
       });
 
-      if (!updatedMid && progress > 0.24) {
-        updatedMid = true;
-        updateCaption("中央に力がかかり、幕がゆっくりほどけていきます。");
-      }
-
-      if (!updatedLate && progress > 0.7) {
-        updatedLate = true;
-        updateCaption("幕の奥から、招待状が静かに現れます。");
-      }
-
       if (progress < 1) {
         animationFrameId = window.requestAnimationFrame(step);
         return;
@@ -193,8 +181,8 @@ export function setupCurtain({
     stage.classList.add("is-anticipating");
     updateCaption(
       manual
-        ? "静けさのあと、中央から幕がほどけます。"
-        : "静けさのなかで、幕にそっと力がかかります。"
+        ? "幕をひらきます。"
+        : "しばらくすると、幕がひらきます。"
     );
 
     const preludeStart = performance.now();
@@ -266,7 +254,7 @@ export function setupCurtain({
     pinch: 0
   });
 
-  updateCaption(prefersReducedMotion ? "タップで招待状を表示します。" : "静かに、お待ちください。");
+  updateCaption(prefersReducedMotion ? "招待状を表示します。" : "しばらくすると、幕がひらきます。");
 
   autoStartTimer = window.setTimeout(() => {
     startSequence();

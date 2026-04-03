@@ -1,69 +1,89 @@
 function drawScratchSurface(context, width, height) {
-  const gradient = context.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, "#f7e4b8");
-  gradient.addColorStop(0.34, "#d7ab5d");
-  gradient.addColorStop(0.62, "#9c6f2e");
-  gradient.addColorStop(1, "#7a531d");
-
   context.clearRect(0, 0, width, height);
-  context.fillStyle = gradient;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const radius = Math.min(width, height) * 0.49;
+  const base = context.createRadialGradient(
+    width * 0.28,
+    height * 0.22,
+    width * 0.06,
+    centerX,
+    centerY,
+    radius
+  );
+  base.addColorStop(0, "#f9e9bf");
+  base.addColorStop(0.34, "#d7ab5d");
+  base.addColorStop(0.68, "#9a6d2f");
+  base.addColorStop(1, "#77501d");
+
+  context.save();
+  context.beginPath();
+  context.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  context.clip();
+  context.fillStyle = base;
   context.fillRect(0, 0, width, height);
 
   const highlight = context.createRadialGradient(
-    width * 0.3,
-    height * 0.26,
-    width * 0.05,
-    width * 0.36,
-    height * 0.34,
-    width * 0.7
+    width * 0.28,
+    height * 0.24,
+    width * 0.02,
+    width * 0.34,
+    height * 0.28,
+    width * 0.54
   );
-  highlight.addColorStop(0, "rgba(255, 252, 241, 0.92)");
-  highlight.addColorStop(0.28, "rgba(255, 237, 196, 0.48)");
+  highlight.addColorStop(0, "rgba(255, 252, 241, 0.95)");
+  highlight.addColorStop(0.22, "rgba(255, 242, 206, 0.52)");
   highlight.addColorStop(1, "rgba(255, 226, 175, 0)");
 
   context.fillStyle = highlight;
   context.beginPath();
-  context.arc(width / 2, height / 2, width * 0.48, 0, Math.PI * 2);
+  context.arc(centerX, centerY, radius * 0.98, 0, Math.PI * 2);
   context.fill();
 
   context.save();
-  context.strokeStyle = "rgba(255, 246, 216, 0.08)";
+  context.strokeStyle = "rgba(255, 243, 213, 0.08)";
 
-  for (let index = 0; index < 140; index += 1) {
-    const y = (height / 140) * index;
+  for (let index = 0; index < 120; index += 1) {
+    const y = (height / 120) * index;
 
-    context.lineWidth = 0.8 + (index % 3) * 0.35;
+    context.lineWidth = 0.5 + (index % 4) * 0.22;
     context.beginPath();
-    context.moveTo(-12, y);
+    context.moveTo(-10, y);
     context.bezierCurveTo(
       width * 0.22,
-      y + Math.sin(index * 0.42) * 3,
+      y + Math.sin(index * 0.34) * 2,
       width * 0.74,
-      y - Math.cos(index * 0.35) * 3,
-      width + 12,
-      y + Math.sin(index * 0.2) * 2
+      y - Math.cos(index * 0.3) * 2,
+      width + 10,
+      y + Math.sin(index * 0.18) * 1.5
     );
     context.stroke();
   }
 
   context.restore();
 
-  for (let index = 0; index < 220; index += 1) {
-    const alpha = 0.04 + Math.random() * 0.12;
-    const radius = 0.4 + Math.random() * 1.6;
+  for (let index = 0; index < 84; index += 1) {
+    const alpha = 0.03 + Math.random() * 0.05;
+    const sparkRadius = 0.4 + Math.random() * 1.2;
 
-    context.fillStyle = `rgba(255, 250, 237, ${alpha})`;
+    context.fillStyle = `rgba(255, 248, 232, ${alpha})`;
     context.beginPath();
-    context.arc(Math.random() * width, Math.random() * height, radius, 0, Math.PI * 2);
+    context.arc(Math.random() * width, Math.random() * height, sparkRadius, 0, Math.PI * 2);
     context.fill();
   }
 
-  context.save();
-  context.globalCompositeOperation = "multiply";
-  context.fillStyle = "rgba(122, 83, 29, 0.16)";
+  context.lineWidth = Math.max(2, width * 0.018);
+  context.strokeStyle = "rgba(255, 241, 207, 0.3)";
   context.beginPath();
-  context.arc(width * 0.56, height * 0.64, width * 0.5, 0, Math.PI * 2);
-  context.fill();
+  context.arc(centerX, centerY, radius * 0.91, 0, Math.PI * 2);
+  context.stroke();
+
+  context.lineWidth = Math.max(1.5, width * 0.01);
+  context.strokeStyle = "rgba(110, 73, 25, 0.18)";
+  context.beginPath();
+  context.arc(centerX, centerY, radius * 0.78, 0, Math.PI * 2);
+  context.stroke();
+
   context.restore();
 }
 
@@ -80,10 +100,10 @@ function eraseStamp(context, point, size) {
   context.save();
   context.globalCompositeOperation = "destination-out";
 
-  for (let index = 0; index < 3; index += 1) {
-    const radius = size * (0.56 + Math.random() * 0.26);
-    const offsetX = (Math.random() - 0.5) * size * 0.45;
-    const offsetY = (Math.random() - 0.5) * size * 0.45;
+  for (let index = 0; index < 2; index += 1) {
+    const radius = size * (0.58 + Math.random() * 0.18);
+    const offsetX = (Math.random() - 0.5) * size * 0.28;
+    const offsetY = (Math.random() - 0.5) * size * 0.28;
 
     context.beginPath();
     context.arc(point.x + offsetX, point.y + offsetY, radius, 0, Math.PI * 2);
@@ -225,22 +245,22 @@ export function setupScratch({
     setProgressState(combinedProgress);
 
     if (force || combinedProgress < 0.18) {
-      status.textContent = "まだ封印されています。円を描くように削ってください。";
+      status.textContent = "封印をほどいてください。";
       return;
     }
 
     if (combinedProgress < 0.46) {
-      status.textContent = "封印が少しずつほどけています。もう少し削ってください。";
+      status.textContent = "もう少し。";
       return;
     }
 
     if (combinedProgress < 0.78) {
-      status.textContent = "半分ほど封印がほどけています。続けて削ってください。";
+      status.textContent = "ゆっくり、円を描くように。";
       return;
     }
 
     if (combinedProgress < 0.94) {
-      status.textContent = "あと少しで日付が現れます。最後をやさしく削ってください。";
+      status.textContent = "あと少しです。";
       return;
     }
 
@@ -261,7 +281,7 @@ export function setupScratch({
     setProgressState(1);
 
     if (status) {
-      status.textContent = "封印がほどけ、日付が現れました。";
+      status.textContent = "日付が現れました。";
     }
 
     onReveal?.();
@@ -278,7 +298,7 @@ export function setupScratch({
     setProgressState(1);
 
     if (status) {
-      status.textContent = "封印がほどけ、日付が現れます。";
+      status.textContent = "日付が現れます。";
     }
 
     window.setTimeout(revealDate, prefersReducedMotion ? 0 : revealDelay);
@@ -362,7 +382,7 @@ export function setupScratch({
     }
 
     if (status) {
-      status.textContent = "封印をゆっくり削ってください。";
+      status.textContent = "封印をほどいています。";
     }
   }
 

@@ -25,14 +25,16 @@ export const EXPERIENCE_CONFIG = {
   },
   chapters: {
     okinawa: {
-      date: "7月○日"
+      date: "7月○日",
+      note: "旅のはじまり"
     },
     ceremony: {
-      date: "10月12日"
+      date: "10月12日",
+      note: "京都で迎える本番の一日"
     },
     friendsParty: {
       date: "11月29日",
-      note: "結婚式後の会食とは別日にひらく、友人との集まり"
+      note: "結婚式とは別日にひらく、友人との集まり"
     }
   },
   photoShareNote: "写真共有は挙式後にご案内します",
@@ -40,38 +42,42 @@ export const EXPERIENCE_CONFIG = {
   mapExternalUrl: "https://maps.google.com/?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD",
   rsvpUrl: PLACEHOLDER_URL,
   rsvpDeadline: "2026年8月31日(月)",
+  footerCredit: {
+    prefix: "Designed / Developed by",
+    name: "坂口ケイジ"
+  },
   schedule: [
     {
       time: "11:00",
       title: "受付開始",
-      description: "境内控室にて受付を行います。ゆとりをもってお越しください。"
+      description: "境内控室にて受付を行います。"
     },
     {
       time: "11:30",
       title: "挙式",
-      description: "挙式会場へご案内いたします。お席はスタッフがご案内します。"
+      description: "スタッフがご案内いたします。"
     },
     {
       time: "12:30",
       title: "写真撮影",
-      description: "挙式後に集合写真とご親族撮影を予定しています。"
+      description: "集合写真とご親族撮影を予定しています。"
     },
     {
       time: "13:00",
       title: "会食開始",
-      description: "会場を移して会食を行います。アレルギーなどは RSVP 時にご記入ください。"
+      description: "会場を移して会食を行います。"
     }
   ]
 };
 
 export const EXPERIENCE_SETTINGS = {
-  curtainIntroDelay: 1750,
-  curtainPreludeDuration: 1040,
-  curtainOpenDuration: 2920,
-  curtainRevealDelay: 440,
-  curtainScrollDelay: 840,
-  scratchCompleteRatio: 0.46,
-  scratchBrushSize: 18,
-  scratchGestureDistance: 170,
-  scratchRevealDelay: 360
+  curtainIntroDelay: 960,
+  curtainPreludeDuration: 760,
+  curtainOpenDuration: 2320,
+  curtainRevealDelay: 280,
+  curtainScrollDelay: 620,
+  scratchCompleteRatio: 0.42,
+  scratchBrushSize: 20,
+  scratchGestureDistance: 155,
+  scratchRevealDelay: 260
 };

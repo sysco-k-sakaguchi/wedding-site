@@ -49,9 +49,13 @@ export function bindContent(config) {
   fillText("[data-dining-name]", config.dining?.name ?? "");
   fillText("[data-photo-share-note]", config.photoShareNote ?? "");
   fillText("[data-okinawa-date]", config.chapters?.okinawa?.date ?? "");
+  fillText("[data-okinawa-note]", config.chapters?.okinawa?.note ?? "");
   fillText("[data-ceremony-date]", config.chapters?.ceremony?.date ?? "");
+  fillText("[data-ceremony-note]", config.chapters?.ceremony?.note ?? "");
   fillText("[data-friends-party-date]", config.chapters?.friendsParty?.date ?? "");
   fillText("[data-friends-party-note]", config.chapters?.friendsParty?.note ?? "");
+  fillText("[data-credit-prefix]", config.footerCredit?.prefix ?? "");
+  fillText("[data-credit-name]", config.footerCredit?.name ?? "");
 
   const mapEmbeds = document.querySelectorAll("[data-map-embed]");
   const mapLinks = document.querySelectorAll("[data-map-link]");
