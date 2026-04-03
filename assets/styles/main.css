@@ -207,15 +207,10 @@ iframe {
 .prologue {
   position: relative;
   min-height: 100svh;
-  padding:
-    calc(env(safe-area-inset-top, 0px) + 1.15rem)
-    0.1rem
-    calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+  padding: 0;
   display: grid;
-  grid-template-rows: auto 1fr;
-  align-content: start;
-  justify-items: center;
-  gap: 0.8rem;
+  align-items: stretch;
+  justify-items: stretch;
   overflow: hidden;
 }
 
@@ -240,45 +235,6 @@ iframe {
   pointer-events: none;
 }
 
-.prologue__copy {
-  position: relative;
-  z-index: 2;
-  width: min(calc(100% - 1.35rem), 20rem);
-  padding-top: 0.3rem;
-  text-align: center;
-  color: rgba(255, 247, 237, 0.96);
-}
-
-.prologue__copy .eyebrow {
-  margin-bottom: 0.55rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.24em;
-  color: rgba(234, 214, 174, 0.72);
-}
-
-.prologue__copy h1 {
-  margin: 0;
-  font-size: clamp(2.52rem, 9.9vw, 4.6rem);
-  line-height: 1.03;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  text-wrap: balance;
-}
-
-.prologue__copy h1 span {
-  display: block;
-  margin-top: 0.08em;
-}
-
-.prologue__names {
-  margin: 0.95rem 0 0;
-  font-family: var(--font-display);
-  font-size: 0.92rem;
-  letter-spacing: 0.19em;
-  text-transform: uppercase;
-  color: rgba(255, 236, 209, 0.62);
-}
-
 .curtain-stage {
   --curtain-open: 0;
   --curtain-reveal: 0;
@@ -291,13 +247,12 @@ iframe {
   --press: 0;
   position: relative;
   z-index: 1;
-  align-self: end;
-  width: min(calc(100% - 0.12rem), 31rem);
-  height: clamp(28rem, calc(100svh - 11rem), 50rem);
-  min-height: 0;
+  width: 100%;
+  height: 100svh;
+  min-height: 100svh;
   padding: 0;
   border: 0;
-  border-radius: 2.75rem 2.75rem 2.15rem 2.15rem;
+  border-radius: 0;
   background: transparent;
   appearance: none;
   cursor: pointer;
@@ -344,9 +299,9 @@ iframe {
 .curtain-stage__arch::before {
   content: "";
   position: absolute;
-  inset: 0.42rem;
-  border-radius: 2.3rem 2.3rem 1.8rem 1.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.02);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 26%),
     linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.22) 100%);
@@ -355,8 +310,8 @@ iframe {
 .curtain-stage__arch::after {
   content: "";
   position: absolute;
-  inset: auto 5% 1.25rem;
-  height: 20%;
+  inset: auto 4% 0;
+  height: 22%;
   border-radius: 50%;
   background:
     radial-gradient(circle at 50% 48%, rgba(0, 0, 0, 0.42), transparent 64%),
@@ -365,7 +320,7 @@ iframe {
 }
 
 .curtain-stage__backlight {
-  inset: 8% 10% 18%;
+  inset: 9% 12% 14%;
   border-radius: 46% 46% 42% 42%;
   background: rgba(255, 221, 164, 0.72);
   filter: blur(82px);
@@ -376,7 +331,7 @@ iframe {
 }
 
 .curtain-stage__spotlight {
-  inset: 10% 20% 22%;
+  inset: 12% 21% 16%;
   border-radius: 50%;
   background:
     radial-gradient(circle at 50% 18%, rgba(255, 250, 239, 0.68), transparent 28%),
@@ -387,7 +342,7 @@ iframe {
 }
 
 .curtain-stage__invitation {
-  inset: 9.5% 12.5% 10%;
+  inset: calc(env(safe-area-inset-top, 0px) + 4.7rem) 14% 12%;
   display: grid;
   place-items: center;
   border-radius: 1.95rem;
@@ -458,9 +413,9 @@ iframe {
 }
 
 .curtain-stage__rail {
-  top: 0.9rem;
-  left: 0.7rem;
-  right: 0.7rem;
+  top: calc(env(safe-area-inset-top, 0px) + 1.55rem);
+  left: 0.9rem;
+  right: 0.9rem;
   height: 0.64rem;
   border-radius: 999px;
   background:
@@ -472,7 +427,7 @@ iframe {
 }
 
 .curtain-stage__valance {
-  top: 1rem;
+  top: calc(env(safe-area-inset-top, 0px) + 1.6rem);
   left: 0.9rem;
   right: 0.9rem;
   height: 22%;
@@ -508,7 +463,7 @@ iframe {
 }
 
 .curtain-stage__pinch {
-  top: 0.98rem;
+  top: calc(env(safe-area-inset-top, 0px) + 1.58rem);
   left: 50%;
   width: 23%;
   height: 26%;
@@ -531,8 +486,8 @@ iframe {
 
 .curtain-panel {
   position: absolute;
-  top: 1.06rem;
-  bottom: 0.78rem;
+  top: calc(env(safe-area-inset-top, 0px) + 1.64rem);
+  bottom: 0;
   width: 62%;
   overflow: hidden;
   z-index: 6;
@@ -692,7 +647,7 @@ iframe {
 .curtain-stage__floor {
   left: 5%;
   right: 5%;
-  bottom: 0.7rem;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 0.9rem);
   height: 18%;
   z-index: 3;
   border-radius: 50%;
@@ -707,8 +662,7 @@ iframe {
   inset: 0;
   border-radius: inherit;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
-    inset 0 0 0 0.35rem rgba(255, 255, 255, 0.015);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
   pointer-events: none;
 }
 
@@ -1022,7 +976,7 @@ iframe {
 }
 
 .invitation-sheet__fact {
-  padding: 1.08rem 1.08rem 1rem;
+  padding: 1.35rem 1.2rem 1.2rem;
   border-radius: 1.14rem;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(244, 236, 226, 0.78));
@@ -1032,19 +986,19 @@ iframe {
 
 .invitation-sheet__fact small {
   display: block;
-  margin-bottom: 0.28rem;
+  margin-bottom: 0.52rem;
   font-family: var(--font-display);
   font-size: 0.64rem;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: rgba(111, 31, 51, 0.46);
 }
 
 .invitation-sheet__fact strong {
   display: block;
-  font-size: 1.04rem;
-  line-height: 1.5;
+  font-size: clamp(1.52rem, 6.1vw, 2.15rem);
+  line-height: 1.26;
   color: rgba(47, 37, 34, 0.94);
 }
 
@@ -1060,7 +1014,7 @@ iframe {
 
 .chapter-link {
   display: block;
-  padding: 1.28rem 1.2rem 1.42rem;
+  padding: 1.45rem 1.3rem 1.55rem;
   background:
     radial-gradient(circle at 10% 14%, rgba(239, 219, 179, 0.2), transparent 20%),
     linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(244, 236, 226, 0.96));
@@ -1101,7 +1055,7 @@ iframe {
 }
 
 .chapter-link__date {
-  margin-bottom: 0.78rem;
+  margin-bottom: 0.95rem;
 }
 
 .chapter-link strong,
@@ -1117,7 +1071,7 @@ iframe {
 .chapter-link__note,
 .chapter-sheet__lead {
   display: block;
-  margin-top: 0.95rem;
+  margin-top: 1.15rem;
   font-size: 0.93rem;
   line-height: 1.84;
   color: var(--ink-soft);
@@ -1128,7 +1082,7 @@ iframe {
 }
 
 .chapter-sheet {
-  padding: 1.95rem 1.2rem 1.85rem;
+  padding: 2.2rem 1.35rem 2.05rem;
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.62), transparent 32%),
     linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(244, 236, 226, 0.96));
@@ -1150,7 +1104,7 @@ iframe {
 }
 
 .chapter-sheet__date {
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.95rem;
 }
 
 .chapter-sheet__lead {
@@ -1167,13 +1121,13 @@ iframe {
 .chapter-facts {
   display: grid;
   gap: 0.8rem;
-  margin-top: 1.55rem;
+  margin-top: 1.8rem;
 }
 
 .chapter-fact,
 .chapter-feature,
 .chapter-panel {
-  padding: 1.08rem;
+  padding: 1.22rem 1.18rem 1.16rem;
   border-radius: var(--radius-panel);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(244, 236, 226, 0.78));
@@ -1184,7 +1138,7 @@ iframe {
 .chapter-fact small,
 .chapter-feature small {
   display: block;
-  margin-bottom: 0.32rem;
+  margin-bottom: 0.52rem;
   font-family: var(--font-display);
   font-size: 0.64rem;
   font-weight: 600;
@@ -1196,7 +1150,7 @@ iframe {
 .chapter-fact strong,
 .chapter-feature strong {
   display: block;
-  font-size: 1.02rem;
+  font-size: 1.12rem;
   line-height: 1.58;
   color: rgba(47, 37, 34, 0.94);
 }
@@ -1209,14 +1163,14 @@ iframe {
 .ceremony-layout {
   display: grid;
   gap: 1rem;
-  margin-top: 1.15rem;
+  margin-top: 1.3rem;
 }
 
 .chapter-panel__headline {
   display: block;
-  margin: -0.12rem 0 0.8rem;
-  font-size: 1.18rem;
-  line-height: 1.45;
+  margin: -0.12rem 0 0.95rem;
+  font-size: 1.28rem;
+  line-height: 1.4;
   color: rgba(47, 37, 34, 0.94);
 }
 
@@ -1251,9 +1205,9 @@ iframe {
 }
 
 .chapter-panel__note {
-  margin: 0.8rem 0 0;
-  font-size: 0.92rem;
-  line-height: 1.78;
+  margin: 0.95rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.82;
   color: rgba(47, 37, 34, 0.84);
 }
 
@@ -1330,7 +1284,7 @@ iframe {
 .chapter-secondary-grid {
   display: grid;
   gap: 0.8rem;
-  margin-top: 1.1rem;
+  margin-top: 1.25rem;
 }
 
 .chapter-actions {
@@ -1425,8 +1379,8 @@ iframe {
   text-align: center;
   font-family: var(--font-display);
   font-size: 0.68rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-transform: none;
   color: rgba(78, 55, 40, 0.5);
 }
 
@@ -1435,7 +1389,8 @@ iframe {
   margin-top: 0.55rem;
   font-size: 0.8rem;
   font-weight: 400;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
+  text-transform: none;
   color: rgba(78, 55, 40, 0.66);
 }
 
@@ -1458,16 +1413,13 @@ iframe {
   }
 
   .prologue {
-    gap: 1rem;
-  }
-
-  .prologue__copy {
-    width: min(100%, 21rem);
+    min-height: 100svh;
   }
 
   .curtain-stage {
-    width: min(calc(100% - 0.4rem), 32rem);
-    height: clamp(31rem, calc(100svh - 10rem), 46rem);
+    width: 100%;
+    height: 100svh;
+    min-height: 100svh;
   }
 
   .date-ritual {
@@ -1511,20 +1463,13 @@ iframe {
   }
 
   .prologue {
-    padding-inline: 1.2rem;
-  }
-
-  .prologue__copy h1 {
-    font-size: clamp(3.9rem, 7vw, 5.8rem);
-  }
-
-  .prologue__names {
-    font-size: 0.98rem;
+    min-height: 100svh;
   }
 
   .curtain-stage {
-    width: min(100%, 34rem);
-    height: clamp(34rem, calc(100svh - 9.5rem), 48rem);
+    width: 100%;
+    height: 100svh;
+    min-height: 100svh;
   }
 
   .invitation-scene .scene__frame--narrow {
@@ -1575,30 +1520,13 @@ iframe {
 
 @media (min-width: 1180px) {
   .prologue {
-    grid-template-columns: minmax(18rem, 34rem) minmax(26rem, 36rem);
-    align-content: center;
-    justify-content: center;
-    column-gap: clamp(3.5rem, 6vw, 6rem);
-    row-gap: 1rem;
-  }
-
-  .prologue__copy {
-    width: min(100%, 32rem);
-    text-align: left;
-    align-self: center;
-  }
-
-  .prologue__copy h1 {
-    font-size: clamp(4.4rem, 5vw, 5.85rem);
-  }
-
-  .prologue__names {
-    margin-left: 0;
+    min-height: 100svh;
   }
 
   .curtain-stage {
-    width: min(100%, 37rem);
-    height: clamp(36rem, calc(100svh - 8rem), 50rem);
+    width: 100%;
+    height: 100svh;
+    min-height: 100svh;
   }
 
   .invitation-sheet {
@@ -1654,14 +1582,11 @@ iframe {
     --narrow-width: min(calc(100% - 0.9rem), 39rem);
   }
 
-  .prologue__copy h1 {
-    font-size: clamp(2.45rem, 10.2vw, 3.75rem);
-  }
-
   .curtain-stage {
-    height: clamp(26.8rem, calc(100svh - 10.6rem), 38rem);
-    min-height: 0;
-    border-radius: 2.1rem 2.1rem 1.75rem 1.75rem;
+    width: 100%;
+    height: 100svh;
+    min-height: 100svh;
+    border-radius: 0;
   }
 
   .invitation-sheet,

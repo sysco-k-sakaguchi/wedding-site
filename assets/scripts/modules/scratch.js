@@ -244,27 +244,9 @@ export function setupScratch({
 
     setProgressState(combinedProgress);
 
-    if (force || combinedProgress < 0.18) {
-      status.textContent = "封印をほどいてください。";
-      return;
+    if (force) {
+      status.textContent = "日付の封印です。";
     }
-
-    if (combinedProgress < 0.46) {
-      status.textContent = "もう少し。";
-      return;
-    }
-
-    if (combinedProgress < 0.78) {
-      status.textContent = "ゆっくり、円を描くように。";
-      return;
-    }
-
-    if (combinedProgress < 0.94) {
-      status.textContent = "あと少しです。";
-      return;
-    }
-
-    status.textContent = "まもなく日付が現れます。";
   }
 
   function revealDate() {
@@ -281,7 +263,7 @@ export function setupScratch({
     setProgressState(1);
 
     if (status) {
-      status.textContent = "日付が現れました。";
+      status.textContent = "日付を表示しました。";
     }
 
     onReveal?.();
@@ -298,7 +280,7 @@ export function setupScratch({
     setProgressState(1);
 
     if (status) {
-      status.textContent = "日付が現れます。";
+      status.textContent = "日付を表示しています。";
     }
 
     window.setTimeout(revealDate, prefersReducedMotion ? 0 : revealDelay);
@@ -379,10 +361,6 @@ export function setupScratch({
 
     if (seal.setPointerCapture) {
       seal.setPointerCapture(event.pointerId);
-    }
-
-    if (status) {
-      status.textContent = "封印をほどいています。";
     }
   }
 
