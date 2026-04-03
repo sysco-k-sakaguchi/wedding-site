@@ -88,7 +88,7 @@ export function setupCurtain({
       pinch: 0
     });
 
-    updateCaption("招待状が届きました。");
+    updateCaption("");
 
     window.setTimeout(() => {
       onComplete?.();
@@ -98,7 +98,7 @@ export function setupCurtain({
   function runOpening() {
     stage.classList.remove("is-anticipating");
     stage.classList.add("is-opening");
-    updateCaption("幕がひらいています。");
+    updateCaption("");
 
     const startTime = performance.now();
 
@@ -173,17 +173,13 @@ export function setupCurtain({
     window.clearTimeout(autoStartTimer);
 
     if (prefersReducedMotion) {
-      updateCaption("招待状を表示します。");
+      updateCaption("");
       finishCurtain();
       return;
     }
 
     stage.classList.add("is-anticipating");
-    updateCaption(
-      manual
-        ? "幕をひらきます。"
-        : "しばらくすると、幕がひらきます。"
-    );
+    updateCaption(manual ? "幕をひらきます。" : "");
 
     const preludeStart = performance.now();
 
@@ -254,7 +250,7 @@ export function setupCurtain({
     pinch: 0
   });
 
-  updateCaption(prefersReducedMotion ? "招待状を表示します。" : "しばらくすると、幕がひらきます。");
+  updateCaption("幕をひらいて招待状を表示します。");
 
   autoStartTimer = window.setTimeout(() => {
     startSequence();

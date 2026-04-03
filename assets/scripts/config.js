@@ -43,7 +43,7 @@ export const EXPERIENCE_CONFIG = {
   rsvpUrl: PLACEHOLDER_URL,
   rsvpDeadline: "2026年8月31日(月)",
   footerCredit: {
-    prefix: "Designed / Developed by",
+    prefix: "Presented by",
     name: "坂口ケイジ"
   },
   schedule: [

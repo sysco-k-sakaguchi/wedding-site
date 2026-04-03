@@ -38,11 +38,11 @@
   --gold-deep: #886030;
   --gold-soft: #ead4a8;
   --rose: #e8d0c5;
-  --shadow-stage: 0 42px 96px rgba(8, 2, 4, 0.48);
-  --shadow-card: 0 24px 70px rgba(54, 31, 24, 0.12);
-  --shadow-soft: 0 16px 40px rgba(54, 31, 24, 0.08);
-  --radius-card: 1.8rem;
-  --radius-panel: 1.3rem;
+  --shadow-stage: 0 54px 120px rgba(8, 2, 4, 0.52);
+  --shadow-card: 0 28px 72px rgba(54, 31, 24, 0.1);
+  --shadow-soft: 0 16px 34px rgba(54, 31, 24, 0.07);
+  --radius-card: 1.7rem;
+  --radius-panel: 1.24rem;
   --page-width: min(calc(100% - 1.2rem), 74rem);
   --narrow-width: min(calc(100% - 1.2rem), 39rem);
 }
@@ -108,6 +108,18 @@ iframe {
   border: 0;
 }
 
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 .noscript-note {
   padding: 0.9rem 1rem;
   background: #fff2c7;
@@ -159,7 +171,7 @@ iframe {
 
 .scene-heading {
   max-width: 27rem;
-  margin: 0 auto 1.8rem;
+  margin: 0 auto 2.35rem;
   text-align: center;
 }
 
@@ -196,13 +208,14 @@ iframe {
   position: relative;
   min-height: 100svh;
   padding:
-    calc(env(safe-area-inset-top, 0px) + 1.4rem)
-    0.25rem
-    calc(env(safe-area-inset-bottom, 0px) + 2rem);
+    calc(env(safe-area-inset-top, 0px) + 1.15rem)
+    0.1rem
+    calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
   display: grid;
-  align-content: space-between;
+  grid-template-rows: auto 1fr;
+  align-content: start;
   justify-items: center;
-  gap: 1.2rem;
+  gap: 0.8rem;
   overflow: hidden;
 }
 
@@ -227,66 +240,43 @@ iframe {
   pointer-events: none;
 }
 
-.prologue__copy,
-.prologue__caption {
+.prologue__copy {
   position: relative;
   z-index: 2;
-}
-
-.prologue__copy {
-  width: min(calc(100% - 1rem), 25rem);
-  padding-top: 0.2rem;
+  width: min(calc(100% - 1.35rem), 20rem);
+  padding-top: 0.3rem;
   text-align: center;
   color: rgba(255, 247, 237, 0.96);
 }
 
 .prologue__copy .eyebrow {
-  margin-bottom: 0.9rem;
-  color: rgba(234, 214, 174, 0.88);
+  margin-bottom: 0.55rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  color: rgba(234, 214, 174, 0.72);
 }
 
 .prologue__copy h1 {
   margin: 0;
-  font-size: clamp(2.7rem, 10.5vw, 4.7rem);
-  line-height: 1.02;
+  font-size: clamp(2.52rem, 9.9vw, 4.6rem);
+  line-height: 1.03;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   text-wrap: balance;
 }
 
 .prologue__copy h1 span {
   display: block;
-  margin-top: 0.14em;
+  margin-top: 0.08em;
 }
 
 .prologue__names {
-  margin: 1.05rem 0 0;
+  margin: 0.95rem 0 0;
   font-family: var(--font-display);
-  font-size: 1rem;
-  letter-spacing: 0.16em;
+  font-size: 0.92rem;
+  letter-spacing: 0.19em;
   text-transform: uppercase;
-  color: rgba(255, 236, 209, 0.72);
-}
-
-.prologue__script {
-  margin: 0.55rem 0 0;
-  font-family: var(--font-script);
-  font-size: clamp(1.5rem, 5.8vw, 2.35rem);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  color: rgba(239, 221, 191, 0.78);
-}
-
-.prologue__caption {
-  padding: 0.7rem 1.15rem;
-  border-radius: 999px;
-  background: rgba(255, 247, 236, 0.08);
-  border: 1px solid rgba(255, 236, 209, 0.12);
-  color: rgba(255, 243, 224, 0.72);
-  font-size: 0.74rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  backdrop-filter: blur(8px);
+  color: rgba(255, 236, 209, 0.62);
 }
 
 .curtain-stage {
@@ -301,12 +291,13 @@ iframe {
   --press: 0;
   position: relative;
   z-index: 1;
-  width: min(calc(100% - 0.6rem), 29.5rem);
-  height: min(72svh, 42rem);
-  min-height: 30rem;
+  align-self: end;
+  width: min(calc(100% - 0.12rem), 31rem);
+  height: clamp(28rem, calc(100svh - 11rem), 50rem);
+  min-height: 0;
   padding: 0;
   border: 0;
-  border-radius: 2.5rem 2.5rem 2rem 2rem;
+  border-radius: 2.75rem 2.75rem 2.15rem 2.15rem;
   background: transparent;
   appearance: none;
   cursor: pointer;
@@ -344,72 +335,73 @@ iframe {
   inset: 0;
   border-radius: inherit;
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 241, 210, 0.1), transparent 22%),
-    radial-gradient(circle at 50% 32%, rgba(255, 232, 191, 0.05), transparent 18%),
-    linear-gradient(180deg, #26161b 0%, #120c0f 58%, #21141a 100%);
+    radial-gradient(circle at 50% 0%, rgba(255, 241, 210, 0.08), transparent 24%),
+    radial-gradient(circle at 50% 34%, rgba(255, 232, 191, 0.04), transparent 18%),
+    radial-gradient(circle at 50% 82%, rgba(0, 0, 0, 0.3), transparent 36%),
+    linear-gradient(180deg, #211216 0%, #0f090c 58%, #190f13 100%);
 }
 
 .curtain-stage__arch::before {
   content: "";
   position: absolute;
-  inset: 0.7rem;
-  border-radius: 1.95rem 1.95rem 1.45rem 1.45rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  inset: 0.42rem;
+  border-radius: 2.3rem 2.3rem 1.8rem 1.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 28%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2) 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 26%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.22) 100%);
 }
 
 .curtain-stage__arch::after {
   content: "";
   position: absolute;
-  inset: auto 7% 2.4rem;
-  height: 22%;
+  inset: auto 5% 1.25rem;
+  height: 20%;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 48%, rgba(255, 239, 214, 0.04), transparent 64%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
-  opacity: calc(0.78 - var(--curtain-open) * 0.34);
+    radial-gradient(circle at 50% 48%, rgba(0, 0, 0, 0.42), transparent 64%),
+    radial-gradient(circle at 50% 22%, rgba(255, 239, 214, 0.06), transparent 38%);
+  opacity: calc(0.86 - var(--curtain-open) * 0.3);
 }
 
 .curtain-stage__backlight {
-  inset: 10% 14% 22%;
+  inset: 8% 10% 18%;
   border-radius: 46% 46% 42% 42%;
   background: rgba(255, 221, 164, 0.72);
-  filter: blur(68px);
-  opacity: calc(0.12 + var(--curtain-glow) * 0.54);
+  filter: blur(82px);
+  opacity: calc(0.1 + var(--curtain-glow) * 0.5);
   transform:
-    translateY(calc((1 - var(--curtain-reveal)) * 1.35rem - var(--curtain-lift) * 0.45rem))
-    scale(calc(0.88 + var(--curtain-reveal) * 0.22));
+    translateY(calc((1 - var(--curtain-reveal)) * 1rem - var(--curtain-lift) * 0.55rem))
+    scale(calc(0.94 + var(--curtain-reveal) * 0.18));
 }
 
 .curtain-stage__spotlight {
-  inset: 12% 23% 28%;
+  inset: 10% 20% 22%;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 18%, rgba(255, 250, 239, 0.74), transparent 32%),
-    radial-gradient(circle at 50% 42%, rgba(255, 233, 190, 0.36), transparent 56%);
-  filter: blur(16px);
-  opacity: calc(0.2 + var(--curtain-reveal) * 0.52);
-  transform: translateY(calc((1 - var(--curtain-reveal)) * 2.2rem));
+    radial-gradient(circle at 50% 18%, rgba(255, 250, 239, 0.68), transparent 28%),
+    radial-gradient(circle at 50% 42%, rgba(255, 233, 190, 0.3), transparent 54%);
+  filter: blur(18px);
+  opacity: calc(0.12 + var(--curtain-reveal) * 0.42);
+  transform: translateY(calc((1 - var(--curtain-reveal)) * 1.6rem));
 }
 
 .curtain-stage__invitation {
-  inset: 12% 16% 16%;
+  inset: 9.5% 12.5% 10%;
   display: grid;
   place-items: center;
-  border-radius: 1.8rem;
+  border-radius: 1.95rem;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.08)),
     linear-gradient(180deg, rgba(252, 248, 242, 0.98), rgba(236, 224, 206, 0.98));
   box-shadow:
-    0 32px 80px rgba(7, 3, 5, 0.28),
+    0 36px 96px rgba(7, 3, 5, 0.32),
     inset 0 0 0 1px rgba(157, 116, 59, 0.16);
   opacity: calc(0.08 + var(--curtain-reveal) * 0.94);
   filter: blur(calc((1 - var(--curtain-reveal)) * 8px));
   transform:
-    translateY(calc((1 - var(--curtain-reveal)) * 4rem + (1 - var(--curtain-lift)) * 0.8rem))
-    scale(calc(0.88 + var(--curtain-reveal) * 0.12));
+    translateY(calc((1 - var(--curtain-reveal)) * 4.5rem + (1 - var(--curtain-lift)) * 0.7rem))
+    scale(calc(0.86 + var(--curtain-reveal) * 0.14));
 }
 
 .curtain-stage__invitation::before {
@@ -431,7 +423,7 @@ iframe {
 
 .curtain-stage__invitation-inner {
   position: relative;
-  padding: 1.4rem 1.4rem 1.1rem;
+  padding: 1.35rem 1.45rem 1.05rem;
   text-align: center;
   color: rgba(55, 39, 31, 0.82);
 }
@@ -444,8 +436,8 @@ iframe {
 
 .curtain-stage__invitation-inner small {
   font-family: var(--font-display);
-  font-size: 0.78rem;
-  letter-spacing: 0.15em;
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -460,14 +452,15 @@ iframe {
 
 .curtain-stage__invitation-inner em {
   font-family: var(--font-script);
-  font-size: 1.55rem;
-  color: rgba(111, 31, 51, 0.72);
+  margin-top: 0.18rem;
+  font-size: 1.48rem;
+  color: rgba(111, 31, 51, 0.6);
 }
 
 .curtain-stage__rail {
-  top: 1rem;
-  left: 0.9rem;
-  right: 0.9rem;
+  top: 0.9rem;
+  left: 0.7rem;
+  right: 0.7rem;
   height: 0.64rem;
   border-radius: 999px;
   background:
@@ -479,9 +472,9 @@ iframe {
 }
 
 .curtain-stage__valance {
-  top: 1.2rem;
-  left: 1.1rem;
-  right: 1.1rem;
+  top: 1rem;
+  left: 0.9rem;
+  right: 0.9rem;
   height: 22%;
   z-index: 6;
   border-radius: 2rem 2rem 3.4rem 3.4rem;
@@ -515,7 +508,7 @@ iframe {
 }
 
 .curtain-stage__pinch {
-  top: 1.18rem;
+  top: 0.98rem;
   left: 50%;
   width: 23%;
   height: 26%;
@@ -538,12 +531,12 @@ iframe {
 
 .curtain-panel {
   position: absolute;
-  top: 1.26rem;
-  bottom: 1rem;
-  width: 60%;
+  top: 1.06rem;
+  bottom: 0.78rem;
+  width: 62%;
   overflow: hidden;
   z-index: 6;
-  box-shadow: 0 28px 40px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 34px 54px rgba(0, 0, 0, 0.28);
   transform-style: preserve-3d;
   filter: brightness(calc(0.95 + var(--curtain-gather) * 0.08));
 }
@@ -697,25 +690,25 @@ iframe {
 }
 
 .curtain-stage__floor {
-  left: 10%;
-  right: 10%;
-  bottom: 1.4rem;
-  height: 15%;
+  left: 5%;
+  right: 5%;
+  bottom: 0.7rem;
+  height: 18%;
   z-index: 3;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 46%, rgba(0, 0, 0, 0.5), transparent 60%),
-    radial-gradient(circle at 50% 10%, rgba(255, 237, 204, 0.14), transparent 42%);
-  opacity: calc(0.44 + var(--curtain-reveal) * 0.28);
-  transform: scale(calc(0.95 + var(--curtain-reveal) * 0.07));
+    radial-gradient(circle at 50% 48%, rgba(0, 0, 0, 0.56), transparent 58%),
+    radial-gradient(circle at 50% 8%, rgba(255, 237, 204, 0.12), transparent 40%);
+  opacity: calc(0.5 + var(--curtain-reveal) * 0.24);
+  transform: scale(calc(0.96 + var(--curtain-reveal) * 0.06));
 }
 
 .curtain-stage__frame {
   inset: 0;
   border-radius: inherit;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-    inset 0 0 0 0.45rem rgba(255, 255, 255, 0.03);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    inset 0 0 0 0.35rem rgba(255, 255, 255, 0.015);
   pointer-events: none;
 }
 
@@ -819,19 +812,19 @@ iframe {
 
 .date-ritual {
   display: grid;
-  gap: 1.25rem;
-  margin-top: 1.8rem;
+  gap: 1.1rem;
+  margin-top: 2.15rem;
   padding-top: 0.2rem;
 }
 
 .date-ritual__copy {
-  max-width: 15rem;
+  max-width: 13rem;
   margin: 0 auto;
 }
 
 .date-ritual__copy h3 {
   margin: 0;
-  font-size: clamp(2rem, 8vw, 2.7rem);
+  font-size: clamp(2.1rem, 8.2vw, 2.8rem);
   line-height: 1.14;
   font-weight: 600;
   text-wrap: balance;
@@ -1008,8 +1001,8 @@ iframe {
 }
 
 .invitation-sheet__details {
-  margin-top: 1.6rem;
-  padding-top: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 1.75rem;
   border-top: 1px solid rgba(190, 151, 93, 0.16);
   opacity: 0;
   transform: translateY(1rem);
@@ -1025,12 +1018,12 @@ iframe {
 
 .invitation-sheet__facts {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.9rem;
 }
 
 .invitation-sheet__fact {
-  padding: 1rem 1.05rem;
-  border-radius: 1.2rem;
+  padding: 1.08rem 1.08rem 1rem;
+  border-radius: 1.14rem;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(244, 236, 226, 0.78));
   border: 1px solid rgba(190, 151, 93, 0.14);
@@ -1039,43 +1032,35 @@ iframe {
 
 .invitation-sheet__fact small {
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.28rem;
   font-family: var(--font-display);
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(111, 31, 51, 0.62);
+  color: rgba(111, 31, 51, 0.46);
 }
 
 .invitation-sheet__fact strong {
   display: block;
-  font-size: 1rem;
-  line-height: 1.55;
+  font-size: 1.04rem;
+  line-height: 1.5;
   color: rgba(47, 37, 34, 0.94);
 }
 
-.invitation-sheet__chapter-cue {
-  margin: 1rem 0 0;
-  font-family: var(--font-display);
-  font-size: 0.84rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(111, 31, 51, 0.58);
-}
-
 .chapters-scene {
-  padding-top: 2rem;
+  padding-top: 4.4rem;
+  padding-bottom: 1.9rem;
 }
 
 .chapter-hub {
   display: grid;
-  gap: 1rem;
+  gap: 1.05rem;
 }
 
 .chapter-link {
   display: block;
-  padding: 1.2rem 1.15rem 1.25rem;
+  padding: 1.28rem 1.2rem 1.42rem;
   background:
     radial-gradient(circle at 10% 14%, rgba(239, 219, 179, 0.2), transparent 20%),
     linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(244, 236, 226, 0.96));
@@ -1105,29 +1090,18 @@ iframe {
   outline-offset: 4px;
 }
 
-.chapter-link__eyebrow {
-  display: block;
-  margin-bottom: 0.28rem;
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(190, 151, 93, 0.92);
-}
-
 .chapter-link__date,
 .chapter-sheet__date {
   display: block;
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  color: rgba(111, 31, 51, 0.6);
+  letter-spacing: 0.18em;
+  color: rgba(111, 31, 51, 0.5);
 }
 
 .chapter-link__date {
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.78rem;
 }
 
 .chapter-link strong,
@@ -1143,18 +1117,18 @@ iframe {
 .chapter-link__note,
 .chapter-sheet__lead {
   display: block;
-  margin-top: 0.8rem;
-  font-size: 0.94rem;
+  margin-top: 0.95rem;
+  font-size: 0.93rem;
   line-height: 1.84;
   color: var(--ink-soft);
 }
 
 .chapter-scene {
-  padding-top: 1.4rem;
+  padding-top: 1.1rem;
 }
 
 .chapter-sheet {
-  padding: 1.7rem 1.15rem;
+  padding: 1.95rem 1.2rem 1.85rem;
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.62), transparent 32%),
     linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(244, 236, 226, 0.96));
@@ -1176,11 +1150,11 @@ iframe {
 }
 
 .chapter-sheet__date {
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.8rem;
 }
 
 .chapter-sheet__lead {
-  max-width: 22rem;
+  max-width: 20rem;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1193,13 +1167,13 @@ iframe {
 .chapter-facts {
   display: grid;
   gap: 0.8rem;
-  margin-top: 1.4rem;
+  margin-top: 1.55rem;
 }
 
 .chapter-fact,
 .chapter-feature,
 .chapter-panel {
-  padding: 1rem;
+  padding: 1.08rem;
   border-radius: var(--radius-panel);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(244, 236, 226, 0.78));
@@ -1210,32 +1184,32 @@ iframe {
 .chapter-fact small,
 .chapter-feature small {
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.32rem;
   font-family: var(--font-display);
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(190, 151, 93, 0.9);
+  color: rgba(190, 151, 93, 0.76);
 }
 
 .chapter-fact strong,
 .chapter-feature strong {
   display: block;
-  font-size: 1.04rem;
-  line-height: 1.55;
+  font-size: 1.02rem;
+  line-height: 1.58;
   color: rgba(47, 37, 34, 0.94);
 }
 
 .chapter-feature--soft {
-  margin-top: 1.4rem;
+  margin-top: 1.65rem;
   text-align: center;
 }
 
 .ceremony-layout {
   display: grid;
-  gap: 0.95rem;
-  margin-top: 1rem;
+  gap: 1rem;
+  margin-top: 1.15rem;
 }
 
 .chapter-panel__headline {
@@ -1256,7 +1230,7 @@ iframe {
     rgba(239, 231, 218, 0.82);
   box-shadow:
     inset 0 0 0 1px rgba(190, 151, 93, 0.16),
-    0 8px 20px rgba(70, 44, 32, 0.08);
+    0 12px 24px rgba(70, 44, 32, 0.08);
 }
 
 .chapter-mini-map::after {
@@ -1356,13 +1330,13 @@ iframe {
 .chapter-secondary-grid {
   display: grid;
   gap: 0.8rem;
-  margin-top: 1rem;
+  margin-top: 1.1rem;
 }
 
 .chapter-actions {
   display: grid;
-  gap: 0.8rem;
-  margin-top: 1.25rem;
+  gap: 0.85rem;
+  margin-top: 1.45rem;
 }
 
 .secondary-link,
@@ -1370,9 +1344,13 @@ iframe {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 3.35rem;
-  padding: 0.92rem 1.25rem;
+  min-height: 3.4rem;
+  padding: 0.92rem 1.35rem;
   border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease,
@@ -1386,17 +1364,18 @@ iframe {
   font-weight: 600;
   box-shadow:
     inset 0 0 0 1px rgba(190, 151, 93, 0.18),
-    0 10px 24px rgba(94, 19, 36, 0.06);
+    0 12px 26px rgba(94, 19, 36, 0.06);
 }
 
 .primary-link {
   background:
-    linear-gradient(180deg, rgba(134, 33, 58, 0.98), rgba(94, 19, 36, 0.98));
+    linear-gradient(180deg, rgba(124, 28, 52, 0.98), rgba(90, 18, 34, 0.98));
   color: rgba(255, 248, 241, 0.95);
   font-weight: 700;
   box-shadow:
-    0 18px 34px rgba(94, 19, 36, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    0 16px 30px rgba(94, 19, 36, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 246, 233, 0.06);
 }
 
 .secondary-link:active,
@@ -1405,29 +1384,59 @@ iframe {
 }
 
 .site-footer {
+  position: relative;
   padding:
-    1.8rem
+    4.6rem
     0
-    calc(env(safe-area-inset-bottom, 0px) + 2.2rem);
+    calc(env(safe-area-inset-bottom, 0px) + 3rem);
+  background:
+    linear-gradient(180deg, rgba(248, 243, 235, 0), rgba(248, 243, 235, 0.94) 34%, rgba(247, 241, 232, 0.98) 100%);
+}
+
+.site-footer::before {
+  content: "";
+  position: absolute;
+  top: 1.85rem;
+  left: 50%;
+  width: min(100% - 6rem, 10rem);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(190, 151, 93, 0.34), transparent);
+  transform: translateX(-50%);
+}
+
+.site-footer::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 8rem;
+  background: radial-gradient(circle at 50% 0, rgba(239, 219, 179, 0.14), transparent 50%);
+  pointer-events: none;
+}
+
+.site-footer__inner {
+  position: relative;
+  width: min(calc(100% - 2rem), 26rem);
+  margin: 0 auto;
+  padding-top: 1.5rem;
 }
 
 .site-footer__credit {
-  width: min(calc(100% - 2rem), 38rem);
-  margin: 0 auto;
+  margin: 0;
   text-align: center;
   font-family: var(--font-display);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(78, 55, 40, 0.58);
+  color: rgba(78, 55, 40, 0.5);
 }
 
 .site-footer__credit strong {
   display: block;
-  margin-top: 0.4rem;
-  font-size: 0.82rem;
+  margin-top: 0.55rem;
+  font-size: 0.8rem;
   font-weight: 400;
-  color: rgba(78, 55, 40, 0.72);
+  letter-spacing: 0.18em;
+  color: rgba(78, 55, 40, 0.66);
 }
 
 @keyframes hero-glow {
@@ -1448,21 +1457,17 @@ iframe {
     max-width: 33rem;
   }
 
-  .scene-heading p {
-    max-width: 23rem;
-  }
-
   .prologue {
-    gap: 1.45rem;
+    gap: 1rem;
   }
 
   .prologue__copy {
-    width: min(100%, 36rem);
+    width: min(100%, 21rem);
   }
 
   .curtain-stage {
-    width: min(calc(100% - 1.2rem), 32rem);
-    height: min(74svh, 46rem);
+    width: min(calc(100% - 0.4rem), 32rem);
+    height: clamp(31rem, calc(100svh - 10rem), 46rem);
   }
 
   .date-ritual {
@@ -1514,12 +1519,12 @@ iframe {
   }
 
   .prologue__names {
-    font-size: 1.08rem;
+    font-size: 0.98rem;
   }
 
   .curtain-stage {
     width: min(100%, 34rem);
-    height: min(76svh, 48rem);
+    height: clamp(34rem, calc(100svh - 9.5rem), 48rem);
   }
 
   .invitation-scene .scene__frame--narrow {
@@ -1587,18 +1592,13 @@ iframe {
     font-size: clamp(4.4rem, 5vw, 5.85rem);
   }
 
-  .prologue__names,
-  .prologue__script {
+  .prologue__names {
     margin-left: 0;
   }
 
   .curtain-stage {
-    width: min(100%, 36rem);
-    height: min(78svh, 50rem);
-  }
-
-  .prologue__caption {
-    justify-self: center;
+    width: min(100%, 37rem);
+    height: clamp(36rem, calc(100svh - 8rem), 50rem);
   }
 
   .invitation-sheet {
@@ -1658,14 +1658,9 @@ iframe {
     font-size: clamp(2.45rem, 10.2vw, 3.75rem);
   }
 
-  .prologue__caption {
-    padding-inline: 0.95rem;
-    font-size: 0.7rem;
-  }
-
   .curtain-stage {
-    height: min(69svh, 38rem);
-    min-height: 28rem;
+    height: clamp(26.8rem, calc(100svh - 10.6rem), 38rem);
+    min-height: 0;
     border-radius: 2.1rem 2.1rem 1.75rem 1.75rem;
   }
 
