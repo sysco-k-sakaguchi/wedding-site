@@ -72,16 +72,10 @@ function drawScratchSurface(context, width, height) {
     context.fill();
   }
 
-  context.lineWidth = Math.max(2, width * 0.018);
-  context.strokeStyle = "rgba(255, 241, 207, 0.3)";
+  context.lineWidth = Math.max(1.8, width * 0.015);
+  context.strokeStyle = "rgba(255, 241, 207, 0.22)";
   context.beginPath();
   context.arc(centerX, centerY, radius * 0.91, 0, Math.PI * 2);
-  context.stroke();
-
-  context.lineWidth = Math.max(1.5, width * 0.01);
-  context.strokeStyle = "rgba(110, 73, 25, 0.18)";
-  context.beginPath();
-  context.arc(centerX, centerY, radius * 0.78, 0, Math.PI * 2);
   context.stroke();
 
   context.restore();

@@ -27,7 +27,7 @@ export const EXPERIENCE_CONFIG = {
   chapters: {
     okinawa: {
       date: "7月○日",
-      note: "旅の予定は整い次第ご案内します"
+      note: "旅の予定は整い次第、あらためてご案内します"
     },
     ceremony: {
       date: "10月12日",
@@ -35,7 +35,7 @@ export const EXPERIENCE_CONFIG = {
     },
     friendsParty: {
       date: "11月29日",
-      note: "友人の皆さまと別日にご一緒する会です"
+      note: "友人の皆さまと、別日にゆっくり集う時間を考えています"
     }
   },
   photoShareNote: "写真共有は挙式後にご案内します",
@@ -43,10 +43,6 @@ export const EXPERIENCE_CONFIG = {
   mapExternalUrl: "https://maps.google.com/?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD",
   rsvpUrl: PLACEHOLDER_URL,
   rsvpDeadline: "2026年8月31日(月)",
-  footerCredit: {
-    prefix: "Invitation design",
-    name: "Keiichi Sakaguchi"
-  },
   closingMessage: "皆さまにお会いできる日を、心より楽しみにしております。",
   schedule: [
     {

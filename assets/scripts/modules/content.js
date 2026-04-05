@@ -56,8 +56,6 @@ export function bindContent(config) {
   fillText("[data-friends-party-date]", config.chapters?.friendsParty?.date ?? "");
   fillText("[data-friends-party-note]", config.chapters?.friendsParty?.note ?? "");
   fillText("[data-closing-message]", config.closingMessage ?? "");
-  fillText("[data-credit-prefix]", config.footerCredit?.prefix ?? "");
-  fillText("[data-credit-name]", config.footerCredit?.name ?? "");
 
   const mapEmbeds = document.querySelectorAll("[data-map-embed]");
   const mapLinks = document.querySelectorAll("[data-map-link]");
