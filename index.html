@@ -25,7 +25,14 @@
   </noscript>
 
   <main class="site-shell">
-    <section class="section section--hero" id="top" aria-labelledby="hero-title">
+    <section class="section section--hero" id="top" aria-labelledby="hero-title" data-curtain-root>
+      <div class="hero-intro" data-curtain-stage aria-hidden="true" hidden>
+        <span class="hero-intro__veil hero-intro__veil--left"></span>
+        <span class="hero-intro__veil hero-intro__veil--right"></span>
+        <span class="hero-intro__glow"></span>
+        <span class="hero-intro__line"></span>
+      </div>
+
       <div class="section__inner section__inner--wide">
         <div class="hero__content" data-reveal>
           <p class="section-tag">Wedding</p>

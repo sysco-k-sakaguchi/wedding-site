@@ -1,5 +1,6 @@
-import { EXPERIENCE_CONFIG, PLACEHOLDER_URL } from "./config.js";
+import { EXPERIENCE_CONFIG, EXPERIENCE_SETTINGS, PLACEHOLDER_URL } from "./config.js";
 import { bindContent, setupPlaceholderLinks } from "./modules/content.js";
+import { setupCurtain } from "./modules/curtain.js";
 import { setupRevealObserver } from "./modules/reveal.js";
 
 function initializeExperience() {
@@ -10,6 +11,12 @@ function initializeExperience() {
 
   const revealController = setupRevealObserver();
   revealController.observeAll(document.querySelectorAll("[data-reveal]"));
+
+  setupCurtain({
+    introDelay: EXPERIENCE_SETTINGS.curtainIntroDelay,
+    openDuration: EXPERIENCE_SETTINGS.curtainOpenDuration,
+    revealDelay: EXPERIENCE_SETTINGS.curtainRevealDelay
+  });
 }
 
 initializeExperience();
