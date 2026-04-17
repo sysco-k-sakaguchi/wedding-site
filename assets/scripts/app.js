@@ -14,6 +14,7 @@ function initializeExperience() {
 
   setupCurtain({
     introDelay: EXPERIENCE_SETTINGS.curtainIntroDelay,
+    preludeDuration: EXPERIENCE_SETTINGS.curtainPreludeDuration,
     openDuration: EXPERIENCE_SETTINGS.curtainOpenDuration,
     revealDelay: EXPERIENCE_SETTINGS.curtainRevealDelay
   });

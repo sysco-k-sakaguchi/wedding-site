@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wedding Guide</title>
+  <title>Wedding Invitation</title>
   <meta
     name="description"
-    content="結婚式当日の流れや各日のご案内を、やわらかな余白と落ち着いた色で見やすくまとめたウェディングサイトです。"
+    content="挙式と会食、各日のご案内を落ち着いた余白と色合いで見やすくまとめたウェディングサイトです。"
   >
   <meta name="theme-color" content="#ece3d6">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,21 +25,64 @@
   </noscript>
 
   <main class="site-shell">
-    <section class="section section--hero" id="top" aria-labelledby="hero-title" data-curtain-root>
-      <div class="hero-intro" data-curtain-stage aria-hidden="true" hidden>
-        <span class="hero-intro__veil hero-intro__veil--left"></span>
-        <span class="hero-intro__veil hero-intro__veil--right"></span>
-        <span class="hero-intro__glow"></span>
-        <span class="hero-intro__line"></span>
-      </div>
+    <div class="site-curtain" data-curtain-overlay hidden>
+      <div class="site-curtain__ambient" aria-hidden="true"></div>
+      <p class="sr-only" id="opening-title">Wedding Invitation Opening</p>
+
+      <button
+        class="curtain-stage"
+        type="button"
+        data-curtain-stage
+        aria-describedby="opening-caption"
+        aria-labelledby="opening-title"
+        aria-label="幕をひらいてご案内を表示する"
+      >
+        <span class="curtain-stage__backlight" aria-hidden="true"></span>
+        <span class="curtain-stage__spotlight" aria-hidden="true"></span>
+        <span class="curtain-stage__arch" aria-hidden="true"></span>
+
+        <span class="curtain-stage__invitation" aria-hidden="true">
+          <span class="curtain-stage__invitation-inner">
+            <small>Wedding Invitation</small>
+            <strong data-couple-names>Masato &amp; Haruka</strong>
+            <em data-date-display>2026年10月12日(月)</em>
+          </span>
+        </span>
+
+        <span class="curtain-stage__rail" aria-hidden="true"></span>
+        <span class="curtain-stage__valance" aria-hidden="true"></span>
+        <span class="curtain-stage__pinch" aria-hidden="true"></span>
+
+        <span class="curtain-panel curtain-panel--left" aria-hidden="true">
+          <span class="curtain-panel__body"></span>
+          <span class="curtain-panel__sheen"></span>
+          <span class="curtain-panel__hem"></span>
+        </span>
+
+        <span class="curtain-panel curtain-panel--right" aria-hidden="true">
+          <span class="curtain-panel__body"></span>
+          <span class="curtain-panel__sheen"></span>
+          <span class="curtain-panel__hem"></span>
+        </span>
+
+        <span class="curtain-stage__floor" aria-hidden="true"></span>
+        <span class="curtain-stage__frame" aria-hidden="true"></span>
+      </button>
+
+      <p class="sr-only" id="opening-caption" data-curtain-caption>
+        幕をひらいてご案内を表示します。
+      </p>
+    </div>
+
+    <section class="section section--hero" id="top" aria-labelledby="hero-title">
 
       <div class="section__inner section__inner--wide">
         <div class="hero__content" data-reveal>
           <p class="section-tag">Wedding</p>
-          <p class="hero__subhead">Guide</p>
+          <p class="hero__subhead">Invitation</p>
           <h1 class="hero__title" id="hero-title" data-couple-names>Masato &amp; Haruka</h1>
           <p class="hero__date" data-date-display>2026年10月12日(月)</p>
-          <p class="hero__lead">当日の情報を掲載しています。</p>
+          <p class="hero__lead">このたび挙式と会食を執り行う運びとなりました。</p>
           <p class="hero__message" data-invitation-message>どうぞお越しいただけましたら幸いです。</p>
         </div>
 
@@ -72,7 +115,7 @@
               <span class="chapter-index__eyebrow">Travel</span>
               <h3>沖縄編</h3>
               <span class="chapter-index__date" data-okinawa-date>7月○日</span>
-              <span class="chapter-index__text" data-okinawa-note>沖縄旅行</span>
+              <span class="chapter-index__text" data-okinawa-note>沖縄旅行について</span>
             </div>
           </a>
 
@@ -82,7 +125,7 @@
               <span class="chapter-index__eyebrow">Ceremony</span>
               <h3>挙式編</h3>
               <span class="chapter-index__date" data-ceremony-date>10月12日</span>
-              <span class="chapter-index__text" data-ceremony-note>挙式・会食</span>
+              <span class="chapter-index__text" data-ceremony-note>挙式・会食のご案内</span>
             </div>
           </a>
 
@@ -92,7 +135,7 @@
               <span class="chapter-index__eyebrow">Party</span>
               <h3>友人の集い編</h3>
               <span class="chapter-index__date" data-friends-party-date>11月29日</span>
-              <span class="chapter-index__text" data-friends-party-note>詳細調整中</span>
+              <span class="chapter-index__text" data-friends-party-note>詳細は決まり次第ご案内します</span>
             </div>
           </a>
         </nav>
@@ -106,7 +149,7 @@
             <p class="section-tag">Travel</p>
             <p class="chapter__date" data-okinawa-date>7月○日</p>
             <h2 id="okinawa-title">沖縄編</h2>
-            <p class="chapter__lead" data-okinawa-note>沖縄旅行</p>
+            <p class="chapter__lead" data-okinawa-note>沖縄旅行について</p>
           </div>
 
           <div class="fact-list" aria-label="沖縄編の情報">
@@ -116,8 +159,8 @@
             </div>
 
             <div class="fact-list__item">
-              <small>Info</small>
-              <p data-okinawa-note>沖縄旅行</p>
+              <small>Details</small>
+              <p data-okinawa-note>沖縄旅行について</p>
             </div>
           </div>
         </article>
@@ -131,7 +174,7 @@
             <p class="section-tag">Ceremony</p>
             <p class="chapter__date" data-ceremony-date>10月12日</p>
             <h2 id="ceremony-title">挙式編</h2>
-            <p class="chapter__lead" data-ceremony-note>挙式・会食</p>
+            <p class="chapter__lead" data-ceremony-note>挙式・会食のご案内</p>
           </div>
 
           <div class="fact-list" aria-label="挙式の基本情報">
@@ -240,7 +283,7 @@
             <p class="section-tag">Party</p>
             <p class="chapter__date" data-friends-party-date>11月29日</p>
             <h2 id="party-title">友人の集い編</h2>
-            <p class="chapter__lead" data-friends-party-note>詳細調整中</p>
+            <p class="chapter__lead" data-friends-party-note>詳細は決まり次第ご案内します</p>
           </div>
 
           <div class="fact-list" aria-label="友人の集い編の情報">
@@ -250,8 +293,8 @@
             </div>
 
             <div class="fact-list__item">
-              <small>Info</small>
-              <p data-friends-party-note>詳細調整中</p>
+              <small>Details</small>
+              <p data-friends-party-note>詳細は決まり次第ご案内します</p>
             </div>
           </div>
         </article>

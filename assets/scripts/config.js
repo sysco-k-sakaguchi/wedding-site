@@ -5,7 +5,7 @@ export const PLACEHOLDER_URL = "FORM_URL";
 
 export const EXPERIENCE_CONFIG = {
   coupleNames: "Masato & Haruka",
-  invitationMessage: "どうぞお越しいただけましたら幸いです。",
+  invitationMessage: "ご多用のところ恐縮ではございますが、ご列席賜れますと幸いです。",
   weddingDateIso: "2026-10-12T11:30:00+09:00",
   weddingDateDisplay: "2026年10月12日(月)",
   weddingTimeDisplay: "11:30 挙式開始",
@@ -27,15 +27,15 @@ export const EXPERIENCE_CONFIG = {
   chapters: {
     okinawa: {
       date: "7月○日",
-      note: "沖縄旅行"
+      note: "沖縄旅行について"
     },
     ceremony: {
       date: "10月12日",
-      note: "挙式・会食"
+      note: "挙式・会食のご案内"
     },
     friendsParty: {
       date: "11月29日",
-      note: "詳細調整中"
+      note: "詳細は決まり次第ご案内します"
     }
   },
   photoShareNote: "写真共有は挙式後にご案内します",
@@ -69,9 +69,10 @@ export const EXPERIENCE_CONFIG = {
 };
 
 export const EXPERIENCE_SETTINGS = {
-  curtainIntroDelay: 180,
-  curtainOpenDuration: 1180,
-  curtainRevealDelay: 140,
+  curtainIntroDelay: 1750,
+  curtainPreludeDuration: 620,
+  curtainOpenDuration: 2360,
+  curtainRevealDelay: 260,
   scratchCompleteRatio: 0.42,
   scratchBrushSize: 20,
   scratchGestureDistance: 155,
