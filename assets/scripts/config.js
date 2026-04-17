@@ -27,21 +27,21 @@ export const EXPERIENCE_CONFIG = {
   chapters: {
     okinawa: {
       date: "7月○日",
-      note: "旅の予定は整い次第、あらためてご案内します"
+      note: "沖縄旅行"
     },
     ceremony: {
       date: "10月12日",
-      note: "挙式と会食についてご案内します"
+      note: "挙式・会食"
     },
     friendsParty: {
       date: "11月29日",
-      note: "友人の皆さまと、別日にゆっくり集う時間を考えています"
+      note: "詳細調整中"
     }
   },
   photoShareNote: "写真共有は挙式後にご案内します",
   mapEmbedUrl: "https://maps.google.com/maps?hl=ja&q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&z=16&output=embed",
   mapExternalUrl: "https://maps.google.com/?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD",
-  rsvpUrl: PLACEHOLDER_URL,
+  rsvpUrl: "https://brapla.com/bcs/guest/01KK7V9HQ9TXP1XWVWQJC10RHN/o29x?openExternalBrowser=1&t=1775548405",
   rsvpDeadline: "2026年8月31日(月)",
   closingMessage: "皆さまにお会いできる日を、心より楽しみにしております。",
   schedule: [
