@@ -290,7 +290,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 
 .curtain-stage__invitation {
   inset:
-    calc(env(safe-area-inset-top, 0px) + 5.2rem)
+    calc(env(safe-area-inset-top, 0px) + 4.6rem)
     10%
     calc(env(safe-area-inset-bottom, 0px) + 4rem);
   display: flex;
@@ -337,7 +337,7 @@ body.is-curtain-opened .section--hero .hero__summary {
   gap: 0.9rem;
   width: 100%;
   min-height: 100%;
-  padding: clamp(4.8rem, 17vh, 7.4rem) 1.45rem clamp(4.4rem, 15vh, 6.6rem);
+  padding: clamp(4rem, 15vh, 6.4rem) 1.45rem clamp(3.7rem, 13vh, 5.8rem);
   text-align: center;
   color: rgba(55, 39, 31, 0.86);
 }
@@ -1061,13 +1061,13 @@ body.is-curtain-opened .section--hero .hero__summary {
 .section--hero .section__inner--wide {
   display: grid;
   gap: clamp(2.4rem, 7vw, 3.25rem);
-  min-height: clamp(38rem, 88svh, 47rem);
+  min-height: clamp(35rem, 80svh, 43rem);
   align-content: center;
 }
 
 .hero__content {
   max-width: 34rem;
-  padding-top: clamp(4.4rem, 14vw, 7.6rem);
+  padding-top: clamp(2.8rem, 9vw, 5rem);
 }
 
 .hero__subhead {
@@ -1728,9 +1728,9 @@ body.is-curtain-opened .section--hero .hero__summary {
 
   .curtain-stage__invitation {
     inset:
-      calc(env(safe-area-inset-top, 0px) + 6.4rem)
+      calc(env(safe-area-inset-top, 0px) + 5.8rem)
       18%
-      calc(env(safe-area-inset-bottom, 0px) + 4.6rem);
+      calc(env(safe-area-inset-bottom, 0px) + 4.2rem);
   }
 
   .chapter-index {
@@ -1777,7 +1777,7 @@ body.is-curtain-opened .section--hero .hero__summary {
   }
 
   .curtain-stage__invitation-inner {
-    padding: clamp(5.2rem, 17vh, 8rem) 1.9rem clamp(4.8rem, 15vh, 6.9rem);
+    padding: clamp(4.6rem, 15vh, 7rem) 1.9rem clamp(4.2rem, 13vh, 6rem);
   }
 
   .section--hero .section__inner--wide {
@@ -1785,7 +1785,7 @@ body.is-curtain-opened .section--hero .hero__summary {
     grid-template-columns: minmax(0, 1.18fr) minmax(17rem, 0.82fr);
     gap: 4.2rem;
     align-items: center;
-    min-height: clamp(39rem, 84vh, 47rem);
+    min-height: clamp(36rem, 78vh, 44rem);
   }
 
   .hero__summary {
@@ -1794,7 +1794,7 @@ body.is-curtain-opened .section--hero .hero__summary {
   }
 
   .hero__content {
-    padding-top: clamp(4.8rem, 9vw, 7rem);
+    padding-top: clamp(3rem, 6.5vw, 5rem);
   }
 
   .summary-row:first-child {
@@ -1839,8 +1839,8 @@ body.is-curtain-opened .section--hero .hero__summary {
   }
 
   .section--hero {
-    padding-top: max(11.8rem, calc(env(safe-area-inset-top, 0px) + 10.8rem));
-    padding-bottom: clamp(4.4rem, 13vw, 5.4rem);
+    padding-top: max(9.9rem, calc(env(safe-area-inset-top, 0px) + 8.9rem));
+    padding-bottom: clamp(4rem, 12vw, 5rem);
   }
 
   .section--index {
@@ -1872,9 +1872,9 @@ body.is-curtain-opened .section--hero .hero__summary {
 
   .curtain-stage__invitation {
     inset:
-      calc(env(safe-area-inset-top, 0px) + 5.8rem)
+      calc(env(safe-area-inset-top, 0px) + 5.1rem)
       7%
-      calc(env(safe-area-inset-bottom, 0px) + 3rem);
+      calc(env(safe-area-inset-bottom, 0px) + 3.1rem);
   }
 
   .hero-intro__glow {
@@ -1882,11 +1882,11 @@ body.is-curtain-opened .section--hero .hero__summary {
   }
 
   .section--hero {
-    padding-top: max(13.6rem, calc(env(safe-area-inset-top, 0px) + 12.1rem));
+    padding-top: max(11rem, calc(env(safe-area-inset-top, 0px) + 9.8rem));
   }
 
   .hero__content {
-    padding-top: 5.4rem;
+    padding-top: 3rem;
   }
 
   .chapter-timeline li {
