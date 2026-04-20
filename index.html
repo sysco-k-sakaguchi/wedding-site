@@ -183,28 +183,174 @@
               <p>前撮り写真や旅行のひとこまを、こちらにゆるやかに重ねていく予定です。</p>
             </div>
 
-            <div class="photo-gallery" aria-label="沖縄編の写真枠">
-              <figure class="photo-card">
-                <div class="photo-card__frame">
-                  <img
-                    src="assets/images/okinawa-photo-placeholder.svg"
-                    alt="沖縄編の前撮り写真を追加予定です"
-                    loading="lazy"
-                  >
-                </div>
-                <figcaption>Pre-wedding Photo</figcaption>
-              </figure>
+            <div class="photo-carousel" data-photo-gallery>
+              <div
+                class="photo-carousel__viewport"
+                aria-label="沖縄編の写真スライダー"
+                tabindex="0"
+                data-photo-gallery-track
+              >
+                <figure class="photo-slide" id="okinawa-photo-01" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 1"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">01</span>
+                  </div>
+                  <figcaption>Travel Memory 01</figcaption>
+                </figure>
 
-              <figure class="photo-card">
-                <div class="photo-card__frame">
-                  <img
-                    src="assets/images/okinawa-photo-placeholder.svg"
-                    alt="沖縄旅行の写真を追加予定です"
-                    loading="lazy"
-                  >
+                <figure class="photo-slide" id="okinawa-photo-02" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 2"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">02</span>
+                  </div>
+                  <figcaption>Travel Memory 02</figcaption>
+                </figure>
+
+                <figure class="photo-slide" id="okinawa-photo-03" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 3"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">03</span>
+                  </div>
+                  <figcaption>Travel Memory 03</figcaption>
+                </figure>
+
+                <figure class="photo-slide" id="okinawa-photo-04" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 4"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">04</span>
+                  </div>
+                  <figcaption>Travel Memory 04</figcaption>
+                </figure>
+
+                <figure class="photo-slide" id="okinawa-photo-05" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 5"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">05</span>
+                  </div>
+                  <figcaption>Travel Memory 05</figcaption>
+                </figure>
+
+                <figure class="photo-slide" id="okinawa-photo-06" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 6"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">06</span>
+                  </div>
+                  <figcaption>Travel Memory 06</figcaption>
+                </figure>
+
+                <figure class="photo-slide" id="okinawa-photo-07" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 7"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">07</span>
+                  </div>
+                  <figcaption>Travel Memory 07</figcaption>
+                </figure>
+
+                <figure class="photo-slide" id="okinawa-photo-08" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 8"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">08</span>
+                  </div>
+                  <figcaption>Travel Memory 08</figcaption>
+                </figure>
+
+                <figure class="photo-slide" id="okinawa-photo-09" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 9"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">09</span>
+                  </div>
+                  <figcaption>Travel Memory 09</figcaption>
+                </figure>
+
+                <figure class="photo-slide" id="okinawa-photo-10" data-photo-slide>
+                  <div class="photo-slide__frame">
+                    <img
+                      src="assets/images/okinawa-photo-placeholder.svg"
+                      alt="沖縄編の写真プレースホルダー 10"
+                      loading="lazy"
+                    >
+                    <span class="photo-slide__index" aria-hidden="true">10</span>
+                  </div>
+                  <figcaption>Travel Memory 10</figcaption>
+                </figure>
+              </div>
+
+              <div class="photo-carousel__meta">
+                <p class="photo-carousel__counter">
+                  <span data-photo-current>01</span>
+                  <span>/</span>
+                  <span data-photo-total>10</span>
+                </p>
+
+                <div class="photo-carousel__dots" aria-label="写真の位置">
+                  <a class="photo-carousel__dot is-active" href="#okinawa-photo-01" data-photo-dot aria-current="true">
+                    <span class="sr-only">写真 1</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-02" data-photo-dot>
+                    <span class="sr-only">写真 2</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-03" data-photo-dot>
+                    <span class="sr-only">写真 3</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-04" data-photo-dot>
+                    <span class="sr-only">写真 4</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-05" data-photo-dot>
+                    <span class="sr-only">写真 5</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-06" data-photo-dot>
+                    <span class="sr-only">写真 6</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-07" data-photo-dot>
+                    <span class="sr-only">写真 7</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-08" data-photo-dot>
+                    <span class="sr-only">写真 8</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-09" data-photo-dot>
+                    <span class="sr-only">写真 9</span>
+                  </a>
+                  <a class="photo-carousel__dot" href="#okinawa-photo-10" data-photo-dot>
+                    <span class="sr-only">写真 10</span>
+                  </a>
                 </div>
-                <figcaption>Travel Memory</figcaption>
-              </figure>
+              </div>
             </div>
           </div>
         </article>

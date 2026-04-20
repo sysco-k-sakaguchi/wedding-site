@@ -43,7 +43,7 @@ export function setupCurtain({
   let currentState = {
     open: 0,
     reveal: 0,
-    glow: 0.28,
+    glow: 0.24,
     leftSway: 0,
     rightSway: 0,
     leftDrape: 0,
@@ -124,7 +124,7 @@ export function setupCurtain({
     document.body.classList.add("is-curtain-opened");
     overlay.classList.add("is-complete");
 
-    const hideDelay = prefersReducedMotion ? 0 : Math.max(revealDelay, 360);
+    const hideDelay = prefersReducedMotion ? 0 : Math.max(revealDelay, 520);
 
     window.setTimeout(() => {
       overlay.hidden = true;
@@ -148,33 +148,33 @@ export function setupCurtain({
 
       const elapsed = now - idleStart;
       const leftSway =
-        Math.sin(elapsed * 0.00102 + 0.42) * 0.0062 +
-        Math.sin(elapsed * 0.00184 + 1.24) * 0.0033;
+        Math.sin(elapsed * 0.00102 + 0.42) * 0.0071 +
+        Math.sin(elapsed * 0.00184 + 1.24) * 0.0038;
       const rightSway =
-        Math.sin(elapsed * 0.00088 + 2.18) * 0.0057 +
-        Math.sin(elapsed * 0.00167 + 0.62) * 0.0029;
-      const leftDrape = leftSway * 1.9 + Math.sin(elapsed * 0.00153 + 1.08) * 0.0042;
-      const rightDrape = rightSway * 1.82 + Math.sin(elapsed * 0.00139 + 2.36) * 0.0038;
-      const leftTail = leftDrape * 1.34 + Math.sin(elapsed * 0.00191 + 0.74) * 0.0048;
-      const rightTail = rightDrape * 1.38 + Math.sin(elapsed * 0.00175 + 1.88) * 0.0045;
+        Math.sin(elapsed * 0.00088 + 2.18) * 0.0064 +
+        Math.sin(elapsed * 0.00167 + 0.62) * 0.0032;
+      const leftDrape = leftSway * 2.08 + Math.sin(elapsed * 0.00153 + 1.08) * 0.0049;
+      const rightDrape = rightSway * 2 + Math.sin(elapsed * 0.00139 + 2.36) * 0.0042;
+      const leftTail = leftDrape * 1.42 + Math.sin(elapsed * 0.00191 + 0.74) * 0.0054;
+      const rightTail = rightDrape * 1.44 + Math.sin(elapsed * 0.00175 + 1.88) * 0.0049;
       const breath = (Math.sin(elapsed * 0.00042 + 0.86) + 1) / 2;
 
       applyState({
         open: 0,
         reveal: 0,
-        glow: 0.22 + breath * 0.08,
+        glow: 0.18 + breath * 0.09,
         leftSway,
         rightSway,
         leftDrape,
         rightDrape,
         leftTail,
         rightTail,
-        lift: breath * 0.04,
-        gather: 0.05 + breath * 0.05,
-        pinch: 0.05 + breath * 0.08,
+        lift: breath * 0.05,
+        gather: 0.06 + breath * 0.06,
+        pinch: 0.06 + breath * 0.09,
         tension: 0,
-        stack: 0.04 + breath * 0.05,
-        breathe: breath * 0.72
+        stack: 0.05 + breath * 0.06,
+        breathe: breath * 0.76
       });
 
       animationFrameId = window.requestAnimationFrame(idleFrame);
@@ -228,29 +228,29 @@ export function setupCurtain({
 
     function settleMotion() {
       const settleStart = performance.now();
-      const settleDuration = 1260;
+      const settleDuration = 1520;
 
       function settleFrame(now) {
         const progress = clamp((now - settleStart) / settleDuration);
-        const residue = Math.sin(progress * Math.PI * 1.92 + 0.12) * Math.pow(1 - progress, 2.3) * 0.018;
-        const tailResidue = Math.sin(progress * Math.PI * 2.5 + 0.88) * Math.pow(1 - progress, 2.05) * 0.022;
+        const residue = Math.sin(progress * Math.PI * 2.16 + 0.18) * Math.pow(1 - progress, 2.18) * 0.022;
+        const tailResidue = Math.sin(progress * Math.PI * 2.84 + 0.76) * Math.pow(1 - progress, 1.98) * 0.027;
 
         applyState({
           open: 1,
           reveal: 1,
-          glow: 1,
+          glow: 0.98,
           leftSway: residue,
-          rightSway: -residue * 0.88,
-          leftDrape: residue * 1.26 + tailResidue,
-          rightDrape: -residue * 1.12 - tailResidue * 0.84,
-          leftTail: tailResidue * 1.18,
-          rightTail: -tailResidue,
+          rightSway: -residue * 0.92,
+          leftDrape: residue * 1.34 + tailResidue,
+          rightDrape: -residue * 1.16 - tailResidue * 0.88,
+          leftTail: tailResidue * 1.2,
+          rightTail: -tailResidue * 1.04,
           lift: 1,
           gather: 1,
-          pinch: (1 - progress) * 0.08,
-          tension: (1 - progress) * 0.06,
+          pinch: (1 - progress) * 0.1,
+          tension: (1 - progress) * 0.08,
           stack: 1,
-          breathe: (1 - progress) * 0.12
+          breathe: (1 - progress) * 0.14
         });
 
         if (progress < 1) {
@@ -266,41 +266,41 @@ export function setupCurtain({
 
     function step(now) {
       const progress = clamp((now - startTime) / openDuration);
-      const tensionPhase = easeOutCubic(clamp(progress / 0.18));
-      const open = easeInOutCubic(clamp((progress - 0.08) / 0.92));
-      const reveal = easeOutCubic(clamp((progress - 0.24) / 0.76));
-      const lift = easeOutCubic(clamp((progress - 0.1) / 0.9));
-      const gather = clamp(0.16 + tensionPhase * 0.1 + easeOutCubic(clamp((progress - 0.06) / 0.94)) * 0.74);
-      const stack = clamp(0.08 + easeOutCubic(clamp((progress - 0.16) / 0.84)) * 0.92);
-      const tension = clamp(tensionPhase * (1 - open * 0.62));
-      const flutter = Math.sin(progress * Math.PI * 3.4 + 0.24) * Math.pow(1 - progress, 1.82) * 0.028;
-      const drag = Math.sin(progress * Math.PI * 1.15 + 0.36) * Math.pow(1 - progress, 1.18) * 0.012;
-      const tailLag = Math.sin(progress * Math.PI * 4.2 + 0.92) * Math.pow(1 - progress, 1.52) * 0.034;
+      const tensionPhase = easeOutCubic(clamp(progress / 0.22));
+      const open = easeInOutCubic(clamp((progress - 0.12) / 0.88));
+      const reveal = easeOutCubic(clamp((progress - 0.32) / 0.68));
+      const lift = easeOutCubic(clamp((progress - 0.14) / 0.86));
+      const gather = clamp(0.18 + tensionPhase * 0.14 + easeOutCubic(clamp((progress - 0.08) / 0.92)) * 0.72);
+      const stack = clamp(0.08 + easeOutCubic(clamp((progress - 0.2) / 0.8)) * 0.92);
+      const tension = clamp(tensionPhase * (1 - open * 0.55));
+      const flutter = Math.sin(progress * Math.PI * 3.62 + 0.24) * Math.pow(1 - progress, 1.68) * 0.034;
+      const drag = Math.sin(progress * Math.PI * 1.18 + 0.42) * Math.pow(1 - progress, 1.16) * 0.017;
+      const tailLag = Math.sin(progress * Math.PI * 4.44 + 0.92) * Math.pow(1 - progress, 1.48) * 0.042;
       const leftDrape =
-        tension * 0.028 +
-        flutter * 1.42 +
-        Math.sin(progress * Math.PI * 2.08 + 0.54) * Math.pow(1 - progress, 1.55) * 0.023;
+        tension * 0.034 +
+        flutter * 1.56 +
+        Math.sin(progress * Math.PI * 2.18 + 0.54) * Math.pow(1 - progress, 1.5) * 0.026;
       const rightDrape =
-        -tension * 0.024 -
-        flutter * 1.18 +
-        Math.sin(progress * Math.PI * 1.92 + 1.08) * Math.pow(1 - progress, 1.52) * 0.021;
+        -tension * 0.03 -
+        flutter * 1.28 +
+        Math.sin(progress * Math.PI * 1.96 + 1.08) * Math.pow(1 - progress, 1.5) * 0.024;
 
       applyState({
         open,
         reveal,
-        glow: 0.26 + reveal * 0.62,
-        leftSway: tension * 0.012 + flutter - drag,
-        rightSway: -tension * 0.01 - flutter * 0.78 - drag * 0.72,
+        glow: 0.2 + reveal * 0.68,
+        leftSway: tension * 0.015 + flutter - drag,
+        rightSway: -tension * 0.013 - flutter * 0.82 - drag * 0.76,
         leftDrape,
         rightDrape,
-        leftTail: leftDrape * 1.14 + tailLag,
-        rightTail: rightDrape * 1.12 - tailLag * 0.84,
+        leftTail: leftDrape * 1.18 + tailLag,
+        rightTail: rightDrape * 1.16 - tailLag * 0.88,
         lift,
         gather,
-        pinch: clamp(0.12 + tension * 0.52 + Math.sin(progress * Math.PI) * 0.22 - open * 0.18),
+        pinch: clamp(0.14 + tension * 0.56 + Math.sin(progress * Math.PI) * 0.24 - open * 0.16),
         tension,
         stack,
-        breathe: (1 - open) * 0.18
+        breathe: (1 - open) * 0.22
       });
 
       if (progress < 1) {
@@ -340,27 +340,27 @@ export function setupCurtain({
     function preludeStep(now) {
       const progress = clamp((now - preludeStart) / preludeDuration);
       const pulse = easeInOutSine(progress);
-      const leftSway = preludeOrigin.leftSway * (1 - progress) + pulse * 0.012;
-      const rightSway = preludeOrigin.rightSway * (1 - progress) - pulse * 0.01;
-      const leftDrape = preludeOrigin.leftDrape * (1 - progress * 0.64) + pulse * 0.018;
-      const rightDrape = preludeOrigin.rightDrape * (1 - progress * 0.64) - pulse * 0.016;
+      const leftSway = preludeOrigin.leftSway * (1 - progress) + pulse * 0.014;
+      const rightSway = preludeOrigin.rightSway * (1 - progress) - pulse * 0.012;
+      const leftDrape = preludeOrigin.leftDrape * (1 - progress * 0.64) + pulse * 0.021;
+      const rightDrape = preludeOrigin.rightDrape * (1 - progress * 0.64) - pulse * 0.019;
 
       applyState({
         open: 0,
         reveal: 0,
-        glow: 0.24 + pulse * 0.1,
+        glow: 0.18 + pulse * 0.12,
         leftSway,
         rightSway,
         leftDrape,
         rightDrape,
-        leftTail: preludeOrigin.leftTail * (1 - progress * 0.42) + pulse * 0.024,
-        rightTail: preludeOrigin.rightTail * (1 - progress * 0.42) - pulse * 0.022,
-        lift: pulse * 0.08,
-        gather: 0.08 + pulse * 0.22,
-        pinch: 0.08 + Math.sin(progress * Math.PI) * 0.16 + pulse * 0.18,
+        leftTail: preludeOrigin.leftTail * (1 - progress * 0.42) + pulse * 0.028,
+        rightTail: preludeOrigin.rightTail * (1 - progress * 0.42) - pulse * 0.026,
+        lift: pulse * 0.1,
+        gather: 0.1 + pulse * 0.24,
+        pinch: 0.1 + Math.sin(progress * Math.PI) * 0.18 + pulse * 0.2,
         tension: pulse,
-        stack: 0.08 + pulse * 0.14,
-        breathe: (1 - progress) * preludeOrigin.breathe * 0.5
+        stack: 0.1 + pulse * 0.18,
+        breathe: (1 - progress) * preludeOrigin.breathe * 0.56
       });
 
       if (progress < 1) {
