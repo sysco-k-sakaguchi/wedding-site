@@ -26,7 +26,7 @@ export const EXPERIENCE_CONFIG = {
   },
   chapters: {
     okinawa: {
-      date: "7/7",
+      date: "7月7日",
       note: "沖縄旅行について"
     },
     ceremony: {
