@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Okinawa photo placeholder</title>
+  <desc id="desc">A soft beige placeholder card for Okinawa photos.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7efe4"/>
+      <stop offset="100%" stop-color="#eadbcb"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7d8c3" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f7d8c3" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <rect x="44" y="44" width="712" height="912" rx="32" fill="none" stroke="#c9af95" stroke-width="2.5" stroke-dasharray="10 12"/>
+  <circle cx="400" cy="274" r="110" fill="url(#sun)"/>
+  <path d="M150 640c66-118 164-202 254-202 102 0 188 74 248 188" fill="none" stroke="#d4b79f" stroke-width="20" stroke-linecap="round"/>
+  <path d="M144 706c50-24 96-38 142-38 58 0 102 18 160 46 60 30 120 50 206 50 18 0 38-2 64-8" fill="none" stroke="#e2c9b7" stroke-width="18" stroke-linecap="round"/>
+  <text x="400" y="818" text-anchor="middle" fill="#8f7564" font-family="'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif" font-size="34" letter-spacing="5">NO IMAGE</text>
+  <text x="400" y="872" text-anchor="middle" fill="#a48a78" font-family="'Shippori Mincho B1', 'Hiragino Mincho ProN', serif" font-size="26" letter-spacing="3">Travel photos coming soon</text>
+</svg>
