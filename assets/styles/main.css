@@ -29,6 +29,9 @@
   --content-width: min(100% - 1.75rem, 40rem);
   --content-width-wide: min(100% - 1.75rem, 72rem);
   --section-space: clamp(4.5rem, 13vw, 7rem);
+  --label-size: 0.82rem;
+  --fine-print-size: 0.94rem;
+  --caption-size: 0.98rem;
 }
 
 *,
@@ -359,7 +362,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .curtain-stage__invitation-inner small {
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   text-transform: uppercase;
 }
 
@@ -373,7 +376,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .curtain-stage__invitation-inner em {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: rgba(111, 31, 51, 0.68);
 }
 
@@ -975,7 +978,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 .fact-list__item small,
 .info-list__item small {
   display: block;
-  font-size: 0.77rem;
+  font-size: var(--label-size);
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1140,7 +1143,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .summary-row__sub {
-  font-size: 1rem;
+  font-size: 1.02rem;
   color: var(--text-faint);
 }
 
@@ -1163,7 +1166,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .chapter-index__count {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   letter-spacing: 0.14em;
   color: var(--accent);
   padding-top: 0.18rem;
@@ -1180,12 +1183,12 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .chapter-index__date {
-  font-size: 1rem;
+  font-size: 1.04rem;
   color: var(--accent-deep);
 }
 
 .chapter-index__text {
-  font-size: 1rem;
+  font-size: 1.03rem;
   line-height: 1.82;
   color: var(--text-soft);
 }
@@ -1241,7 +1244,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .fact-list__sub {
-  font-size: 1rem;
+  font-size: 1.02rem;
   font-weight: 400;
   line-height: 1.84;
   color: var(--text-faint);
@@ -1418,7 +1421,7 @@ body.is-curtain-opened .section--hero .hero__summary {
   border-radius: 999px;
   background: rgba(50, 40, 35, 0.28);
   backdrop-filter: blur(8px);
-  font-size: 0.86rem;
+  font-size: var(--fine-print-size);
   letter-spacing: 0.16em;
   color: rgba(255, 255, 255, 0.86);
   opacity: var(--photo-index-opacity);
@@ -1427,7 +1430,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 
 .photo-slide figcaption {
   padding: 0 0.15rem 0.05rem;
-  font-size: 0.92rem;
+  font-size: var(--caption-size);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-faint);
@@ -1447,7 +1450,7 @@ body.is-curtain-opened .section--hero .hero__summary {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.86rem;
+  font-size: var(--fine-print-size);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent-deep);
@@ -1549,7 +1552,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .section-block__intro {
-  font-size: 1rem;
+  font-size: 1.02rem;
   line-height: 1.82;
   color: var(--text-faint);
 }
@@ -1599,7 +1602,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .chapter-timeline p {
-  font-size: 1rem;
+  font-size: 1.02rem;
   line-height: 1.82;
   color: var(--text-soft);
 }
@@ -1715,7 +1718,7 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .rsvp-card__note {
-  font-size: 0.94rem;
+  font-size: var(--fine-print-size);
   line-height: 1.75;
   color: var(--text-faint);
 }
@@ -1787,9 +1790,9 @@ body.is-curtain-opened .section--hero .hero__summary {
 
 .site-footer__credit-text {
   max-width: 24rem;
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   line-height: 1.8;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--text-faint);
 }
 
@@ -1941,6 +1944,9 @@ body.is-curtain-opened .section--hero .hero__summary {
   :root {
     --content-width: min(100% - 1.2rem, 40rem);
     --content-width-wide: min(100% - 1.2rem, 72rem);
+    --label-size: 0.84rem;
+    --fine-print-size: 0.96rem;
+    --caption-size: 1rem;
   }
 
   .curtain-stage__invitation {
@@ -1970,7 +1976,7 @@ body.is-curtain-opened .section--hero .hero__summary {
   .chapter-timeline time {
     min-width: 3.7rem;
     padding-inline: 0.35rem;
-    font-size: 0.94rem;
+    font-size: 0.98rem;
   }
 
   .photo-slide__frame {
