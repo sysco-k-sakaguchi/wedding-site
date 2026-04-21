@@ -105,14 +105,6 @@ img {
   max-width: 100%;
 }
 
-.noscript-note {
-  padding: 0.9rem 1rem;
-  background: #f4ebdc;
-  color: #6c5746;
-  text-align: center;
-  font-size: 0.88rem;
-}
-
 .sr-only {
   position: absolute !important;
   width: 1px !important;
@@ -1187,12 +1179,6 @@ body.is-curtain-opened .section--hero .hero__summary {
   color: var(--accent-deep);
 }
 
-.chapter-index__text {
-  font-size: 1.03rem;
-  line-height: 1.82;
-  color: var(--text-soft);
-}
-
 .chapter {
   max-width: 44rem;
 }
@@ -1355,7 +1341,6 @@ body.is-curtain-opened .section--hero .hero__summary {
 
 .photo-carousel.is-dragging .photo-slide,
 .photo-carousel.is-dragging .photo-slide__frame,
-.photo-carousel.is-dragging .photo-slide figcaption,
 .photo-carousel.is-dragging .photo-slide__index {
   transition: none;
 }
@@ -1425,16 +1410,6 @@ body.is-curtain-opened .section--hero .hero__summary {
   letter-spacing: 0.16em;
   color: rgba(255, 255, 255, 0.86);
   opacity: var(--photo-index-opacity);
-  transition: opacity 280ms ease-out;
-}
-
-.photo-slide figcaption {
-  padding: 0 0.15rem 0.05rem;
-  font-size: var(--caption-size);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  opacity: var(--photo-caption-opacity);
   transition: opacity 280ms ease-out;
 }
 
@@ -1549,12 +1524,6 @@ body.is-curtain-opened .section--hero .hero__summary {
   border-radius: 1.4rem;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.2));
   box-shadow: 0 20px 38px rgba(117, 92, 71, 0.07);
-}
-
-.section-block__intro {
-  font-size: 1.02rem;
-  line-height: 1.82;
-  color: var(--text-faint);
 }
 
 .chapter-timeline {
@@ -1715,12 +1684,6 @@ body.is-curtain-opened .section--hero .hero__summary {
   border-radius: 1.3rem;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(245, 236, 225, 0.72));
   box-shadow: 0 18px 38px rgba(111, 87, 67, 0.08);
-}
-
-.rsvp-card__note {
-  font-size: var(--fine-print-size);
-  line-height: 1.75;
-  color: var(--text-faint);
 }
 
 .chapter-index__item:focus-visible,
@@ -2013,7 +1976,6 @@ body.is-curtain-opened .section--hero .hero__summary {
   .photo-carousel__rail,
   .photo-slide,
   .photo-slide__frame,
-  .photo-slide figcaption,
   .photo-slide__index {
     transition: none;
   }

@@ -27,7 +27,6 @@ export function setupCurtain({
 } = {}) {
   const overlay = document.querySelector("[data-curtain-overlay]");
   const stage = document.querySelector("[data-curtain-stage]");
-  const caption = document.querySelector("[data-curtain-caption]");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (!stage || !overlay) {
@@ -60,12 +59,6 @@ export function setupCurtain({
 
   overlay.hidden = false;
   document.body.classList.add("is-curtain-active");
-
-  function updateCaption(text) {
-    if (caption) {
-      caption.textContent = text;
-    }
-  }
 
   function applyState({
     open = 0,
@@ -215,14 +208,12 @@ export function setupCurtain({
       breathe: 0
     });
 
-    updateCaption("");
     hideOverlay();
   }
 
   function runOpening() {
     stage.classList.remove("is-anticipating");
     stage.classList.add("is-opening");
-    updateCaption("");
 
     const startTime = performance.now();
 
@@ -326,14 +317,11 @@ export function setupCurtain({
     stage.classList.remove("is-idling");
 
     if (prefersReducedMotion) {
-      updateCaption("");
       finishCurtain();
       return;
     }
 
     stage.classList.add("is-anticipating");
-    updateCaption(manual ? "まもなく幕がひらきます。" : "");
-
     const preludeOrigin = { ...currentState };
     const preludeStart = performance.now();
 
@@ -395,7 +383,6 @@ export function setupCurtain({
   stage.addEventListener("click", () => {
     if (performance.now() < holdUntil && !started) {
       queuedManualStart = true;
-      updateCaption("幕はまもなくひらきます。");
       return;
     }
 
@@ -409,7 +396,6 @@ export function setupCurtain({
       event.preventDefault();
       if (performance.now() < holdUntil && !started) {
         queuedManualStart = true;
-        updateCaption("幕はまもなくひらきます。");
         return;
       }
 
@@ -420,7 +406,6 @@ export function setupCurtain({
   });
 
   applyState(currentState);
-  updateCaption("幕をひらいてご案内を表示します。");
   startIdleMotion();
 
   autoStartTimer = window.setTimeout(() => {

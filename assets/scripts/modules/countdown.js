@@ -11,7 +11,7 @@ export function setupCountdown(config) {
   const targetDate = new Date(config.weddingDateIso);
 
   if (Number.isNaN(targetDate.getTime())) {
-    label.textContent = "日付設定を確認してください。";
+    label.textContent = "日付設定をご確認ください";
     days.textContent = "";
     unit.textContent = "";
     return;
@@ -23,7 +23,7 @@ export function setupCountdown(config) {
 
     if (diff <= 0) {
       root.classList.add("is-today");
-      label.textContent = "本日は結婚式当日です。";
+      label.textContent = "本日は結婚式当日です";
       days.textContent = "";
       unit.textContent = "";
       return;

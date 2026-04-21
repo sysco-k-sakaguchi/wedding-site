@@ -90,7 +90,7 @@ export function setupPlaceholderLinks({ placeholderValue }) {
       }
 
       event.preventDefault();
-      window.alert("RSVP の URL はまだ仮設定です。assets/scripts/config.js の rsvpUrl を差し替えてください。");
+      window.alert("RSVP の URL はまだ仮設定です\nassets/scripts/config.js の rsvpUrl を差し替えてください");
     });
   });
 }

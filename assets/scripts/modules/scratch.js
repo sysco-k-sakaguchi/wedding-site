@@ -239,7 +239,7 @@ export function setupScratch({
     setProgressState(combinedProgress);
 
     if (force) {
-      status.textContent = "日付の封印です。";
+      status.textContent = "お日取りをそっと包んでいます";
     }
   }
 
@@ -257,7 +257,7 @@ export function setupScratch({
     setProgressState(1);
 
     if (status) {
-      status.textContent = "日付を表示しました。";
+      status.textContent = "お日取りを表示しました";
     }
 
     onReveal?.();
@@ -274,7 +274,7 @@ export function setupScratch({
     setProgressState(1);
 
     if (status) {
-      status.textContent = "日付を表示しています。";
+      status.textContent = "お日取りを表示しています";
     }
 
     window.setTimeout(revealDate, prefersReducedMotion ? 0 : revealDelay);
