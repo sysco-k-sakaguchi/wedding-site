@@ -1273,8 +1273,11 @@ body.is-curtain-opened .section--hero .hero__summary {
   perspective: 1800px;
   perspective-origin: center center;
   touch-action: pan-y pinch-zoom;
+  overscroll-behavior-x: contain;
   cursor: grab;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .photo-carousel__viewport::before,
@@ -1338,13 +1341,13 @@ body.is-curtain-opened .section--hero .hero__summary {
   opacity: var(--photo-opacity);
   filter: blur(calc(var(--photo-blur) * 1px));
   transform:
-    translateX(calc(var(--photo-shift) * 1%))
+    translate3d(calc(var(--photo-shift) * 1%), 0, 0)
     rotateY(calc(var(--photo-rotate) * 1deg))
     scale(var(--photo-scale));
   transition:
-    transform 720ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 520ms ease,
-    filter 520ms ease;
+    transform 560ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 320ms ease-out,
+    filter 320ms ease-out;
 }
 
 .photo-carousel.is-dragging .photo-slide,
@@ -1352,6 +1355,10 @@ body.is-curtain-opened .section--hero .hero__summary {
 .photo-carousel.is-dragging .photo-slide figcaption,
 .photo-carousel.is-dragging .photo-slide__index {
   transition: none;
+}
+
+.photo-carousel.is-dragging .photo-slide {
+  filter: none;
 }
 
 .photo-slide__frame {
@@ -1367,8 +1374,8 @@ body.is-curtain-opened .section--hero .hero__summary {
     0 18px 34px rgba(117, 92, 71, var(--photo-shadow));
   transform: translateZ(calc((1 - var(--photo-scale)) * -18px));
   transition:
-    box-shadow 640ms ease,
-    transform 720ms cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow 420ms ease-out,
+    transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .photo-slide__frame::before,
@@ -1415,7 +1422,7 @@ body.is-curtain-opened .section--hero .hero__summary {
   letter-spacing: 0.16em;
   color: rgba(255, 255, 255, 0.86);
   opacity: var(--photo-index-opacity);
-  transition: opacity 440ms ease;
+  transition: opacity 280ms ease-out;
 }
 
 .photo-slide figcaption {
@@ -1425,7 +1432,7 @@ body.is-curtain-opened .section--hero .hero__summary {
   text-transform: uppercase;
   color: var(--text-faint);
   opacity: var(--photo-caption-opacity);
-  transition: opacity 440ms ease;
+  transition: opacity 280ms ease-out;
 }
 
 .photo-carousel__meta {

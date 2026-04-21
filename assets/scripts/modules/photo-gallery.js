@@ -69,14 +69,19 @@ export function setupPhotoGallery() {
     viewport.appendChild(rail);
 
     const renderedSlides = Array.from(rail.querySelectorAll("[data-photo-slide]"));
-    const transitionDuration = prefersReducedMotion ? 0 : 760;
+    const transitionDuration = prefersReducedMotion ? 0 : 520;
     const autoplayDelay = 4400;
     const interactionResumeDelay = 5200;
+    const axisIntentDistance = 4;
+    const axisCommitDistance = 10;
+    const snapThresholdRatio = 0.11;
+    const flickProjection = 160;
 
     let slideWidth = 0;
     let renderedIndex = 1;
     let activeIndex = 0;
     let dragging = false;
+    let horizontalDragging = false;
     let animationLocked = false;
     let pointerId = null;
     let startX = 0;
@@ -86,6 +91,8 @@ export function setupPhotoGallery() {
     let axisLock = "";
     let autoTimer = 0;
     let resumeTimer = 0;
+    let pendingDragFrame = 0;
+    let pendingDragOffset = 0;
     let velocitySamples = [];
 
     function setTimer(callback, delay) {
@@ -130,13 +137,13 @@ export function setupPhotoGallery() {
 
     function setTrackOffset(offset, animated) {
       rail.style.transition = animated
-        ? `transform ${transitionDuration}ms cubic-bezier(0.22, 1, 0.36, 1)`
+        ? `transform ${transitionDuration}ms cubic-bezier(0.16, 1, 0.3, 1)`
         : "none";
       rail.style.transform = `translate3d(${offset}px, 0, 0)`;
-      syncSlideTransforms(offset);
+      syncSlideTransforms(offset, horizontalDragging);
     }
 
-    function syncSlideTransforms(offset) {
+    function syncSlideTransforms(offset, isInteractive = false) {
       if (!slideWidth) {
         return;
       }
@@ -147,14 +154,14 @@ export function setupPhotoGallery() {
         const distance = index - reference;
         const absDistance = Math.min(Math.abs(distance), 2.4);
         const direction = absDistance === 0 ? 0 : distance / Math.abs(distance);
-        const shift = direction * Math.min(absDistance * 18, 24);
-        const rotate = direction * Math.min(absDistance * 24, 32);
-        const scale = 1 - Math.min(absDistance * 0.08, 0.18);
-        const opacity = 1 - Math.min(absDistance * 0.38, 0.72);
-        const blur = Math.min(absDistance * 1.8, 3.8);
-        const shadow = 0.08 + Math.max(0, 0.2 - absDistance * 0.07);
-        const captionOpacity = 1 - Math.min(absDistance * 0.36, 0.58);
-        const indexOpacity = 0.88 - Math.min(absDistance * 0.24, 0.48);
+        const shift = direction * Math.min(absDistance * (isInteractive ? 12 : 18), isInteractive ? 16 : 24);
+        const rotate = direction * Math.min(absDistance * (isInteractive ? 10 : 24), isInteractive ? 12 : 32);
+        const scale = 1 - Math.min(absDistance * (isInteractive ? 0.05 : 0.08), isInteractive ? 0.1 : 0.18);
+        const opacity = 1 - Math.min(absDistance * (isInteractive ? 0.24 : 0.38), isInteractive ? 0.48 : 0.72);
+        const blur = Math.min(absDistance * (isInteractive ? 0.55 : 1.8), isInteractive ? 1.2 : 3.8);
+        const shadow = 0.08 + Math.max(0, (isInteractive ? 0.14 : 0.2) - absDistance * (isInteractive ? 0.05 : 0.07));
+        const captionOpacity = 1 - Math.min(absDistance * (isInteractive ? 0.28 : 0.36), isInteractive ? 0.5 : 0.58);
+        const indexOpacity = 0.88 - Math.min(absDistance * (isInteractive ? 0.18 : 0.24), isInteractive ? 0.38 : 0.48);
 
         slide.style.setProperty("--photo-shift", shift.toFixed(3));
         slide.style.setProperty("--photo-rotate", rotate.toFixed(3));
@@ -166,6 +173,39 @@ export function setupPhotoGallery() {
         slide.style.setProperty("--photo-index-opacity", Math.max(0.32, indexOpacity).toFixed(3));
         slide.style.zIndex = String(40 - Math.round(absDistance * 10));
         slide.classList.toggle("is-active", absDistance < 0.5);
+      });
+    }
+
+    function startHorizontalDrag() {
+      if (horizontalDragging) {
+        return;
+      }
+
+      horizontalDragging = true;
+      gallery.classList.add("is-dragging");
+      viewport.classList.add("is-grabbing");
+      rail.style.transition = "none";
+
+      if (pointerId !== null && viewport.setPointerCapture) {
+        viewport.setPointerCapture(pointerId);
+      }
+    }
+
+    function queueDragOffset(offset) {
+      pendingDragOffset = offset;
+
+      if (pendingDragFrame) {
+        return;
+      }
+
+      pendingDragFrame = window.requestAnimationFrame(() => {
+        pendingDragFrame = 0;
+
+        if (!horizontalDragging) {
+          return;
+        }
+
+        setTrackOffset(startOffset + pendingDragOffset, false);
       });
     }
 
@@ -252,7 +292,7 @@ export function setupPhotoGallery() {
       }
 
       const finalDragOffset = dragOffset;
-      const threshold = slideWidth * 0.16;
+      const threshold = Math.min(slideWidth * snapThresholdRatio, 52);
       const firstSample = velocitySamples[0] ?? {
         x: startX,
         time: performance.now()
@@ -260,9 +300,18 @@ export function setupPhotoGallery() {
       const lastSample = velocitySamples[velocitySamples.length - 1] ?? firstSample;
       const elapsed = Math.max(1, lastSample.time - firstSample.time);
       const velocity = (lastSample.x - firstSample.x) / elapsed;
-      const horizontalDrag = axisLock === "x";
+      const projectedOffset = finalDragOffset + velocity * flickProjection;
+      const horizontalDrag = horizontalDragging;
 
       dragging = false;
+      horizontalDragging = false;
+      pendingDragOffset = 0;
+
+      if (pendingDragFrame) {
+        window.cancelAnimationFrame(pendingDragFrame);
+        pendingDragFrame = 0;
+      }
+
       dragOffset = 0;
       axisLock = "";
       velocitySamples = [];
@@ -270,17 +319,16 @@ export function setupPhotoGallery() {
       viewport.classList.remove("is-grabbing");
 
       if (!horizontalDrag) {
-        setTrackOffset(-(renderedIndex * slideWidth), true);
         queueAutoLoop();
         return;
       }
 
-      if (finalDragOffset < -threshold || (finalDragOffset < -24 && velocity < -0.42)) {
+      if (projectedOffset < -threshold) {
         goToRenderedIndex(renderedIndex + 1);
         return;
       }
 
-      if (finalDragOffset > threshold || (finalDragOffset > 24 && velocity > 0.42)) {
+      if (projectedOffset > threshold) {
         goToRenderedIndex(renderedIndex - 1);
         return;
       }
@@ -298,11 +346,26 @@ export function setupPhotoGallery() {
       const deltaY = event.clientY - startY;
 
       if (!axisLock) {
-        if (Math.abs(deltaX) < 6 && Math.abs(deltaY) < 6) {
+        const absDeltaX = Math.abs(deltaX);
+        const absDeltaY = Math.abs(deltaY);
+
+        if (absDeltaX < axisIntentDistance && absDeltaY < axisIntentDistance) {
           return;
         }
 
-        axisLock = Math.abs(deltaX) > Math.abs(deltaY) ? "x" : "y";
+        if (absDeltaX >= axisIntentDistance && absDeltaX > absDeltaY * 1.02) {
+          axisLock = "x";
+        } else if (absDeltaY >= axisIntentDistance && absDeltaY > absDeltaX * 1.12) {
+          axisLock = "y";
+        } else if (absDeltaX >= axisCommitDistance || absDeltaY >= axisCommitDistance) {
+          axisLock = absDeltaX > absDeltaY ? "x" : "y";
+        } else {
+          return;
+        }
+      }
+
+      if (axisLock === "x") {
+        startHorizontalDrag();
       }
 
       if (axisLock !== "x") {
@@ -311,7 +374,7 @@ export function setupPhotoGallery() {
 
       event.preventDefault();
       dragOffset = clamp(deltaX, -slideWidth * 1.08, slideWidth * 1.08);
-      setTrackOffset(startOffset + dragOffset, false);
+      queueDragOffset(dragOffset);
 
       velocitySamples.push({
         x: event.clientX,
@@ -326,6 +389,10 @@ export function setupPhotoGallery() {
     function handlePointerEnd(event) {
       if (pointerId === null || event.pointerId !== pointerId) {
         return;
+      }
+
+      if (viewport.hasPointerCapture?.(event.pointerId)) {
+        viewport.releasePointerCapture(event.pointerId);
       }
 
       pointerId = null;
@@ -350,6 +417,7 @@ export function setupPhotoGallery() {
 
       pointerId = event.pointerId;
       dragging = true;
+      horizontalDragging = false;
       dragOffset = 0;
       startX = event.clientX;
       startY = event.clientY;
@@ -363,9 +431,6 @@ export function setupPhotoGallery() {
       ];
 
       stopAutoLoop();
-      gallery.classList.add("is-dragging");
-      viewport.classList.add("is-grabbing");
-      rail.style.transition = "none";
     });
 
     window.addEventListener("pointermove", handlePointerMove);
