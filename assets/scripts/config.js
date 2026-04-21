@@ -42,7 +42,7 @@ export const EXPERIENCE_CONFIG = {
   mapEmbedUrl: "https://maps.google.com/maps?hl=ja&q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&z=16&output=embed",
   mapExternalUrl: "https://maps.google.com/?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD",
   rsvpUrl: "https://brapla.com/bcs/guest/01KK7V9HQ9TXP1XWVWQJC10RHN/o29x?openExternalBrowser=1&t=1775548405",
-  rsvpDeadline: "2026年8月31日(月)",
+  rsvpDeadline: "2026年6月30日(火)",
   closingMessage: "皆さまにお会いできる日を心より楽しみにしております",
   schedule: [
     {
@@ -56,12 +56,12 @@ export const EXPERIENCE_CONFIG = {
       description: "スタッフがご案内いたします"
     },
     {
-      time: "12:30",
+      time: "12:00",
       title: "写真撮影",
       description: "集合写真とご親族でのお写真を予定しています"
     },
     {
-      time: "13:00",
+      time: "15:00",
       title: "会食開始",
       description: "会場を移して会食を行います"
     }
