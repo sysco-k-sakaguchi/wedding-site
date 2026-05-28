@@ -21,8 +21,12 @@ export const EXPERIENCE_CONFIG = {
     note: "到着後は境内のご案内に沿って受付までお進みください"
   },
   dining: {
-    name: "イタリアンダニエルズルーチェ",
-    note: "挙式後は会場を移して会食を予定しております"
+    name: "都ホテル 京都八条",
+    hall: "陽明殿（ようめいでん）",
+    note: "陽明殿（ようめいでん）",
+    venuePageUrl: "https://www.miyakohotels.ne.jp/kyoto-hachijo/banquet/youmeiden/",
+    mapEmbedUrl: "https://maps.google.com/maps?hl=ja&q=%E9%83%BD%E3%83%9B%E3%83%86%E3%83%AB%20%E4%BA%AC%E9%83%BD%E5%85%AB%E6%9D%A1%20%E9%99%BD%E6%98%8E%E6%AE%BF&z=16&output=embed",
+    mapExternalUrl: "https://maps.app.goo.gl/bGf6cdNNWKWx3iPX8?g_st=il"
   },
   chapters: {
     okinawa: {
@@ -31,7 +35,7 @@ export const EXPERIENCE_CONFIG = {
     },
     ceremony: {
       date: "10月12日",
-      note: "挙式・会食のご案内"
+      note: "挙式・披露宴のご案内"
     },
     friendsParty: {
       date: "11月29日",
@@ -61,9 +65,19 @@ export const EXPERIENCE_CONFIG = {
       description: "集合写真とご親族でのお写真を予定しています"
     },
     {
-      time: "15:00",
-      title: "会食開始",
-      description: "会場を移して会食を行います"
+      time: "14:00",
+      title: "会食受付",
+      description: "都ホテル 京都八条にて受付を承ります"
+    },
+    {
+      time: "14:30",
+      title: "乾杯",
+      description: "陽明殿にて会食を行います"
+    },
+    {
+      time: "17:00",
+      title: "おひらき",
+      description: "本日は誠にありがとうございました"
     }
   ]
 };

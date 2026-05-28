@@ -19,14 +19,19 @@ function renderSchedule(scheduleItems = []) {
       const time = document.createElement("time");
       const copy = document.createElement("div");
       const title = document.createElement("strong");
-      const description = document.createElement("p");
 
       time.dateTime = item.time;
       time.textContent = item.time;
       title.textContent = item.title;
-      description.textContent = item.description;
 
-      copy.append(title, description);
+      copy.append(title);
+
+      if (item.description) {
+        const description = document.createElement("p");
+        description.textContent = item.description;
+        copy.append(description);
+      }
+
       entry.append(time, copy);
       list.append(entry);
     });
@@ -47,6 +52,7 @@ export function bindContent(config) {
   fillText("[data-venue-note]", config.venue.note);
   fillText("[data-rsvp-deadline]", config.rsvpDeadline);
   fillText("[data-dining-name]", config.dining?.name ?? "");
+  fillText("[data-dining-hall]", config.dining?.hall ?? "");
   fillText("[data-dining-note]", config.dining?.note ?? "");
   fillText("[data-photo-share-note]", config.photoShareNote ?? "");
   fillText("[data-okinawa-date]", config.chapters?.okinawa?.date ?? "");
@@ -59,6 +65,9 @@ export function bindContent(config) {
 
   const mapEmbeds = document.querySelectorAll("[data-map-embed]");
   const mapLinks = document.querySelectorAll("[data-map-link]");
+  const diningMapEmbeds = document.querySelectorAll("[data-dining-map-embed]");
+  const diningMapLinks = document.querySelectorAll("[data-dining-map-link]");
+  const diningVenuePageLinks = document.querySelectorAll("[data-dining-venue-page-link]");
   const rsvpLinks = document.querySelectorAll("[data-rsvp-link]");
 
   mapEmbeds.forEach((mapEmbed) => {
@@ -67,6 +76,18 @@ export function bindContent(config) {
 
   mapLinks.forEach((link) => {
     link.href = config.mapExternalUrl;
+  });
+
+  diningMapEmbeds.forEach((mapEmbed) => {
+    mapEmbed.src = config.dining?.mapEmbedUrl ?? "";
+  });
+
+  diningMapLinks.forEach((link) => {
+    link.href = config.dining?.mapExternalUrl ?? "#";
+  });
+
+  diningVenuePageLinks.forEach((link) => {
+    link.href = config.dining?.venuePageUrl ?? "#";
   });
 
   rsvpLinks.forEach((link) => {
