@@ -1,0 +1,9 @@
+[
+  {"file":"01_beach_smile.jpeg","alt":"青い海を背景に笑顔で並ぶ新郎新婦","recommendedUse":"hero"},
+  {"file":"02_mirror_and_bouquet.jpeg","alt":"鏡に映る新郎新婦と手前のブーケ","recommendedUse":"gallery"},
+  {"file":"03_wide_beach_view.jpeg","alt":"広い青空と海を背景に砂浜に立つ新郎新婦","recommendedUse":"wideBanner"},
+  {"file":"04_chapel_portrait.jpeg","alt":"大きな窓のあるチャペルで並ぶ新郎新婦","recommendedUse":"gallery"},
+  {"file":"05_back_view_blue_sky.jpeg","alt":"青空の下で手をつなぐ新郎新婦の後ろ姿","recommendedUse":"sectionCover"},
+  {"file":"06_chapel_silhouette.jpeg","alt":"チャペルの窓辺で向かい合う新郎新婦のシルエット","recommendedUse":"ending"},
+  {"file":"07_beach_closeup.jpeg","alt":"海辺で寄り添う新郎新婦のクローズアップ","recommendedUse":"profile"}
+]

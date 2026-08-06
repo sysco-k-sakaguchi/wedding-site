@@ -22,7 +22,7 @@ export function setupCurtain({
   introDelay = 1750,
   preludeDuration = 620,
   openDuration = 2360,
-  revealDelay = 260,
+  holdDuration = 900,
   onComplete
 } = {}) {
   const overlay = document.querySelector("[data-curtain-overlay]");
@@ -37,8 +37,6 @@ export function setupCurtain({
   let completed = false;
   let animationFrameId = 0;
   let autoStartTimer = 0;
-  let queuedManualStart = false;
-  const holdUntil = performance.now() + introDelay;
   let currentState = {
     open: 0,
     reveal: 0,
@@ -115,14 +113,18 @@ export function setupCurtain({
   function hideOverlay() {
     document.body.classList.remove("is-curtain-active");
     document.body.classList.add("is-curtain-opened");
-    overlay.classList.add("is-complete");
 
-    const hideDelay = prefersReducedMotion ? 0 : Math.max(revealDelay, 520);
+    const holdDelay = prefersReducedMotion ? 0 : holdDuration;
+    const fadeDuration = prefersReducedMotion ? 0 : 560;
 
     window.setTimeout(() => {
-      overlay.hidden = true;
-      onComplete?.();
-    }, hideDelay);
+      overlay.classList.add("is-complete");
+
+      window.setTimeout(() => {
+        overlay.hidden = true;
+        onComplete?.();
+      }, fadeDuration);
+    }, holdDelay);
   }
 
   function startIdleMotion() {
@@ -182,7 +184,6 @@ export function setupCurtain({
     }
 
     completed = true;
-    queuedManualStart = false;
     window.clearTimeout(autoStartTimer);
     window.cancelAnimationFrame(animationFrameId);
 
@@ -219,7 +220,7 @@ export function setupCurtain({
 
     function settleMotion() {
       const settleStart = performance.now();
-      const settleDuration = 1520;
+      const settleDuration = 520;
 
       function settleFrame(now) {
         const progress = clamp((now - settleStart) / settleDuration);
@@ -305,13 +306,12 @@ export function setupCurtain({
     animationFrameId = window.requestAnimationFrame(step);
   }
 
-  function startSequence({ manual = false } = {}) {
+  function startSequence() {
     if (started || completed) {
       return;
     }
 
     started = true;
-    queuedManualStart = false;
     window.clearTimeout(autoStartTimer);
     window.cancelAnimationFrame(animationFrameId);
     stage.classList.remove("is-idling");
@@ -381,38 +381,24 @@ export function setupCurtain({
   });
 
   stage.addEventListener("click", () => {
-    if (performance.now() < holdUntil && !started) {
-      queuedManualStart = true;
-      return;
-    }
-
-    startSequence({
-      manual: true
-    });
+    startSequence();
   });
 
   stage.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      if (performance.now() < holdUntil && !started) {
-        queuedManualStart = true;
-        return;
-      }
-
-      startSequence({
-        manual: true
-      });
+      startSequence();
     }
   });
 
   applyState(currentState);
   startIdleMotion();
 
-  autoStartTimer = window.setTimeout(() => {
-    startSequence({
-      manual: queuedManualStart
-    });
-  }, introDelay);
+  if (prefersReducedMotion) {
+    startSequence();
+  } else {
+    autoStartTimer = window.setTimeout(startSequence, introDelay);
+  }
 
   return {
     finish: finishCurtain

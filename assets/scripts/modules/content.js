@@ -4,12 +4,14 @@ function fillText(selector, value) {
   });
 }
 
+function fillAttribute(selector, attribute, value) {
+  document.querySelectorAll(selector).forEach((element) => {
+    element.setAttribute(attribute, value);
+  });
+}
+
 function renderSchedule(scheduleItems = []) {
   const lists = document.querySelectorAll("[data-schedule-list]");
-
-  if (!lists.length) {
-    return;
-  }
 
   lists.forEach((list) => {
     list.innerHTML = "";
@@ -19,99 +21,156 @@ function renderSchedule(scheduleItems = []) {
       const time = document.createElement("time");
       const copy = document.createElement("div");
       const title = document.createElement("strong");
+      const description = document.createElement("p");
 
       time.dateTime = item.time;
       time.textContent = item.time;
       title.textContent = item.title;
+      description.textContent = item.description;
 
-      copy.append(title);
-
-      if (item.description) {
-        const description = document.createElement("p");
-        description.textContent = item.description;
-        copy.append(description);
-      }
-
+      copy.append(title, description);
       entry.append(time, copy);
       list.append(entry);
     });
   });
 }
 
-export function bindContent(config) {
-  fillText("[data-couple-names]", config.coupleNames);
-  fillText("[data-invitation-message]", config.invitationMessage);
-  fillText("[data-date-display]", config.weddingDateDisplay);
-  fillText("[data-wedding-time]", config.weddingTimeDisplay);
-  fillText("[data-date-year]", config.dateReveal.year);
-  fillText("[data-date-day]", config.dateReveal.day);
-  fillText("[data-date-weekday]", config.dateReveal.weekday);
-  fillText("[data-venue-name]", config.venue.name);
-  fillText("[data-venue-address]", config.venue.address);
-  fillText("[data-venue-access]", config.venue.access);
-  fillText("[data-venue-note]", config.venue.note);
-  fillText("[data-rsvp-deadline]", config.rsvpDeadline);
-  fillText("[data-dining-name]", config.dining?.name ?? "");
-  fillText("[data-dining-hall]", config.dining?.hall ?? "");
-  fillText("[data-dining-note]", config.dining?.note ?? "");
-  fillText("[data-photo-share-note]", config.photoShareNote ?? "");
-  fillText("[data-okinawa-date]", config.chapters?.okinawa?.date ?? "");
-  fillText("[data-okinawa-note]", config.chapters?.okinawa?.note ?? "");
-  fillText("[data-ceremony-date]", config.chapters?.ceremony?.date ?? "");
-  fillText("[data-ceremony-note]", config.chapters?.ceremony?.note ?? "");
-  fillText("[data-friends-party-date]", config.chapters?.friendsParty?.date ?? "");
-  fillText("[data-friends-party-note]", config.chapters?.friendsParty?.note ?? "");
-  fillText("[data-closing-message]", config.closingMessage ?? "");
+function localizePhotoLabels(copy, locale) {
+  document.querySelectorAll("[data-photo-image]").forEach((image) => {
+    if (image.closest("[data-photo-clone]")) {
+      return;
+    }
 
-  const mapEmbeds = document.querySelectorAll("[data-map-embed]");
-  const mapLinks = document.querySelectorAll("[data-map-link]");
-  const diningMapEmbeds = document.querySelectorAll("[data-dining-map-embed]");
-  const diningMapLinks = document.querySelectorAll("[data-dining-map-link]");
-  const diningVenuePageLinks = document.querySelectorAll("[data-dining-venue-page-link]");
-  const rsvpLinks = document.querySelectorAll("[data-rsvp-link]");
+    const localizedAlt = locale === "en"
+      ? image.dataset.photoAltEn
+      : image.dataset.photoAltJa;
 
-  mapEmbeds.forEach((mapEmbed) => {
-    mapEmbed.src = config.mapEmbedUrl;
+    if (localizedAlt) {
+      image.alt = localizedAlt;
+    }
+
+    const expandButton = image.closest("[data-photo-expand]");
+
+    if (expandButton) {
+      expandButton.setAttribute(
+        "aria-label",
+        locale === "en"
+          ? `Enlarge photo: ${image.alt}`
+          : `写真を拡大表示：${image.alt}`
+      );
+    }
   });
 
-  mapLinks.forEach((link) => {
-    link.href = config.mapExternalUrl;
+  document.querySelectorAll("[data-photo-dot] .sr-only").forEach((label, index) => {
+    label.textContent = `${copy.photoDotPrefix} ${index + 1}`;
   });
-
-  diningMapEmbeds.forEach((mapEmbed) => {
-    mapEmbed.src = config.dining?.mapEmbedUrl ?? "";
-  });
-
-  diningMapLinks.forEach((link) => {
-    link.href = config.dining?.mapExternalUrl ?? "#";
-  });
-
-  diningVenuePageLinks.forEach((link) => {
-    link.href = config.dining?.venuePageUrl ?? "#";
-  });
-
-  rsvpLinks.forEach((link) => {
-    link.href = config.rsvpUrl;
-  });
-
-  renderSchedule(config.schedule);
 }
 
-export function setupPlaceholderLinks({ placeholderValue }) {
-  const rsvpLinks = document.querySelectorAll("[data-rsvp-link]");
+function localizeStaticCopy(copy) {
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    const key = element.dataset.i18n;
 
-  if (!rsvpLinks.length) {
-    return;
+    if (copy[key] !== undefined) {
+      element.textContent = copy[key];
+    }
+  });
+
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    const key = element.dataset.i18nAriaLabel;
+
+    if (copy[key] !== undefined) {
+      element.setAttribute("aria-label", copy[key]);
+    }
+  });
+
+  document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+    const key = element.dataset.i18nTitle;
+
+    if (copy[key] !== undefined) {
+      element.title = copy[key];
+    }
+  });
+
+  document.querySelectorAll("[data-i18n-alt]").forEach((element) => {
+    const key = element.dataset.i18nAlt;
+
+    if (copy[key] !== undefined) {
+      element.alt = copy[key];
+    }
+  });
+}
+
+export function getLocaleConfig(config, locale) {
+  return config.locales[locale] ?? config.locales[config.defaultLocale];
+}
+
+export function bindContent(config, locale = config.defaultLocale) {
+  const localized = getLocaleConfig(config, locale);
+  const copy = localized.copy;
+  const metaDescription = document.querySelector('meta[name="description"]');
+
+  document.documentElement.lang = locale;
+  document.body.dataset.locale = locale;
+  document.title = localized.metaTitle;
+
+  if (metaDescription) {
+    metaDescription.content = localized.metaDescription;
   }
 
-  rsvpLinks.forEach((rsvpLink) => {
+  localizeStaticCopy(copy);
+  fillText("[data-couple-names]", localized.coupleNames);
+  fillText("[data-curtain-date]", config.shared.curtainDateDisplay);
+  fillText("[data-invitation-message]", localized.invitationMessage);
+  fillText("[data-date-display]", localized.weddingDateDisplay);
+  fillText("[data-wedding-time]", localized.weddingTimeDisplay);
+  fillText("[data-date-year]", localized.dateReveal.year);
+  fillText("[data-date-day]", localized.dateReveal.day);
+  fillText("[data-date-weekday]", localized.dateReveal.weekday);
+  fillText("[data-venue-name]", localized.venue.name);
+  fillText("[data-venue-address]", localized.venue.address);
+  fillText("[data-venue-access]", localized.venue.access);
+  fillText("[data-venue-note]", localized.venue.note);
+  fillText("[data-rsvp-deadline]", localized.rsvpDeadline);
+  fillText("[data-dining-name]", localized.dining.name);
+  fillText("[data-dining-note]", localized.dining.note);
+  fillText("[data-photo-share-note]", localized.photoShareNote);
+  fillText("[data-okinawa-date]", localized.chapters.okinawa.date);
+  fillText("[data-okinawa-note]", localized.chapters.okinawa.note);
+  fillText("[data-ceremony-date]", localized.chapters.ceremony.date);
+  fillText("[data-ceremony-note]", localized.chapters.ceremony.note);
+  fillText("[data-friends-party-date]", localized.chapters.friendsParty.date);
+  fillText("[data-friends-party-note]", localized.chapters.friendsParty.note);
+  fillText("[data-closing-message]", localized.closingMessage);
+  fillText("[data-language-switch-label]", copy.languageSwitchLabel);
+  fillAttribute("[data-language-switch]", "aria-label", copy.languageSwitchAria);
+
+  document.querySelectorAll("[data-map-embed]").forEach((mapEmbed) => {
+    mapEmbed.src = localized.mapEmbedUrl;
+  });
+
+  document.querySelectorAll("[data-map-link]").forEach((link) => {
+    link.href = config.shared.mapExternalUrl;
+  });
+
+  document.querySelectorAll("[data-rsvp-link]").forEach((link) => {
+    link.href = config.shared.rsvpUrl;
+  });
+
+  renderSchedule(localized.schedule);
+  localizePhotoLabels(copy, locale);
+
+  return localized;
+}
+
+export function setupPlaceholderLinks({ placeholderValue, getMessage }) {
+  document.querySelectorAll("[data-rsvp-link]").forEach((rsvpLink) => {
     rsvpLink.addEventListener("click", (event) => {
       if (rsvpLink.getAttribute("href") !== placeholderValue) {
         return;
       }
 
       event.preventDefault();
-      window.alert("RSVP の URL はまだ仮設定です\nassets/scripts/config.js の rsvpUrl を差し替えてください");
+      window.alert(getMessage());
     });
   });
 }

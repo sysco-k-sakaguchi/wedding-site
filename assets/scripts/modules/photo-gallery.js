@@ -22,6 +22,15 @@ function createClone(slide, logicalIndex) {
     element.removeAttribute("id");
   });
 
+  clone.querySelectorAll("img").forEach((image) => {
+    image.alt = "";
+  });
+
+  clone.querySelectorAll("[data-photo-expand]").forEach((trigger) => {
+    trigger.removeAttribute("data-photo-expand");
+    trigger.setAttribute("tabindex", "-1");
+  });
+
   return clone;
 }
 
@@ -42,6 +51,18 @@ export function setupPhotoGallery() {
 
     if (total) {
       total.textContent = formatIndex(sourceSlides.length);
+    }
+
+    if (gallery.hasAttribute("data-photo-gallery-static")) {
+      sourceSlides.forEach((slide, index) => {
+        slide.classList.toggle("is-active", index === 0);
+      });
+
+      if (current) {
+        current.textContent = formatIndex(1);
+      }
+
+      return;
     }
 
     if (sourceSlides.length === 1) {
@@ -272,16 +293,21 @@ export function setupPhotoGallery() {
 
     function goToLogicalIndex(targetIndex) {
       const desired = clamp(targetIndex, 0, sourceSlides.length - 1);
-      const forwardDistance = mod(desired - activeIndex, sourceSlides.length);
-      const backwardDistance = mod(activeIndex - desired, sourceSlides.length);
-      const nextRenderedIndex = forwardDistance <= backwardDistance
-        ? renderedIndex + forwardDistance
-        : renderedIndex - backwardDistance;
+      let nextRenderedIndex = desired + 1;
+
+      if (activeIndex === 0 && desired === sourceSlides.length - 1) {
+        nextRenderedIndex = 0;
+      } else if (activeIndex === sourceSlides.length - 1 && desired === 0) {
+        nextRenderedIndex = sourceSlides.length + 1;
+      }
 
       goToRenderedIndex(nextRenderedIndex);
     }
 
     function measure() {
+      animationLocked = false;
+      gallery.classList.remove("is-animating");
+      normalizeLoopEdges();
       slideWidth = viewport.getBoundingClientRect().width;
       jumpToRenderedIndex(renderedIndex);
     }
@@ -457,6 +483,13 @@ export function setupPhotoGallery() {
         return;
       }
 
+      animationLocked = false;
+      gallery.classList.remove("is-animating");
+      normalizeLoopEdges();
+      queueAutoLoop();
+    });
+
+    rail.addEventListener("transitioncancel", () => {
       animationLocked = false;
       gallery.classList.remove("is-animating");
       normalizeLoopEdges();

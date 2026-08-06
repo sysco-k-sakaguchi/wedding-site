@@ -6,7 +6,7 @@
   <title>Wedding Invitation</title>
   <meta
     name="description"
-    content="挙式と披露宴をはじめ各日のご案内を落ち着いた余白と色合いで見やすくまとめたウェディングサイトです"
+    content="挙式と会食をはじめ各日のご案内を落ち着いた余白と色合いで見やすくまとめたウェディングサイトです"
   >
   <meta name="theme-color" content="#ece3d6">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,6 +19,89 @@
 </head>
 <body>
   <main class="site-shell">
+    <div class="language-gate" data-language-gate hidden>
+      <div class="language-gate__ambient" aria-hidden="true"></div>
+      <section
+        class="language-gate__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="language-gate-title"
+        aria-describedby="language-gate-help"
+      >
+        <div class="language-gate__heading">
+          <p class="language-gate__kicker">Wedding Invitation</p>
+          <h2 id="language-gate-title">
+            <span lang="ja">招待状をお選びください</span>
+            <span lang="en">Choose your invitation</span>
+          </h2>
+          <p id="language-gate-help">
+            <span lang="ja">お好きな言語のカードを削ってお進みください</span>
+            <span lang="en">Scratch your preferred language to enter</span>
+          </p>
+        </div>
+
+        <div class="language-gate__cards" aria-label="言語の選択 / Language selection">
+          <button
+            class="scratch-card"
+            type="button"
+            data-scratch-card
+            data-language="ja"
+            aria-label="日本語版の招待状を削って開く"
+          >
+            <span class="scratch-card__ornament" aria-hidden="true"></span>
+            <span class="scratch-card__number" aria-hidden="true">01</span>
+            <span class="scratch-card__language">
+              <strong lang="ja">日本語</strong>
+              <small>Japanese</small>
+            </span>
+            <span class="scratch-card__zone" data-scratch-zone aria-hidden="true">
+              <span class="scratch-card__reveal">
+                <small>OPEN</small>
+                <strong>日本語</strong>
+                <span>→</span>
+              </span>
+              <canvas class="scratch-card__canvas" data-scratch-canvas></canvas>
+            </span>
+            <span class="scratch-card__instruction" lang="ja">削ってひらく</span>
+          </button>
+
+          <button
+            class="scratch-card"
+            type="button"
+            data-scratch-card
+            data-language="en"
+            lang="en"
+            aria-label="Scratch to open the English invitation"
+          >
+            <span class="scratch-card__ornament" aria-hidden="true"></span>
+            <span class="scratch-card__number" aria-hidden="true">02</span>
+            <span class="scratch-card__language">
+              <strong>English</strong>
+              <small lang="ja">英語</small>
+            </span>
+            <span class="scratch-card__zone" data-scratch-zone aria-hidden="true">
+              <span class="scratch-card__reveal">
+                <small>OPEN</small>
+                <strong>English</strong>
+                <span>→</span>
+              </span>
+              <canvas class="scratch-card__canvas" data-scratch-canvas></canvas>
+            </span>
+            <span class="scratch-card__instruction">Scratch to open</span>
+          </button>
+        </div>
+
+        <p class="language-gate__status" data-language-status aria-live="polite">
+          <span lang="ja">カードの中央を指で削れます</span>
+          <span lang="en">Use your finger or cursor</span>
+        </p>
+      </section>
+    </div>
+
+    <button class="language-switch" type="button" data-language-switch hidden>
+      <span data-language-switch-label>English</span>
+    </button>
+
     <div class="site-curtain" data-curtain-overlay hidden>
       <div class="site-curtain__ambient" aria-hidden="true"></div>
 
@@ -26,7 +109,7 @@
         class="curtain-stage"
         type="button"
         data-curtain-stage
-        aria-label="招待状をひらく"
+        aria-label="オープニングをすぐ再生 / Play opening now"
       >
         <span class="curtain-stage__backlight" aria-hidden="true"></span>
         <span class="curtain-stage__spotlight" aria-hidden="true"></span>
@@ -36,7 +119,7 @@
           <span class="curtain-stage__invitation-inner">
             <small>Wedding Invitation</small>
             <strong data-couple-names>Masato &amp; Haruka</strong>
-            <em data-date-display>2026年10月12日(月)</em>
+            <em data-curtain-date>2026 · 10 · 12</em>
           </span>
         </span>
 
@@ -61,6 +144,7 @@
       </button>
     </div>
 
+    <div class="site-content" data-site-content>
     <section class="section section--hero" id="top" aria-labelledby="hero-title">
 
       <div class="section__inner section__inner--wide">
@@ -69,11 +153,11 @@
           <p class="hero__subhead">Invitation</p>
           <h1 class="hero__title" id="hero-title" data-couple-names>Masato &amp; Haruka</h1>
           <p class="hero__date" data-date-display>2026年10月12日(月)</p>
-          <p class="hero__lead">このたび挙式と披露宴を執り行うこととなりました</p>
+          <p class="hero__lead" data-i18n="heroLead">このたび挙式と会食を執り行うこととなりました</p>
           <p class="hero__message" data-invitation-message>ご多用のところ恐れ入りますがご列席賜れますと幸いです</p>
         </div>
 
-        <div class="hero__summary" data-reveal aria-label="基本情報">
+        <div class="hero__summary" data-reveal aria-label="基本情報" data-i18n-aria-label="summaryAria">
           <div class="summary-row">
             <small>Date</small>
             <p data-date-display>2026年10月12日(月)</p>
@@ -98,21 +182,26 @@
               rel="noopener noreferrer"
               data-rsvp-link
             >
-              出欠回答はこちら
+              <span data-i18n="rsvpButton">出欠回答はこちら</span>
             </a>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section section--index" id="chapters" aria-label="各編への移動">
+    <section
+      class="section section--index"
+      id="chapters"
+      aria-label="各編への移動"
+      data-i18n-aria-label="chapterNavAria"
+    >
       <div class="section__inner section__inner--wide">
-        <nav class="chapter-index" aria-label="各編への移動">
+        <nav class="chapter-index" aria-label="各編への移動" data-i18n-aria-label="chapterNavAria">
           <a class="chapter-index__item" href="#okinawa" data-reveal>
             <span class="chapter-index__count">01</span>
             <div class="chapter-index__body">
               <span class="chapter-index__eyebrow">Travel</span>
-              <h3>沖縄編</h3>
+              <h3 data-i18n="okinawaTitle">沖縄編</h3>
               <span class="chapter-index__date" data-okinawa-date>7月7日</span>
             </div>
           </a>
@@ -121,7 +210,7 @@
             <span class="chapter-index__count">02</span>
             <div class="chapter-index__body">
               <span class="chapter-index__eyebrow">Ceremony</span>
-              <h3>挙式編</h3>
+              <h3 data-i18n="ceremonyTitle">挙式編</h3>
               <span class="chapter-index__date" data-ceremony-date>10月12日</span>
             </div>
           </a>
@@ -130,7 +219,7 @@
             <span class="chapter-index__count">03</span>
             <div class="chapter-index__body">
               <span class="chapter-index__eyebrow">Party</span>
-              <h3>友人の集い編</h3>
+              <h3 data-i18n="partyTitle">友人の集い編</h3>
               <span class="chapter-index__date" data-friends-party-date>11月29日</span>
             </div>
           </a>
@@ -143,10 +232,10 @@
         <article class="chapter" data-reveal>
           <div class="chapter__heading">
             <p class="section-tag">Travel</p>
-            <h2 id="okinawa-title">沖縄編</h2>
+            <h2 id="okinawa-title" data-i18n="okinawaTitle">沖縄編</h2>
           </div>
 
-          <div class="fact-list" aria-label="沖縄編の情報">
+          <div class="fact-list" aria-label="沖縄編の情報" data-i18n-aria-label="okinawaFactsAria">
             <div class="fact-list__item">
               <small>Date</small>
               <p data-okinawa-date>7月7日</p>
@@ -155,124 +244,234 @@
 
           <div class="photo-section" aria-labelledby="okinawa-photos-title">
             <div class="section-heading section-heading--left section-heading--compact">
-              <p class="section-tag">Photos</p>
-              <h3 id="okinawa-photos-title">旅の記録</h3>
+              <h3 id="okinawa-photos-title" data-i18n="photoTitle">PHOTOS</h3>
+              <p class="photo-section__note" data-i18n="photoReserved">
+                横にスワイプしてご覧ください · タップで拡大
+              </p>
             </div>
 
             <div class="photo-carousel" data-photo-gallery>
               <div
                 class="photo-carousel__viewport"
-                aria-label="沖縄編の写真スライダー"
-                tabindex="0"
+                aria-label="ウェディング写真ギャラリー"
+                data-i18n-aria-label="photoPlaceholderAria"
                 data-photo-gallery-track
+                tabindex="0"
               >
                 <figure class="photo-slide" id="okinawa-photo-01" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 1"
-                      loading="lazy"
+                  <div class="photo-slide__frame photo-slide__frame--beach-smile">
+                    <button
+                      class="photo-expand"
+                      type="button"
+                      data-photo-expand
+                      data-photo-full-src="images/01_beach_smile.jpeg"
                     >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcset="images/wedding/01_beach_smile-640.webp 640w, images/wedding/01_beach_smile-1280.webp 1280w"
+                          sizes="(min-width: 720px) 672px, calc(100vw - 48px)"
+                        >
+                        <img
+                          src="images/01_beach_smile.jpeg"
+                          alt="青い海を背景に笑顔で並ぶ新郎新婦"
+                          data-photo-image
+                          data-photo-alt-ja="青い海を背景に笑顔で並ぶ新郎新婦"
+                          data-photo-alt-en="A smiling bride and groom standing together with the blue ocean behind them"
+                          width="1536"
+                          height="1024"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      </picture>
+                    </button>
                     <span class="photo-slide__index" aria-hidden="true">01</span>
                   </div>
                 </figure>
 
                 <figure class="photo-slide" id="okinawa-photo-02" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 2"
-                      loading="lazy"
+                  <div class="photo-slide__frame photo-slide__frame--mirror">
+                    <button
+                      class="photo-expand"
+                      type="button"
+                      data-photo-expand
+                      data-photo-full-src="images/02_mirror_and_bouquet.jpeg"
                     >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcset="images/wedding/02_mirror_and_bouquet-640.webp 640w, images/wedding/02_mirror_and_bouquet-1280.webp 1280w"
+                          sizes="(min-width: 720px) 672px, calc(100vw - 48px)"
+                        >
+                        <img
+                          src="images/02_mirror_and_bouquet.jpeg"
+                          alt="鏡に映る新郎新婦と手前のブーケ"
+                          data-photo-image
+                          data-photo-alt-ja="鏡に映る新郎新婦と手前のブーケ"
+                          data-photo-alt-en="The bride and groom reflected in a mirror beside a bouquet in the foreground"
+                          width="1536"
+                          height="1024"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      </picture>
+                    </button>
                     <span class="photo-slide__index" aria-hidden="true">02</span>
                   </div>
                 </figure>
 
                 <figure class="photo-slide" id="okinawa-photo-03" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 3"
-                      loading="lazy"
+                  <div class="photo-slide__frame photo-slide__frame--wide-beach">
+                    <button
+                      class="photo-expand"
+                      type="button"
+                      data-photo-expand
+                      data-photo-full-src="images/03_wide_beach_view.jpeg"
                     >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcset="images/wedding/03_wide_beach_view-640.webp 640w, images/wedding/03_wide_beach_view-1280.webp 1280w"
+                          sizes="(min-width: 720px) 672px, calc(100vw - 48px)"
+                        >
+                        <img
+                          src="images/03_wide_beach_view.jpeg"
+                          alt="広い青空と海を背景に砂浜に立つ新郎新婦"
+                          data-photo-image
+                          data-photo-alt-ja="広い青空と海を背景に砂浜に立つ新郎新婦"
+                          data-photo-alt-en="The bride and groom standing on the beach beneath a wide blue sky and ocean"
+                          width="3600"
+                          height="2400"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      </picture>
+                    </button>
                     <span class="photo-slide__index" aria-hidden="true">03</span>
                   </div>
                 </figure>
 
                 <figure class="photo-slide" id="okinawa-photo-04" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 4"
-                      loading="lazy"
+                  <div class="photo-slide__frame photo-slide__frame--portrait">
+                    <button
+                      class="photo-expand"
+                      type="button"
+                      data-photo-expand
+                      data-photo-full-src="images/04_chapel_portrait.jpeg"
                     >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcset="images/wedding/04_chapel_portrait-480.webp 480w, images/wedding/04_chapel_portrait-960.webp 960w"
+                          sizes="(min-width: 720px) 672px, calc(100vw - 48px)"
+                        >
+                        <img
+                          src="images/04_chapel_portrait.jpeg"
+                          alt="大きな窓のあるチャペルで並ぶ新郎新婦"
+                          data-photo-image
+                          data-photo-alt-ja="大きな窓のあるチャペルで並ぶ新郎新婦"
+                          data-photo-alt-en="The bride and groom standing together in a chapel with large windows"
+                          width="1024"
+                          height="1536"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      </picture>
+                    </button>
                     <span class="photo-slide__index" aria-hidden="true">04</span>
                   </div>
                 </figure>
 
                 <figure class="photo-slide" id="okinawa-photo-05" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 5"
-                      loading="lazy"
+                  <div class="photo-slide__frame photo-slide__frame--back-view">
+                    <button
+                      class="photo-expand"
+                      type="button"
+                      data-photo-expand
+                      data-photo-full-src="images/05_back_view_blue_sky.jpeg"
                     >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcset="images/wedding/05_back_view_blue_sky-640.webp 640w, images/wedding/05_back_view_blue_sky-1280.webp 1280w"
+                          sizes="(min-width: 720px) 672px, calc(100vw - 48px)"
+                        >
+                        <img
+                          src="images/05_back_view_blue_sky.jpeg"
+                          alt="青空の下で手をつなぐ新郎新婦の後ろ姿"
+                          data-photo-image
+                          data-photo-alt-ja="青空の下で手をつなぐ新郎新婦の後ろ姿"
+                          data-photo-alt-en="The bride and groom holding hands from behind beneath a blue sky"
+                          width="3600"
+                          height="2400"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      </picture>
+                    </button>
                     <span class="photo-slide__index" aria-hidden="true">05</span>
                   </div>
                 </figure>
 
                 <figure class="photo-slide" id="okinawa-photo-06" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 6"
-                      loading="lazy"
+                  <div class="photo-slide__frame photo-slide__frame--silhouette">
+                    <button
+                      class="photo-expand"
+                      type="button"
+                      data-photo-expand
+                      data-photo-full-src="images/06_chapel_silhouette.jpeg"
                     >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcset="images/wedding/06_chapel_silhouette-640.webp 640w, images/wedding/06_chapel_silhouette-1280.webp 1280w"
+                          sizes="(min-width: 720px) 672px, calc(100vw - 48px)"
+                        >
+                        <img
+                          src="images/06_chapel_silhouette.jpeg"
+                          alt="チャペルの窓辺で向かい合う新郎新婦のシルエット"
+                          data-photo-image
+                          data-photo-alt-ja="チャペルの窓辺で向かい合う新郎新婦のシルエット"
+                          data-photo-alt-en="Silhouettes of the bride and groom facing each other by the chapel windows"
+                          width="3600"
+                          height="2400"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      </picture>
+                    </button>
                     <span class="photo-slide__index" aria-hidden="true">06</span>
                   </div>
                 </figure>
 
                 <figure class="photo-slide" id="okinawa-photo-07" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 7"
-                      loading="lazy"
+                  <div class="photo-slide__frame photo-slide__frame--closeup">
+                    <button
+                      class="photo-expand"
+                      type="button"
+                      data-photo-expand
+                      data-photo-full-src="images/07_beach_closeup.jpeg"
                     >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcset="images/wedding/07_beach_closeup-640.webp 640w, images/wedding/07_beach_closeup-1280.webp 1280w"
+                          sizes="(min-width: 720px) 672px, calc(100vw - 48px)"
+                        >
+                        <img
+                          src="images/07_beach_closeup.jpeg"
+                          alt="海辺で寄り添う新郎新婦のクローズアップ"
+                          data-photo-image
+                          data-photo-alt-ja="海辺で寄り添う新郎新婦のクローズアップ"
+                          data-photo-alt-en="A close-up of the bride and groom together by the ocean"
+                          width="1536"
+                          height="1024"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      </picture>
+                    </button>
                     <span class="photo-slide__index" aria-hidden="true">07</span>
-                  </div>
-                </figure>
-
-                <figure class="photo-slide" id="okinawa-photo-08" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 8"
-                      loading="lazy"
-                    >
-                    <span class="photo-slide__index" aria-hidden="true">08</span>
-                  </div>
-                </figure>
-
-                <figure class="photo-slide" id="okinawa-photo-09" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 9"
-                      loading="lazy"
-                    >
-                    <span class="photo-slide__index" aria-hidden="true">09</span>
-                  </div>
-                </figure>
-
-                <figure class="photo-slide" id="okinawa-photo-10" data-photo-slide>
-                  <div class="photo-slide__frame">
-                    <img
-                      src="assets/images/okinawa-photo-placeholder.svg"
-                      alt="沖縄編の写真プレースホルダー 10"
-                      loading="lazy"
-                    >
-                    <span class="photo-slide__index" aria-hidden="true">10</span>
                   </div>
                 </figure>
               </div>
@@ -281,10 +480,14 @@
                 <p class="photo-carousel__counter">
                   <span data-photo-current>01</span>
                   <span>/</span>
-                  <span data-photo-total>10</span>
+                  <span data-photo-total>07</span>
                 </p>
 
-                <div class="photo-carousel__dots" aria-label="写真の位置">
+                <div
+                  class="photo-carousel__dots"
+                  aria-label="写真の位置"
+                  data-i18n-aria-label="photoDotsAria"
+                >
                   <a class="photo-carousel__dot is-active" href="#okinawa-photo-01" data-photo-dot aria-current="true">
                     <span class="sr-only">写真 1</span>
                   </a>
@@ -306,15 +509,6 @@
                   <a class="photo-carousel__dot" href="#okinawa-photo-07" data-photo-dot>
                     <span class="sr-only">写真 7</span>
                   </a>
-                  <a class="photo-carousel__dot" href="#okinawa-photo-08" data-photo-dot>
-                    <span class="sr-only">写真 8</span>
-                  </a>
-                  <a class="photo-carousel__dot" href="#okinawa-photo-09" data-photo-dot>
-                    <span class="sr-only">写真 9</span>
-                  </a>
-                  <a class="photo-carousel__dot" href="#okinawa-photo-10" data-photo-dot>
-                    <span class="sr-only">写真 10</span>
-                  </a>
                 </div>
               </div>
             </div>
@@ -328,10 +522,10 @@
         <article class="chapter chapter--ceremony">
           <div class="chapter__heading">
             <p class="section-tag">Ceremony</p>
-            <h2 id="ceremony-title">挙式編</h2>
+            <h2 id="ceremony-title" data-i18n="ceremonyTitle">挙式編</h2>
           </div>
 
-          <div class="fact-list" aria-label="挙式の基本情報">
+          <div class="fact-list" aria-label="挙式の基本情報" data-i18n-aria-label="ceremonyFactsAria">
             <div class="fact-list__item">
               <small>Date</small>
               <p data-date-display>2026年10月12日(月)</p>
@@ -350,8 +544,8 @@
 
             <div class="fact-list__item">
               <small>Dining</small>
-              <p data-dining-name>都ホテル 京都八条</p>
-              <p class="fact-list__sub" data-dining-note>陽明殿（ようめいでん）</p>
+              <p data-dining-name>イタリアンダニエルズルーチェ</p>
+              <p class="fact-list__sub" data-dining-note>挙式後は会場を移して会食を予定しております</p>
             </div>
           </div>
 
@@ -359,7 +553,7 @@
             <div class="ceremony-guide__copy">
               <div class="section-heading section-heading--left">
                 <p class="section-tag">Access</p>
-                <h3>会場について</h3>
+                <h3 data-i18n="venueHeading">会場について</h3>
               </div>
 
               <p class="ceremony-guide__venue" data-venue-name>京都・梨木神社</p>
@@ -371,24 +565,23 @@
                 到着後は境内のご案内に沿って受付までお進みください
               </p>
 
-              <a
-                class="text-link"
-                href="https://maps.google.com/?q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD"
-                target="_blank"
-                rel="noopener noreferrer"
-                data-map-link
-              >
-                Google Mapsで見る
+              <a class="text-link" href="#" target="_blank" rel="noopener noreferrer" data-map-link>
+                <span data-i18n="mapLink">Google Mapsで見る</span>
               </a>
             </div>
 
-            <div class="ceremony-guide__map" aria-label="挙式会場の地図">
+            <div
+              class="ceremony-guide__map"
+              aria-label="挙式会場の地図"
+              data-i18n-aria-label="mapAria"
+            >
               <div class="map-frame">
                 <iframe
                   title="挙式会場地図"
+                  data-i18n-title="mapTitle"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"
-                  src="https://maps.google.com/maps?hl=ja&amp;q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&amp;z=16&amp;output=embed"
+                  src=""
                   data-map-embed
                 ></iframe>
               </div>
@@ -396,53 +589,10 @@
           </div>
 
           <div class="ceremony-detail-flow">
-            <section class="section-block" aria-labelledby="dining-title">
-              <div class="section-heading section-heading--left">
-                <p class="section-tag">Dining</p>
-                <h3 id="dining-title">食事会場</h3>
-              </div>
-
-              <div class="info-list">
-                <div class="info-list__item">
-                  <small>Venue</small>
-                  <p data-dining-name>都ホテル 京都八条</p>
-                  <p class="muted" data-dining-hall>陽明殿（ようめいでん）</p>
-                  <a
-                    class="text-link"
-                    href="https://www.miyakohotels.ne.jp/kyoto-hachijo/banquet/youmeiden/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-dining-venue-page-link
-                  >
-                    会場ページを見る
-                  </a>
-                  <a
-                    class="text-link"
-                    href="https://maps.app.goo.gl/bGf6cdNNWKWx3iPX8?g_st=il"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-dining-map-link
-                  >
-                    Google Mapsで見る
-                  </a>
-                </div>
-              </div>
-
-              <div class="map-frame">
-                <iframe
-                  title="食事会場地図"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  src="https://maps.google.com/maps?hl=ja&amp;q=%E9%83%BD%E3%83%9B%E3%83%86%E3%83%AB%20%E4%BA%AC%E9%83%BD%E5%85%AB%E6%9D%A1%20%E9%99%BD%E6%98%8E%E6%AE%BF&amp;z=16&amp;output=embed"
-                  data-dining-map-embed
-                ></iframe>
-              </div>
-            </section>
-
             <section class="section-block" aria-labelledby="schedule-title">
               <div class="section-heading section-heading--left">
                 <p class="section-tag">Schedule</p>
-                <h3 id="schedule-title">当日の流れ</h3>
+                <h3 id="schedule-title" data-i18n="scheduleHeading">当日の流れ</h3>
               </div>
               <ol class="chapter-timeline" data-schedule-list></ol>
             </section>
@@ -450,14 +600,18 @@
             <section class="section-block" aria-labelledby="info-title">
               <div class="section-heading section-heading--left">
                 <p class="section-tag">Information</p>
-                <h3 id="info-title">ご案内</h3>
+                <h3 id="info-title" data-i18n="informationHeading">ご案内</h3>
               </div>
 
               <div class="info-list">
                 <div class="info-list__item info-list__item--cta">
                   <div class="rsvp-card">
                     <small>RSVP</small>
-                    <p>ご返信は <span data-rsvp-deadline>2026年6月30日(火)</span> までにお願いいたします</p>
+                    <p>
+                      <span data-i18n="rsvpDeadlinePrefix">ご返信は</span>
+                      <span data-rsvp-deadline>2026年6月30日(火)</span>
+                      <span data-i18n="rsvpDeadlineSuffix">までにお願いいたします</span>
+                    </p>
                     <a
                       class="button-link button-link--primary"
                       href="https://brapla.com/bcs/guest/01KK7V9HQ9TXP1XWVWQJC10RHN/o29x?openExternalBrowser=1&amp;t=1775548405"
@@ -465,7 +619,7 @@
                       rel="noopener noreferrer"
                       data-rsvp-link
                     >
-                      出欠回答はこちら
+                      <span data-i18n="rsvpButton">出欠回答はこちら</span>
                     </a>
                   </div>
                 </div>
@@ -486,11 +640,11 @@
         <article class="chapter" data-reveal>
           <div class="chapter__heading">
             <p class="section-tag">Party</p>
-            <h2 id="party-title">友人の集い編</h2>
+            <h2 id="party-title" data-i18n="partyTitle">友人の集い編</h2>
             <p class="chapter__lead" data-friends-party-note>詳細は決まり次第ご案内します</p>
           </div>
 
-          <div class="fact-list" aria-label="友人の集い編の情報">
+          <div class="fact-list" aria-label="友人の集い編の情報" data-i18n-aria-label="partyFactsAria">
             <div class="fact-list__item">
               <small>Date</small>
               <p data-friends-party-date>11月29日</p>
@@ -509,11 +663,16 @@
           </p>
           <p class="site-footer__names" data-couple-names>Masato &amp; Haruka</p>
 
-          <div class="site-footer__credit" aria-label="サイト作成者情報">
+          <div
+            class="site-footer__credit"
+            aria-label="サイト作成者情報"
+            data-i18n-aria-label="creditAria"
+          >
             <div class="site-footer__credit-photo">
               <img
                 src="images/自画像.jpeg"
                 alt="サイト作成者 Keiichi Sakaguchi の写真"
+                data-i18n-alt="creditPhotoAlt"
                 width="1442"
                 height="1510"
                 loading="lazy"
@@ -525,6 +684,27 @@
         </div>
       </div>
     </footer>
+
+    <dialog
+      class="photo-lightbox"
+      data-photo-lightbox
+      aria-label="写真の拡大表示"
+      data-i18n-aria-label="photoLightboxAria"
+    >
+      <div class="photo-lightbox__content">
+        <button
+          class="photo-lightbox__close"
+          type="button"
+          data-photo-lightbox-close
+          aria-label="拡大表示を閉じる"
+          data-i18n-aria-label="photoCloseAria"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+        <img data-photo-lightbox-image alt="">
+      </div>
+    </dialog>
+    </div>
   </main>
 
   <script type="module" src="assets/scripts/app.js"></script>

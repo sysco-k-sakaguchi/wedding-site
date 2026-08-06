@@ -1,20 +1,36 @@
-function drawScratchSurface(context, width, height) {
-  context.clearRect(0, 0, width, height);
+function clamp(value, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function createSeededRandom(seed) {
+  let state = seed >>> 0;
+
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+}
+
+function drawScratchSurface(context, width, height, seed = 1) {
   const centerX = width / 2;
   const centerY = height / 2;
   const radius = Math.min(width, height) * 0.49;
+  const random = createSeededRandom(seed);
   const base = context.createRadialGradient(
     width * 0.28,
-    height * 0.22,
-    width * 0.06,
+    height * 0.2,
+    width * 0.04,
     centerX,
     centerY,
     radius
   );
-  base.addColorStop(0, "#f9e9bf");
-  base.addColorStop(0.34, "#d7ab5d");
-  base.addColorStop(0.68, "#9a6d2f");
-  base.addColorStop(1, "#77501d");
+
+  context.clearRect(0, 0, width, height);
+  base.addColorStop(0, "#fff4d8");
+  base.addColorStop(0.24, "#e4c47f");
+  base.addColorStop(0.58, "#b88a3f");
+  base.addColorStop(0.82, "#8f6428");
+  base.addColorStop(1, "#6f4819");
 
   context.save();
   context.beginPath();
@@ -23,61 +39,74 @@ function drawScratchSurface(context, width, height) {
   context.fillStyle = base;
   context.fillRect(0, 0, width, height);
 
-  const highlight = context.createRadialGradient(
-    width * 0.28,
-    height * 0.24,
-    width * 0.02,
-    width * 0.34,
-    height * 0.28,
-    width * 0.54
-  );
-  highlight.addColorStop(0, "rgba(255, 252, 241, 0.95)");
-  highlight.addColorStop(0.22, "rgba(255, 242, 206, 0.52)");
-  highlight.addColorStop(1, "rgba(255, 226, 175, 0)");
+  const sheen = context.createLinearGradient(0, 0, width, height);
+  sheen.addColorStop(0, "rgba(255, 255, 255, 0.38)");
+  sheen.addColorStop(0.32, "rgba(255, 249, 226, 0.04)");
+  sheen.addColorStop(0.56, "rgba(91, 54, 13, 0.16)");
+  sheen.addColorStop(0.78, "rgba(255, 244, 210, 0.18)");
+  sheen.addColorStop(1, "rgba(75, 43, 10, 0.2)");
+  context.fillStyle = sheen;
+  context.fillRect(0, 0, width, height);
 
-  context.fillStyle = highlight;
-  context.beginPath();
-  context.arc(centerX, centerY, radius * 0.98, 0, Math.PI * 2);
-  context.fill();
+  for (let index = 0; index < 110; index += 1) {
+    const y = random() * height;
+    const alpha = 0.025 + random() * 0.07;
 
-  context.save();
-  context.strokeStyle = "rgba(255, 243, 213, 0.08)";
-
-  for (let index = 0; index < 120; index += 1) {
-    const y = (height / 120) * index;
-
-    context.lineWidth = 0.5 + (index % 4) * 0.22;
+    context.strokeStyle = `rgba(255, 250, 231, ${alpha})`;
+    context.lineWidth = 0.4 + random() * 0.8;
     context.beginPath();
-    context.moveTo(-10, y);
+    context.moveTo(-8, y);
     context.bezierCurveTo(
-      width * 0.22,
-      y + Math.sin(index * 0.34) * 2,
-      width * 0.74,
-      y - Math.cos(index * 0.3) * 2,
-      width + 10,
-      y + Math.sin(index * 0.18) * 1.5
+      width * 0.28,
+      y + (random() - 0.5) * 5,
+      width * 0.72,
+      y + (random() - 0.5) * 5,
+      width + 8,
+      y + (random() - 0.5) * 3
     );
     context.stroke();
   }
 
-  context.restore();
+  for (let index = 0; index < 92; index += 1) {
+    const angle = random() * Math.PI * 2;
+    const distance = Math.sqrt(random()) * radius * 0.92;
+    const dotRadius = 0.35 + random() * 1.1;
 
-  for (let index = 0; index < 84; index += 1) {
-    const alpha = 0.03 + Math.random() * 0.05;
-    const sparkRadius = 0.4 + Math.random() * 1.2;
-
-    context.fillStyle = `rgba(255, 248, 232, ${alpha})`;
+    context.fillStyle = `rgba(255, 250, 235, ${0.04 + random() * 0.12})`;
     context.beginPath();
-    context.arc(Math.random() * width, Math.random() * height, sparkRadius, 0, Math.PI * 2);
+    context.arc(
+      centerX + Math.cos(angle) * distance,
+      centerY + Math.sin(angle) * distance,
+      dotRadius,
+      0,
+      Math.PI * 2
+    );
     context.fill();
   }
 
-  context.lineWidth = Math.max(1.8, width * 0.015);
-  context.strokeStyle = "rgba(255, 241, 207, 0.22)";
+  context.lineWidth = Math.max(1.5, width * 0.014);
+  context.strokeStyle = "rgba(255, 245, 214, 0.38)";
   context.beginPath();
-  context.arc(centerX, centerY, radius * 0.91, 0, Math.PI * 2);
+  context.arc(centerX, centerY, radius * 0.9, 0, Math.PI * 2);
   context.stroke();
 
+  context.lineWidth = Math.max(0.8, width * 0.006);
+  context.strokeStyle = "rgba(87, 49, 10, 0.24)";
+  context.beginPath();
+  context.arc(centerX, centerY, radius * 0.82, 0, Math.PI * 2);
+  context.stroke();
+
+  const headlineSize = clamp(width * 0.105, 12, 21);
+  const detailSize = clamp(width * 0.052, 8, 11);
+
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillStyle = "rgba(75, 43, 10, 0.78)";
+  context.font = `600 ${headlineSize}px "Zen Kaku Gothic New", sans-serif`;
+  context.fillText("SCRATCH", centerX, centerY - height * 0.02);
+  context.fillStyle = "rgba(75, 43, 10, 0.6)";
+  context.font = `500 ${detailSize}px "Zen Kaku Gothic New", sans-serif`;
+  context.fillText("RUB TO OPEN", centerX, centerY + height * 0.115);
   context.restore();
 }
 
@@ -85,8 +114,8 @@ function getPointFromEvent(event, canvas) {
   const rect = canvas.getBoundingClientRect();
 
   return {
-    x: event.clientX - rect.left,
-    y: event.clientY - rect.top
+    x: clamp(event.clientX - rect.left, 0, rect.width),
+    y: clamp(event.clientY - rect.top, 0, rect.height)
   };
 }
 
@@ -94,10 +123,10 @@ function eraseStamp(context, point, size) {
   context.save();
   context.globalCompositeOperation = "destination-out";
 
-  for (let index = 0; index < 2; index += 1) {
-    const radius = size * (0.58 + Math.random() * 0.18);
-    const offsetX = (Math.random() - 0.5) * size * 0.28;
-    const offsetY = (Math.random() - 0.5) * size * 0.28;
+  for (let index = 0; index < 3; index += 1) {
+    const radius = size * (0.46 + Math.random() * 0.2);
+    const offsetX = (Math.random() - 0.5) * size * 0.26;
+    const offsetY = (Math.random() - 0.5) * size * 0.26;
 
     context.beginPath();
     context.arc(point.x + offsetX, point.y + offsetY, radius, 0, Math.PI * 2);
@@ -109,7 +138,7 @@ function eraseStamp(context, point, size) {
 
 function eraseStroke(context, from, to, size) {
   const distance = Math.hypot(to.x - from.x, to.y - from.y);
-  const step = Math.max(2, size * 0.24);
+  const step = Math.max(2, size * 0.2);
 
   for (let offset = 0; offset <= distance; offset += step) {
     const progress = distance === 0 ? 0 : offset / distance;
@@ -133,10 +162,9 @@ function getClearedRatio(context, canvas) {
   const centerY = height / 2;
   const radius = Math.min(width, height) * 0.46;
   const radiusSquared = radius * radius;
-  const step = Math.max(4, Math.round(Math.min(width, height) / 76));
-  const alphaThreshold = 96;
-  let clearedPixels = 0;
-  let sampledPixels = 0;
+  const step = Math.max(4, Math.round(Math.min(width, height) / 72));
+  let cleared = 0;
+  let sampled = 0;
 
   for (let y = 0; y < height; y += step) {
     for (let x = 0; x < width; x += step) {
@@ -147,296 +175,417 @@ function getClearedRatio(context, canvas) {
         continue;
       }
 
-      sampledPixels += 1;
+      sampled += 1;
 
-      if (pixels[(y * width + x) * 4 + 3] <= alphaThreshold) {
-        clearedPixels += 1;
+      if (pixels[(y * width + x) * 4 + 3] <= 96) {
+        cleared += 1;
       }
     }
   }
 
-  return sampledPixels === 0 ? 0 : clearedPixels / sampledPixels;
+  return sampled === 0 ? 0 : cleared / sampled;
 }
 
-function setTilt(seal, point, bounds) {
-  if (!seal || !bounds) {
-    return;
-  }
+function setupCard(card, {
+  cardIndex,
+  completeRatio,
+  brushSize,
+  gestureDistance,
+  onProgress,
+  onComplete,
+  isLocked
+}) {
+  const canvas = card.querySelector("[data-scratch-canvas]");
+  const zone = card.querySelector("[data-scratch-zone]");
+  const context = canvas?.getContext("2d", { willReadFrequently: true });
 
-  const centerX = bounds.width / 2;
-  const centerY = bounds.height / 2;
-  const tiltX = ((point.x - centerX) / centerX) * 7;
-  const tiltY = ((centerY - point.y) / centerY) * 7;
-
-  seal.style.setProperty("--tilt-x", tiltX.toFixed(2));
-  seal.style.setProperty("--tilt-y", tiltY.toFixed(2));
-}
-
-function resetTilt(seal) {
-  if (!seal) {
-    return;
-  }
-
-  seal.style.setProperty("--tilt-x", "0");
-  seal.style.setProperty("--tilt-y", "0");
-}
-
-export function setupScratch({
-  completeRatio = 0.46,
-  brushSize = 18,
-  gestureDistance = 170,
-  revealDelay = 360,
-  onReveal
-} = {}) {
-  const seal = document.querySelector("[data-scratch-seal]");
-  const canvas = document.querySelector("[data-scratch-canvas]");
-  const status = document.querySelector("[data-scratch-status]");
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (!seal || !canvas) {
-    return;
-  }
-
-  const context = canvas.getContext("2d", { willReadFrequently: true });
-
-  if (!context) {
-    return;
+  if (!canvas || !zone || !context) {
+    return null;
   }
 
   let drawing = false;
-  let revealed = false;
-  let queued = false;
-  let totalDistance = 0;
-  let sampleCounter = 0;
-  let clearedRatio = 0;
+  let complete = false;
+  let pointerId = null;
   let lastPoint = null;
-  const assistRatio = Math.max(completeRatio - 0.06, completeRatio * 0.86);
+  let totalDistance = 0;
+  let clearedRatio = 0;
+  let sampleCounter = 0;
+  let cssWidth = 0;
+  let cssHeight = 0;
 
-  function setProgressState(progress) {
-    seal.style.setProperty("--scratch-progress", progress.toFixed(4));
-    seal.classList.toggle("is-nearing", progress >= 0.72 && !revealed && !queued);
-    seal.classList.toggle("is-ready", progress >= 0.9 && !revealed && !queued);
-  }
-
-  function getProgress() {
+  function progressValue() {
     const distanceProgress = Math.min(totalDistance / gestureDistance, 1);
-    const scratchProgress = Math.min(clearedRatio / completeRatio, 1);
+    const areaProgress = Math.min(clearedRatio / completeRatio, 1);
 
-    return {
-      distanceProgress,
-      scratchProgress,
-      combinedProgress: Math.min(scratchProgress * 0.84 + distanceProgress * 0.16, 1)
-    };
+    return Math.min(areaProgress * 0.88 + distanceProgress * 0.12, 1);
   }
 
-  function refreshStatus(force = false) {
-    if (!status || revealed) {
+  function updateProgress() {
+    const progress = progressValue();
+
+    card.style.setProperty("--scratch-progress", progress.toFixed(4));
+    card.classList.toggle("is-scratching", progress > 0.04 && !complete);
+    card.classList.toggle("is-nearing", progress > 0.72 && !complete);
+    onProgress(progress, card.dataset.language);
+  }
+
+  function checkCompletion(force = false) {
+    if (complete || isLocked()) {
       return;
     }
 
-    const { combinedProgress } = getProgress();
+    if (force || sampleCounter % 3 === 0) {
+      clearedRatio = getClearedRatio(context, canvas);
+    }
 
-    setProgressState(combinedProgress);
+    updateProgress();
 
-    if (force) {
-      status.textContent = "お日取りをそっと包んでいます";
+    const distanceProgress = Math.min(totalDistance / gestureDistance, 1);
+    const assistedThreshold = Math.max(completeRatio - 0.055, completeRatio * 0.84);
+
+    if (
+      clearedRatio >= completeRatio ||
+      (clearedRatio >= assistedThreshold && distanceProgress >= 0.58)
+    ) {
+      complete = true;
+      onComplete(card);
     }
   }
 
-  function revealDate() {
-    if (revealed) {
+  function resize() {
+    const rect = zone.getBoundingClientRect();
+
+    if (!rect.width || !rect.height) {
       return;
     }
 
-    revealed = true;
-    queued = false;
-    seal.classList.remove("is-pressed", "is-nearing", "is-ready", "is-releasing");
-    seal.classList.add("is-revealed");
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    resetTilt(seal);
-    setProgressState(1);
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const hadScratchProgress = totalDistance > 0 && canvas.width > 0 && canvas.height > 0;
+    const previousSurface = hadScratchProgress
+      ? document.createElement("canvas")
+      : null;
 
-    if (status) {
-      status.textContent = "お日取りを表示しました";
+    if (previousSurface) {
+      previousSurface.width = canvas.width;
+      previousSurface.height = canvas.height;
+      previousSurface.getContext("2d")?.drawImage(canvas, 0, 0);
     }
 
-    onReveal?.();
-  }
-
-  function queueReveal() {
-    if (revealed || queued) {
-      return;
-    }
-
-    queued = true;
-    seal.classList.remove("is-nearing", "is-ready");
-    seal.classList.add("is-releasing");
-    setProgressState(1);
-
-    if (status) {
-      status.textContent = "お日取りを表示しています";
-    }
-
-    window.setTimeout(revealDate, prefersReducedMotion ? 0 : revealDelay);
-  }
-
-  function updateClearedRatio() {
-    clearedRatio = getClearedRatio(context, canvas);
-  }
-
-  function checkReveal({ force = false } = {}) {
-    if (revealed || queued) {
-      return;
-    }
-
-    if (force || sampleCounter % 4 === 0) {
-      updateClearedRatio();
-    }
-
-    const { distanceProgress, combinedProgress } = getProgress();
-    const clearByArea = clearedRatio >= completeRatio;
-    const clearByAssist = clearedRatio >= assistRatio && distanceProgress >= 0.62;
-    const clearByNearFinish = force && clearedRatio >= assistRatio - 0.02 && combinedProgress >= 0.92;
-
-    if (clearByArea || clearByAssist || clearByNearFinish) {
-      queueReveal();
-      return;
-    }
-
-    refreshStatus();
-  }
-
-  function resizeCanvas() {
-    const rect = seal.getBoundingClientRect();
-
-    if (rect.width === 0 || rect.height === 0) {
-      return;
-    }
-
-    const ratio = window.devicePixelRatio || 1;
-
-    canvas.width = rect.width * ratio;
-    canvas.height = rect.height * ratio;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
+    cssWidth = rect.width;
+    cssHeight = rect.height;
+    canvas.width = Math.round(cssWidth * ratio);
+    canvas.height = Math.round(cssHeight * ratio);
+    canvas.style.width = `${cssWidth}px`;
+    canvas.style.height = `${cssHeight}px`;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    drawScratchSurface(context, rect.width, rect.height);
+    drawScratchSurface(context, cssWidth, cssHeight, 2026 + cardIndex * 101);
 
-    if (revealed) {
-      context.clearRect(0, 0, rect.width, rect.height);
+    if (complete) {
+      context.clearRect(0, 0, cssWidth, cssHeight);
+      return;
+    }
+
+    if (previousSurface) {
+      context.save();
+      context.globalCompositeOperation = "destination-in";
+      context.drawImage(
+        previousSurface,
+        0,
+        0,
+        previousSurface.width,
+        previousSurface.height,
+        0,
+        0,
+        cssWidth,
+        cssHeight
+      );
+      context.restore();
+      clearedRatio = getClearedRatio(context, canvas);
     } else {
       totalDistance = 0;
-      sampleCounter = 0;
       clearedRatio = 0;
-      seal.classList.remove("is-nearing", "is-ready", "is-releasing");
-      setProgressState(0);
-      refreshStatus(true);
+      sampleCounter = 0;
     }
+
+    updateProgress();
   }
 
-  function handlePointerDown(event) {
-    if (revealed || queued) {
+  function endPointer(event) {
+    if (pointerId !== null && canvas.hasPointerCapture?.(pointerId)) {
+      canvas.releasePointerCapture(pointerId);
+    }
+
+    drawing = false;
+    pointerId = null;
+    lastPoint = null;
+    card.classList.remove("is-pressed");
+
+    if (!complete) {
+      checkCompletion(true);
+    }
+
+    event?.preventDefault();
+  }
+
+  canvas.addEventListener("pointerdown", (event) => {
+    if (complete || isLocked()) {
       return;
     }
 
     event.preventDefault();
     drawing = true;
+    pointerId = event.pointerId;
     lastPoint = getPointFromEvent(event, canvas);
-    seal.classList.add("is-pressed");
+    card.classList.add("is-pressed");
+    canvas.setPointerCapture?.(pointerId);
 
-    eraseStamp(context, lastPoint, brushSize * 0.72);
+    const responsiveBrush = Math.max(brushSize, Math.min(cssWidth, cssHeight) * 0.095);
+    eraseStamp(context, lastPoint, responsiveBrush * 0.76);
     sampleCounter += 1;
-    checkReveal({ force: true });
+    checkCompletion(true);
+  });
 
-    if (!prefersReducedMotion) {
-      setTilt(seal, lastPoint, seal.getBoundingClientRect());
-    }
-
-    if (seal.setPointerCapture) {
-      seal.setPointerCapture(event.pointerId);
-    }
-  }
-
-  function handlePointerMove(event) {
-    if (!drawing || !lastPoint || revealed || queued) {
+  canvas.addEventListener("pointermove", (event) => {
+    if (!drawing || !lastPoint || complete || isLocked()) {
       return;
     }
 
     event.preventDefault();
-
     const point = getPointFromEvent(event, canvas);
     const distance = Math.hypot(point.x - lastPoint.x, point.y - lastPoint.y);
 
-    if (distance === 0) {
+    if (!distance) {
       return;
     }
+
+    const responsiveBrush = Math.max(brushSize, Math.min(cssWidth, cssHeight) * 0.095);
 
     totalDistance += distance;
     sampleCounter += 1;
-
-    eraseStroke(context, lastPoint, point, brushSize);
+    eraseStroke(context, lastPoint, point, responsiveBrush);
     lastPoint = point;
+    checkCompletion();
+  });
 
-    if (!prefersReducedMotion) {
-      setTilt(seal, point, seal.getBoundingClientRect());
-    }
-
-    checkReveal();
-  }
-
-  function handlePointerUp(event) {
-    if (seal.hasPointerCapture?.(event.pointerId)) {
-      seal.releasePointerCapture(event.pointerId);
-    }
-
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+  canvas.addEventListener("lostpointercapture", () => {
     drawing = false;
+    pointerId = null;
     lastPoint = null;
-    seal.classList.remove("is-pressed");
-    resetTilt(seal);
+    card.classList.remove("is-pressed");
+  });
 
-    if (revealed || queued) {
-      return;
-    }
-
-    checkReveal({ force: true });
-  }
-
-  function handlePointerCancel(event) {
-    if (seal.hasPointerCapture?.(event.pointerId)) {
-      seal.releasePointerCapture(event.pointerId);
-    }
-
-    drawing = false;
-    lastPoint = null;
-    seal.classList.remove("is-pressed");
-    resetTilt(seal);
-    refreshStatus();
-  }
-
-  function handleKeyDown(event) {
-    if (revealed || queued) {
+  card.addEventListener("keydown", (event) => {
+    if (complete || isLocked()) {
       return;
     }
 
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      queueReveal();
+      complete = true;
+      onComplete(card);
+    }
+  });
+
+  card.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    if (event.detail === 0 && !complete && !isLocked()) {
+      complete = true;
+      onComplete(card);
+    }
+  });
+
+  const resizeObserver = "ResizeObserver" in window
+    ? new ResizeObserver(resize)
+    : null;
+
+  resizeObserver?.observe(zone);
+  window.addEventListener("resize", resize, { passive: true });
+  resize();
+
+  return {
+    clear() {
+      complete = true;
+      context.clearRect(0, 0, cssWidth, cssHeight);
+      card.style.setProperty("--scratch-progress", "1");
+    }
+  };
+}
+
+export function setupScratch({
+  completeRatio = 0.36,
+  brushSize = 24,
+  gestureDistance = 130,
+  revealDelay = 260,
+  onReveal
+} = {}) {
+  const gate = document.querySelector("[data-language-gate]");
+  const cards = Array.from(document.querySelectorAll("[data-scratch-card]"));
+  const status = document.querySelector("[data-language-status]");
+  const siteContent = document.querySelector("[data-site-content]");
+  const languageSwitch = document.querySelector("[data-language-switch]");
+  const heroTitle = document.querySelector("#hero-title");
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!gate || cards.length < 2) {
+    return {
+      activate() {}
+    };
+  }
+
+  let selected = false;
+  let active = false;
+  const controllers = [];
+
+  gate.hidden = false;
+  gate.inert = true;
+  siteContent?.setAttribute("aria-hidden", "true");
+
+  if (siteContent) {
+    siteContent.inert = true;
+  }
+
+  document.body.classList.add("is-language-active");
+
+  function setStatus(message, language = "") {
+    if (status) {
+      if (status.textContent === message && status.lang === language) {
+        return;
+      }
+
+      status.textContent = message;
+      status.lang = language;
     }
   }
 
-  resizeCanvas();
-  setProgressState(0);
+  function closeGate() {
+    gate.classList.add("is-leaving");
 
-  seal.addEventListener("pointerdown", handlePointerDown);
-  seal.addEventListener("pointermove", handlePointerMove);
-  seal.addEventListener("pointerup", handlePointerUp);
-  seal.addEventListener("pointercancel", handlePointerCancel);
-  seal.addEventListener("keydown", handleKeyDown);
+    window.setTimeout(() => {
+      gate.hidden = true;
+      gate.inert = true;
+      document.body.classList.remove("is-language-active");
+      siteContent?.removeAttribute("aria-hidden");
 
-  window.addEventListener("resize", resizeCanvas, { passive: true });
+      if (siteContent) {
+        siteContent.inert = false;
+      }
+
+      if (languageSwitch) {
+        languageSwitch.hidden = false;
+      }
+
+      if (heroTitle) {
+        heroTitle.setAttribute("tabindex", "-1");
+        heroTitle.focus({ preventScroll: true });
+        heroTitle.addEventListener(
+          "blur",
+          () => {
+            heroTitle.removeAttribute("tabindex");
+          },
+          { once: true }
+        );
+      }
+    }, prefersReducedMotion ? 0 : 520);
+  }
+
+  function selectCard(card) {
+    if (selected) {
+      return;
+    }
+
+    selected = true;
+    const language = card.dataset.language === "en" ? "en" : "ja";
+
+    cards.forEach((item) => {
+      item.disabled = true;
+      item.classList.toggle("is-selected", item === card);
+      item.classList.toggle("is-unselected", item !== card);
+    });
+
+    card.classList.add("is-releasing");
+    setStatus(
+      language === "ja"
+        ? "日本語の招待状を開きます"
+        : "Opening the English invitation",
+      language
+    );
+
+    window.setTimeout(() => {
+      const selectedIndex = cards.indexOf(card);
+
+      controllers[selectedIndex]?.clear();
+      card.classList.remove("is-releasing");
+      card.classList.add("is-revealed");
+      onReveal?.(language);
+
+      window.setTimeout(closeGate, prefersReducedMotion ? 0 : 620);
+    }, prefersReducedMotion ? 0 : revealDelay);
+  }
+
+  cards.forEach((card, index) => {
+    const controller = setupCard(card, {
+      cardIndex: index,
+      completeRatio,
+      brushSize,
+      gestureDistance,
+      isLocked: () => selected || !active,
+      onProgress(progress, language) {
+        if (progress < 0.08 || selected) {
+          return;
+        }
+
+        setStatus(
+          language === "ja"
+            ? "そのまま、もう少し削ってください"
+            : "Keep scratching — almost there",
+          language
+        );
+      },
+      onComplete: selectCard
+    });
+
+    controllers.push(controller);
+  });
+
+  gate.addEventListener("keydown", (event) => {
+    if (event.key !== "Tab" || selected) {
+      return;
+    }
+
+    const enabledCards = cards.filter((card) => !card.disabled);
+    const first = enabledCards[0];
+    const last = enabledCards[enabledCards.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
 
   return {
-    refresh: resizeCanvas
+    activate(preferredLanguage = "ja") {
+      if (selected || active) {
+        return;
+      }
+
+      active = true;
+      gate.inert = false;
+      gate.classList.add("is-active");
+      cards.forEach((card) => {
+        card.disabled = false;
+      });
+      window.requestAnimationFrame(() => {
+        const preferredCard =
+          cards.find((card) => card.dataset.language === preferredLanguage) ?? cards[0];
+
+        preferredCard?.focus({ preventScroll: true });
+      });
+    }
   };
 }
