@@ -46,16 +46,35 @@ export function setupPhotoLightbox() {
   closeButton.addEventListener("click", closeLightbox);
 
   dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) {
-      closeLightbox();
+    if (image.contains(event.target) || closeButton.contains(event.target)) {
+      return;
     }
+
+    closeLightbox();
+  });
+
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeLightbox();
+  });
+
+  dialog.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    event.preventDefault();
+    closeLightbox();
   });
 
   dialog.addEventListener("close", () => {
     document.body.classList.remove("is-photo-lightbox-open");
     image.removeAttribute("src");
     image.alt = "";
-    returnFocus?.focus({ preventScroll: true });
+    if (returnFocus?.isConnected) {
+      returnFocus.focus({ preventScroll: true });
+    }
+
     returnFocus = null;
   });
 }

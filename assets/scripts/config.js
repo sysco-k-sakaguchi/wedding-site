@@ -30,8 +30,12 @@ export const EXPERIENCE_CONFIG = {
         note: "到着後は境内のご案内に沿って受付までお進みください"
       },
       dining: {
-        name: "イタリアンダニエルズルーチェ",
-        note: "挙式後は会場を移して会食を予定しております"
+        name: "都ホテル 京都八条",
+        hall: "陽明殿（ようめいでん）",
+        note: "陽明殿（ようめいでん）",
+        venuePageUrl: "https://www.miyakohotels.ne.jp/kyoto-hachijo/banquet/youmeiden/",
+        mapEmbedUrl: "https://maps.google.com/maps?hl=ja&q=%E9%83%BD%E3%83%9B%E3%83%86%E3%83%AB%20%E4%BA%AC%E9%83%BD%E5%85%AB%E6%9D%A1%20%E9%99%BD%E6%98%8E%E6%AE%BF&z=16&output=embed",
+        mapExternalUrl: "https://maps.app.goo.gl/bGf6cdNNWKWx3iPX8?g_st=il"
       },
       chapters: {
         okinawa: {
@@ -68,9 +72,19 @@ export const EXPERIENCE_CONFIG = {
           description: "集合写真とご親族でのお写真を予定しています"
         },
         {
-          time: "15:00",
-          title: "会食開始",
-          description: "会場を移して会食を行います"
+          time: "14:00",
+          title: "会食受付",
+          description: "都ホテル 京都八条にて受付を承ります"
+        },
+        {
+          time: "14:30",
+          title: "乾杯",
+          description: "陽明殿にて会食を行います"
+        },
+        {
+          time: "17:00",
+          title: "おひらき",
+          description: "本日は誠にありがとうございました"
         }
       ],
       copy: {
@@ -92,9 +106,13 @@ export const EXPERIENCE_CONFIG = {
         photoCloseAria: "拡大表示を閉じる",
         ceremonyFactsAria: "挙式の基本情報",
         venueHeading: "会場について",
+        diningHeading: "会食会場について",
+        venuePageLink: "会場ページを見る",
         mapLink: "Google Mapsで見る",
         mapAria: "挙式会場の地図",
         mapTitle: "挙式会場地図",
+        diningMapAria: "会食会場の地図",
+        diningMapTitle: "会食会場地図",
         scheduleHeading: "当日の流れ",
         informationHeading: "ご案内",
         rsvpDeadlinePrefix: "ご返信は",
@@ -126,8 +144,12 @@ export const EXPERIENCE_CONFIG = {
         note: "On arrival, please follow the signs in the shrine grounds to the reception desk."
       },
       dining: {
-        name: "Daniel's Luce",
-        note: "After the ceremony, we will move to the restaurant for a celebratory meal."
+        name: "Miyako Hotel Kyoto Hachijo",
+        hall: "Yomeiden (陽明殿)",
+        note: "Yomeiden (陽明殿)",
+        venuePageUrl: "https://www.miyakohotels.ne.jp/kyoto-hachijo/banquet/youmeiden/",
+        mapEmbedUrl: "https://maps.google.com/maps?hl=en&q=%E9%83%BD%E3%83%9B%E3%83%86%E3%83%AB%20%E4%BA%AC%E9%83%BD%E5%85%AB%E6%9D%A1%20%E9%99%BD%E6%98%8E%E6%AE%BF&z=16&output=embed",
+        mapExternalUrl: "https://maps.app.goo.gl/bGf6cdNNWKWx3iPX8?g_st=il"
       },
       chapters: {
         okinawa: {
@@ -150,23 +172,33 @@ export const EXPERIENCE_CONFIG = {
       schedule: [
         {
           time: "11:00",
-          title: "Reception opens",
-          description: "Please check in at the waiting room within the shrine grounds."
+          title: "受付開始",
+          description: "境内控室にて受付を承ります"
         },
         {
           time: "11:30",
-          title: "Wedding ceremony",
-          description: "Our staff will guide you to the ceremony."
+          title: "挙式",
+          description: "スタッフがご案内いたします"
         },
         {
           time: "12:00",
-          title: "Photographs",
-          description: "Group and family photographs are planned."
+          title: "写真撮影",
+          description: "集合写真とご親族でのお写真を予定しています"
         },
         {
-          time: "15:00",
-          title: "Celebration meal",
-          description: "We will move to the restaurant for the meal."
+          time: "14:00",
+          title: "会食受付",
+          description: "都ホテル 京都八条にて受付を承ります"
+        },
+        {
+          time: "14:30",
+          title: "乾杯",
+          description: "陽明殿にて会食を行います"
+        },
+        {
+          time: "17:00",
+          title: "おひらき",
+          description: "本日は誠にありがとうございました"
         }
       ],
       copy: {
@@ -188,9 +220,13 @@ export const EXPERIENCE_CONFIG = {
         photoCloseAria: "Close enlarged photo",
         ceremonyFactsAria: "Ceremony details",
         venueHeading: "Venue",
+        diningHeading: "Dining venue",
+        venuePageLink: "View venue details",
         mapLink: "View on Google Maps",
         mapAria: "Map of the wedding venue",
         mapTitle: "Wedding venue map",
+        diningMapAria: "Map of the dining venue",
+        diningMapTitle: "Dining venue map",
         scheduleHeading: "Order of the Day",
         informationHeading: "Information",
         rsvpDeadlinePrefix: "Please respond by",

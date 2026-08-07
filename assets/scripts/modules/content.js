@@ -21,14 +21,20 @@ function renderSchedule(scheduleItems = []) {
       const time = document.createElement("time");
       const copy = document.createElement("div");
       const title = document.createElement("strong");
-      const description = document.createElement("p");
 
       time.dateTime = item.time;
       time.textContent = item.time;
       title.textContent = item.title;
-      description.textContent = item.description;
 
-      copy.append(title, description);
+      copy.append(title);
+
+      if (item.description) {
+        const description = document.createElement("p");
+
+        description.textContent = item.description;
+        copy.append(description);
+      }
+
       entry.append(time, copy);
       list.append(entry);
     });
@@ -132,6 +138,7 @@ export function bindContent(config, locale = config.defaultLocale) {
   fillText("[data-venue-note]", localized.venue.note);
   fillText("[data-rsvp-deadline]", localized.rsvpDeadline);
   fillText("[data-dining-name]", localized.dining.name);
+  fillText("[data-dining-hall]", localized.dining.hall);
   fillText("[data-dining-note]", localized.dining.note);
   fillText("[data-photo-share-note]", localized.photoShareNote);
   fillText("[data-okinawa-date]", localized.chapters.okinawa.date);
@@ -151,6 +158,10 @@ export function bindContent(config, locale = config.defaultLocale) {
   document.querySelectorAll("[data-map-link]").forEach((link) => {
     link.href = config.shared.mapExternalUrl;
   });
+
+  fillAttribute("[data-dining-map-embed]", "src", localized.dining.mapEmbedUrl);
+  fillAttribute("[data-dining-map-link]", "href", localized.dining.mapExternalUrl);
+  fillAttribute("[data-dining-venue-page-link]", "href", localized.dining.venuePageUrl);
 
   document.querySelectorAll("[data-rsvp-link]").forEach((link) => {
     link.href = config.shared.rsvpUrl;

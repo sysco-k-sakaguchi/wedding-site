@@ -1497,6 +1497,11 @@ body.is-curtain-opened .section--hero .hero__summary {
   text-wrap: balance;
 }
 
+.hero__title[tabindex="-1"]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .hero__date {
   margin-top: 1.35rem;
   font-size: 1.08rem;
@@ -2140,6 +2145,12 @@ body.is-photo-lightbox-open {
   font-weight: 600;
   line-height: 1.7;
   color: var(--text);
+}
+
+.ceremony-guide__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
 }
 
 .muted {
