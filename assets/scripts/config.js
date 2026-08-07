@@ -145,8 +145,8 @@ export const EXPERIENCE_CONFIG = {
       },
       dining: {
         name: "Miyako Hotel Kyoto Hachijo",
-        hall: "Yomeiden (陽明殿)",
-        note: "Yomeiden (陽明殿)",
+        hall: "陽明殿",
+        note: "陽明殿",
         venuePageUrl: "https://www.miyakohotels.ne.jp/kyoto-hachijo/banquet/youmeiden/",
         mapEmbedUrl: "https://maps.google.com/maps?hl=en&q=%E9%83%BD%E3%83%9B%E3%83%86%E3%83%AB%20%E4%BA%AC%E9%83%BD%E5%85%AB%E6%9D%A1%20%E9%99%BD%E6%98%8E%E6%AE%BF&z=16&output=embed",
         mapExternalUrl: "https://maps.app.goo.gl/bGf6cdNNWKWx3iPX8?g_st=il"
@@ -172,33 +172,33 @@ export const EXPERIENCE_CONFIG = {
       schedule: [
         {
           time: "11:00",
-          title: "受付開始",
-          description: "境内控室にて受付を承ります"
+          title: "Reception opens",
+          description: "Please check in at the waiting room within the shrine grounds."
         },
         {
           time: "11:30",
-          title: "挙式",
-          description: "スタッフがご案内いたします"
+          title: "Ceremony",
+          description: "Our staff will guide you to the ceremony."
         },
         {
           time: "12:00",
-          title: "写真撮影",
-          description: "集合写真とご親族でのお写真を予定しています"
+          title: "Photography",
+          description: "Group and family photographs are planned."
         },
         {
           time: "14:00",
-          title: "会食受付",
-          description: "都ホテル 京都八条にて受付を承ります"
+          title: "Dining reception opens",
+          description: "Please check in at Miyako Hotel Kyoto Hachijo."
         },
         {
           time: "14:30",
-          title: "乾杯",
-          description: "陽明殿にて会食を行います"
+          title: "Toast",
+          description: "The celebratory meal will be held in 陽明殿."
         },
         {
           time: "17:00",
-          title: "おひらき",
-          description: "本日は誠にありがとうございました"
+          title: "Closing",
+          description: "Thank you very much for joining us today."
         }
       ],
       copy: {
