@@ -1497,9 +1497,14 @@ body.is-curtain-opened .section--hero .hero__summary {
   text-wrap: balance;
 }
 
-.hero__title[tabindex="-1"]:focus {
+.hero__title[tabindex="-1"]:focus:not(:focus-visible) {
   outline: none;
   box-shadow: none;
+}
+
+.hero__title[tabindex="-1"]:focus-visible {
+  outline: 2px solid #6c5746;
+  outline-offset: 0.16em;
 }
 
 .hero__date {
@@ -2021,25 +2026,34 @@ body.is-curtain-opened .section--hero .hero__summary {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.34rem;
+  gap: 0.08rem;
   flex-wrap: wrap;
 }
 
 .photo-carousel__dot {
-  display: block;
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border-radius: 999px;
+  background: transparent;
+  transition: opacity 0.24s ease;
+}
+
+.photo-carousel__dot::before {
+  content: "";
   width: 0.56rem;
   height: 0.56rem;
+  border: 1px solid transparent;
   border-radius: 999px;
   background: rgba(141, 118, 96, 0.2);
-  border: 1px solid transparent;
   transition:
     transform 0.24s ease,
     background-color 0.24s ease,
-    border-color 0.24s ease,
-    opacity 0.24s ease;
+    border-color 0.24s ease;
 }
 
-.photo-carousel__dot.is-active {
+.photo-carousel__dot.is-active::before {
   transform: scale(1.18);
   background: rgba(108, 87, 70, 0.72);
   border-color: rgba(108, 87, 70, 0.18);
@@ -2545,7 +2559,7 @@ body.is-photo-lightbox-open {
     border-color: rgba(225, 188, 119, 0.66);
   }
 
-  .photo-carousel__dot:hover {
+  .photo-carousel__dot:hover::before {
     background: rgba(108, 87, 70, 0.44);
   }
 

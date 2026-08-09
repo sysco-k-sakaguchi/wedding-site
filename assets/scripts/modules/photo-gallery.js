@@ -126,13 +126,20 @@ export function setupPhotoGallery() {
     }
 
     function queueAutoLoop(delay = autoplayDelay) {
-      if (prefersReducedMotion) {
+      if (
+        prefersReducedMotion ||
+        document.body.classList.contains("is-photo-lightbox-open")
+      ) {
         return;
       }
 
       stopAutoLoop();
 
       autoTimer = setTimer(() => {
+        if (document.body.classList.contains("is-photo-lightbox-open")) {
+          return;
+        }
+
         goToRenderedIndex(renderedIndex + 1, {
           animated: true,
           fromAutoplay: true
@@ -248,6 +255,14 @@ export function setupPhotoGallery() {
           dot.removeAttribute("aria-current");
         }
       });
+
+      sourceSlides.forEach((slide, index) => {
+        const expandButton = slide.querySelector("[data-photo-expand]");
+
+        if (expandButton) {
+          expandButton.tabIndex = index === activeIndex ? 0 : -1;
+        }
+      });
     }
 
     function jumpToRenderedIndex(nextRenderedIndex) {
@@ -269,6 +284,16 @@ export function setupPhotoGallery() {
 
     function goToRenderedIndex(nextRenderedIndex, { animated = true, fromAutoplay = false } = {}) {
       if (animationLocked && animated) {
+        return;
+      }
+
+      if (nextRenderedIndex === renderedIndex) {
+        updateStatus();
+
+        if (!fromAutoplay) {
+          pauseAutoLoop();
+        }
+
         return;
       }
 
@@ -479,7 +504,7 @@ export function setupPhotoGallery() {
     });
 
     rail.addEventListener("transitionend", (event) => {
-      if (event.propertyName !== "transform") {
+      if (event.target !== rail || event.propertyName !== "transform") {
         return;
       }
 
@@ -489,7 +514,11 @@ export function setupPhotoGallery() {
       queueAutoLoop();
     });
 
-    rail.addEventListener("transitioncancel", () => {
+    rail.addEventListener("transitioncancel", (event) => {
+      if (event.target !== rail || event.propertyName !== "transform") {
+        return;
+      }
+
       animationLocked = false;
       gallery.classList.remove("is-animating");
       normalizeLoopEdges();
