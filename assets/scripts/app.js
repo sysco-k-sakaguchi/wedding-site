@@ -1,10 +1,10 @@
-import { EXPERIENCE_CONFIG, EXPERIENCE_SETTINGS, PLACEHOLDER_URL } from "./config.js";
-import { bindContent, getLocaleConfig, setupPlaceholderLinks } from "./modules/content.js";
-import { setupCurtain } from "./modules/curtain.js";
-import { setupPhotoGallery } from "./modules/photo-gallery.js";
-import { setupPhotoLightbox } from "./modules/photo-lightbox.js";
-import { setupRevealObserver } from "./modules/reveal.js";
-import { setupScratch } from "./modules/scratch.js";
+import { EXPERIENCE_CONFIG, EXPERIENCE_SETTINGS, PLACEHOLDER_URL } from "./config.js?v=20260814-4";
+import { bindContent, getLocaleConfig, setupPlaceholderLinks } from "./modules/content.js?v=20260814-4";
+import { setupCurtain } from "./modules/curtain.js?v=20260814-4";
+import { setupPhotoGallery } from "./modules/photo-gallery.js?v=20260814-4";
+import { setupPhotoLightbox } from "./modules/photo-lightbox.js?v=20260814-4";
+import { setupRevealObserver } from "./modules/reveal.js?v=20260814-4";
+import { setupScratch } from "./modules/scratch.js?v=20260814-4";
 
 const GALLERY_RETURN_STATE_KEY = "weddingGalleryReturn";
 const GALLERY_NAVIGATION_PROOF_KEY = "weddingGalleryNavigationProof:v1";
@@ -78,9 +78,11 @@ function initializeExperience() {
   const supportedLocales = Object.keys(EXPERIENCE_CONFIG.locales);
   const initialUrl = new URL(window.location.href);
   const requestedLocale = initialUrl.searchParams.get("lang");
-  const savedGalleryScroll = Number(window.history.state?.[GALLERY_RETURN_STATE_KEY]?.scrollY);
+  const galleryReturnState = window.history.state?.[GALLERY_RETURN_STATE_KEY];
+  const savedGalleryScroll = Number(galleryReturnState?.scrollY);
   const isGalleryReturn =
     initialUrl.searchParams.get("from") === "gallery" ||
+    Boolean(galleryReturnState) ||
     Number.isFinite(savedGalleryScroll);
   let galleryReturnRestorationScheduled = false;
   let currentLocale = supportedLocales.includes(requestedLocale)
@@ -112,7 +114,7 @@ function initializeExperience() {
         });
         const nextHistoryState = { ...(window.history.state ?? {}) };
 
-        delete nextHistoryState[GALLERY_RETURN_STATE_KEY];
+        nextHistoryState[GALLERY_RETURN_STATE_KEY] = { returned: true };
         window.history.replaceState(nextHistoryState, "", window.location.href);
         window.requestAnimationFrame(() => {
           if (previousInlineScrollBehavior) {
@@ -138,7 +140,7 @@ function initializeExperience() {
       const url = new URL(window.location.href);
 
       url.searchParams.set("lang", currentLocale);
-      window.history.replaceState({}, "", url);
+      window.history.replaceState(window.history.state, "", url);
     }
   }
 
@@ -159,25 +161,26 @@ function initializeExperience() {
   document.querySelector("[data-gallery-link]")?.addEventListener("click", (event) => {
     const link = event.currentTarget;
     const galleryUrl = new URL(link.href, window.location.href);
+    const isSameTabNavigation = isSameTabGalleryNavigation(event, link);
 
     galleryUrl.searchParams.set("from", "main");
     clearGalleryNavigationProof();
 
-    if (isSameTabGalleryNavigation(event, link)) {
+    if (isSameTabNavigation) {
       rememberGalleryNavigation(galleryUrl);
+      window.history.replaceState(
+        {
+          ...(window.history.state ?? {}),
+          [GALLERY_RETURN_STATE_KEY]: { scrollY: window.scrollY }
+        },
+        "",
+        window.location.href
+      );
     } else {
       galleryUrl.searchParams.delete(GALLERY_NAVIGATION_PROOF_PARAM);
     }
 
     link.href = galleryUrl;
-    window.history.replaceState(
-      {
-        ...(window.history.state ?? {}),
-        [GALLERY_RETURN_STATE_KEY]: { scrollY: window.scrollY }
-      },
-      "",
-      window.location.href
-    );
   });
 
   window.addEventListener("pageshow", () => {
@@ -220,7 +223,13 @@ function initializeExperience() {
     }
 
     initialUrl.searchParams.delete("from");
-    window.history.replaceState(window.history.state, "", initialUrl);
+    const galleryReturnHistoryState = { ...(window.history.state ?? {}) };
+
+    if (!galleryReturnHistoryState[GALLERY_RETURN_STATE_KEY]) {
+      galleryReturnHistoryState[GALLERY_RETURN_STATE_KEY] = { returned: true };
+    }
+
+    window.history.replaceState(galleryReturnHistoryState, "", initialUrl);
     restoreGalleryReturnScroll();
   } else {
     setupCurtain({

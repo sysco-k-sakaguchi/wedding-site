@@ -119,6 +119,7 @@ export function setupPhotoGallery() {
     let velocitySamples = [];
     let autoplayEnabled = !prefersReducedMotion;
     let pointerHovering = false;
+    let galleryInView = false;
 
     function setTimer(callback, delay) {
       return window.setTimeout(callback, delay);
@@ -132,12 +133,22 @@ export function setupPhotoGallery() {
     }
 
     function canRunAutoLoop() {
+      const activeElementIsAutoplayButton =
+        Boolean(autoplayButton) && document.activeElement === autoplayButton;
+      const focusBlocksAutoplay =
+        gallery.contains(document.activeElement) && !activeElementIsAutoplayButton;
+      const experienceOverlayIsOpen =
+        document.body.classList.contains("is-curtain-active") ||
+        document.body.classList.contains("is-language-active");
+
       return (
         autoplayEnabled &&
+        galleryInView &&
         !document.hidden &&
         !dragging &&
         !pointerHovering &&
-        !gallery.contains(document.activeElement) &&
+        !focusBlocksAutoplay &&
+        !experienceOverlayIsOpen &&
         !document.body.classList.contains("is-photo-lightbox-open")
       );
     }
@@ -173,6 +184,16 @@ export function setupPhotoGallery() {
           fromAutoplay: true
         });
       }, delay);
+    }
+
+    function syncAutoLoopAvailability(delay = autoplayDelay) {
+      if (canRunAutoLoop()) {
+        queueAutoLoop(delay);
+        return;
+      }
+
+      stopAutoLoop();
+      updateAutoplayPresentation();
     }
 
     function pauseAutoLoop() {
@@ -633,11 +654,47 @@ export function setupPhotoGallery() {
       resumeAutoLoopAfterLightbox
     );
 
+    if ("IntersectionObserver" in window) {
+      const autoplayViewportObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+
+          galleryInView = Boolean(entry?.isIntersecting);
+          syncAutoLoopAvailability();
+        },
+        { threshold: 0.12 }
+      );
+
+      autoplayViewportObserver.observe(gallery);
+    } else {
+      const updateGalleryVisibility = () => {
+        const rect = gallery.getBoundingClientRect();
+
+        galleryInView = rect.bottom > 0 && rect.top < window.innerHeight;
+        syncAutoLoopAvailability();
+      };
+
+      window.addEventListener("scroll", updateGalleryVisibility, { passive: true });
+      window.addEventListener("resize", updateGalleryVisibility, { passive: true });
+      updateGalleryVisibility();
+    }
+
+    if ("MutationObserver" in window) {
+      const experienceStateObserver = new MutationObserver(() => {
+        syncAutoLoopAvailability();
+      });
+
+      experienceStateObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ["class"]
+      });
+    }
+
     window.addEventListener("resize", measure, {
       passive: true
     });
 
     measure();
-    queueAutoLoop();
+    updateAutoplayPresentation();
   });
 }
