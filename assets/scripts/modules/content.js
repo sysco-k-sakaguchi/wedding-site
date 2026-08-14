@@ -42,6 +42,23 @@ function renderSchedule(scheduleItems = []) {
 }
 
 function localizePhotoLabels(copy, locale) {
+  document.querySelectorAll("[data-photo-gallery]").forEach((gallery) => {
+    const slides = Array.from(
+      gallery.querySelectorAll("[data-photo-slide]:not([data-photo-clone])")
+    );
+
+    gallery.setAttribute("aria-roledescription", copy.photoCarouselRoleDescription);
+
+    slides.forEach((slide, index) => {
+      slide.setAttribute("role", "group");
+      slide.setAttribute("aria-roledescription", copy.photoSlideRoleDescription);
+      slide.setAttribute(
+        "aria-label",
+        `${copy.photoDotPrefix} ${index + 1} / ${slides.length}`
+      );
+    });
+  });
+
   document.querySelectorAll("[data-photo-image]").forEach((image) => {
     if (image.closest("[data-photo-clone]")) {
       return;
@@ -70,6 +87,13 @@ function localizePhotoLabels(copy, locale) {
   document.querySelectorAll("[data-photo-dot] .sr-only").forEach((label, index) => {
     label.textContent = `${copy.photoDotPrefix} ${index + 1}`;
   });
+
+  document.querySelectorAll("[data-gallery-link]").forEach((link) => {
+    const url = new URL(link.getAttribute("href") || "/gallery", window.location.href);
+
+    url.searchParams.set("lang", locale);
+    link.setAttribute("href", `${url.pathname}${url.search}${url.hash}`);
+  });
 }
 
 function localizeStaticCopy(copy) {
@@ -86,6 +110,14 @@ function localizeStaticCopy(copy) {
 
     if (copy[key] !== undefined) {
       element.setAttribute("aria-label", copy[key]);
+    }
+  });
+
+  document.querySelectorAll("[data-i18n-aria-roledescription]").forEach((element) => {
+    const key = element.dataset.i18nAriaRoledescription;
+
+    if (copy[key] !== undefined) {
+      element.setAttribute("aria-roledescription", copy[key]);
     }
   });
 

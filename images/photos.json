@@ -1,9 +1,142 @@
-[
-  {"file":"01_beach_smile.jpeg","alt":"青い海を背景に笑顔で並ぶ新郎新婦","recommendedUse":"hero"},
-  {"file":"02_mirror_and_bouquet.jpeg","alt":"鏡に映る新郎新婦と手前のブーケ","recommendedUse":"gallery"},
-  {"file":"03_wide_beach_view.jpeg","alt":"広い青空と海を背景に砂浜に立つ新郎新婦","recommendedUse":"wideBanner"},
-  {"file":"04_chapel_portrait.jpeg","alt":"大きな窓のあるチャペルで並ぶ新郎新婦","recommendedUse":"gallery"},
-  {"file":"05_back_view_blue_sky.jpeg","alt":"青空の下で手をつなぐ新郎新婦の後ろ姿","recommendedUse":"sectionCover"},
-  {"file":"06_chapel_silhouette.jpeg","alt":"チャペルの窓辺で向かい合う新郎新婦のシルエット","recommendedUse":"ending"},
-  {"file":"07_beach_closeup.jpeg","alt":"海辺で寄り添う新郎新婦のクローズアップ","recommendedUse":"profile"}
-]
+{
+  "count": 17,
+  "purpose": "Wedding website photo gallery",
+  "photos": [
+    {
+      "id": 1,
+      "file": "01_beach_smile.jpeg",
+      "width": 1536,
+      "height": 1024,
+      "altJa": "青い海を背景にブーケを手に笑顔で並ぶ新郎新婦",
+      "altEn": "The smiling bride and groom holding a bouquet in front of the blue ocean"
+    },
+    {
+      "id": 2,
+      "file": "02_mirror_and_bouquet.jpeg",
+      "width": 1536,
+      "height": 1024,
+      "altJa": "砂浜の鏡に映る二人と手前に置かれたブーケ",
+      "altEn": "The couple reflected in a beach mirror beside their bouquet"
+    },
+    {
+      "id": 3,
+      "file": "03_wide_beach_view.jpeg",
+      "width": 3600,
+      "height": 2400,
+      "altJa": "広い青空と海の下で砂浜に立つ新郎新婦",
+      "altEn": "The bride and groom on the beach beneath a vast blue sky"
+    },
+    {
+      "id": 4,
+      "file": "04_chapel_portrait.jpeg",
+      "width": 1024,
+      "height": 1536,
+      "altJa": "海の見える明るいチャペルで並ぶ新郎新婦",
+      "altEn": "The bride and groom together in a bright ocean-view chapel"
+    },
+    {
+      "id": 5,
+      "file": "05_back_view_blue_sky.jpeg",
+      "width": 3600,
+      "height": 2400,
+      "altJa": "青空の下で手をつなぐ新郎新婦の後ろ姿",
+      "altEn": "The bride and groom holding hands beneath the blue sky"
+    },
+    {
+      "id": 6,
+      "file": "06_chapel_silhouette.jpeg",
+      "width": 3600,
+      "height": 2400,
+      "altJa": "チャペルの窓辺で向かい合う新郎新婦のシルエット",
+      "altEn": "Silhouettes of the bride and groom facing each other in the chapel"
+    },
+    {
+      "id": 7,
+      "file": "07_beach_closeup.jpeg",
+      "width": 1536,
+      "height": 1024,
+      "altJa": "エメラルド色の海辺で寄り添う新郎新婦",
+      "altEn": "The bride and groom close together by the emerald sea"
+    },
+    {
+      "id": 8,
+      "file": "08_beach_plushies.jpeg",
+      "width": 1536,
+      "height": 1024,
+      "altJa": "沖縄のぬいぐるみを手に砂浜で見つめる新郎新婦",
+      "altEn": "The bride and groom admiring Okinawan plush toys on the beach"
+    },
+    {
+      "id": 9,
+      "file": "09_groom_bouquet_portrait.jpeg",
+      "width": 2400,
+      "height": 3600,
+      "altJa": "明るいチャペルでブーケ越しに微笑む新郎",
+      "altEn": "The groom smiling beyond a bouquet in the bright chapel"
+    },
+    {
+      "id": 10,
+      "file": "10_couple_trees_wide.jpeg",
+      "width": 1536,
+      "height": 1024,
+      "altJa": "青空と大きな木の下で向かい合う新郎新婦",
+      "altEn": "The bride and groom facing each other beneath trees and a blue sky"
+    },
+    {
+      "id": 11,
+      "file": "11_groom_tree_portrait.jpeg",
+      "width": 1024,
+      "height": 1536,
+      "altJa": "海辺の木陰で遠くを見つめる新郎",
+      "altEn": "The groom looking into the distance beneath a seaside tree"
+    },
+    {
+      "id": 12,
+      "file": "12_couple_peace_portrait.jpeg",
+      "width": 3600,
+      "height": 2400,
+      "altJa": "白い壁の前で笑顔のピースサインを見せる新郎新婦",
+      "altEn": "The smiling bride and groom making peace signs"
+    },
+    {
+      "id": 13,
+      "file": "13_couple_bouquet_closeup.jpeg",
+      "width": 1024,
+      "height": 1536,
+      "altJa": "ブーケを間に顔を寄せて見つめ合う新郎新婦",
+      "altEn": "The bride and groom gazing at each other across the bouquet"
+    },
+    {
+      "id": 14,
+      "file": "14_bride_chapel_portrait.jpeg",
+      "width": 2400,
+      "height": 3600,
+      "altJa": "シャンデリアの下でブーケを手に佇む新婦",
+      "altEn": "The bride holding her bouquet beneath the chandelier"
+    },
+    {
+      "id": 15,
+      "file": "15_bride_chapel_framed.jpeg",
+      "width": 3600,
+      "height": 2400,
+      "altJa": "明るいチャペルの窓辺でブーケを持つ新婦",
+      "altEn": "The bride holding her bouquet beside the bright chapel windows"
+    },
+    {
+      "id": 16,
+      "file": "16_bride_veil_detail.jpeg",
+      "width": 2400,
+      "height": 3600,
+      "altJa": "ベール越しに捉えた新婦の横顔とイヤリング",
+      "altEn": "The bride's profile and earrings seen through her veil"
+    },
+    {
+      "id": 17,
+      "file": "17_chapel_couple_wide.jpeg",
+      "width": 3600,
+      "height": 2400,
+      "altJa": "白いチャペルのバージンロードに立つ新郎新婦",
+      "altEn": "The bride and groom standing together in the white chapel aisle"
+    }
+  ]
+}

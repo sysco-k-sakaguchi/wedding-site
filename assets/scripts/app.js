@@ -6,12 +6,126 @@ import { setupPhotoLightbox } from "./modules/photo-lightbox.js";
 import { setupRevealObserver } from "./modules/reveal.js";
 import { setupScratch } from "./modules/scratch.js";
 
+const GALLERY_RETURN_STATE_KEY = "weddingGalleryReturn";
+const GALLERY_NAVIGATION_PROOF_KEY = "weddingGalleryNavigationProof:v1";
+const GALLERY_NAVIGATION_PROOF_PARAM = "returnToken";
+
+function createGalleryNavigationToken() {
+  if (typeof window.crypto?.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+
+  const randomValues = new Uint32Array(4);
+  window.crypto?.getRandomValues?.(randomValues);
+
+  return `${Date.now()}-${Array.from(randomValues, (value) => value.toString(36)).join("-")}`;
+}
+
+function rememberGalleryNavigation(galleryUrl) {
+  galleryUrl.searchParams.delete(GALLERY_NAVIGATION_PROOF_PARAM);
+
+  if (galleryUrl.origin !== window.location.origin) {
+    return;
+  }
+
+  const token = createGalleryNavigationToken();
+  const sourceUrl = new URL(window.location.href);
+  const targetUrl = new URL(galleryUrl);
+
+  sourceUrl.hash = "";
+  targetUrl.hash = "";
+
+  try {
+    window.sessionStorage.setItem(
+      GALLERY_NAVIGATION_PROOF_KEY,
+      JSON.stringify({
+        token,
+        source: sourceUrl.href,
+        target: targetUrl.href,
+        createdAt: Date.now()
+      })
+    );
+    galleryUrl.searchParams.set(GALLERY_NAVIGATION_PROOF_PARAM, token);
+  } catch {
+    // Storage can be unavailable in restricted browsing modes. The Gallery
+    // back link will safely fall back to an explicit Wedding Top URL.
+  }
+}
+
+function clearGalleryNavigationProof() {
+  try {
+    window.sessionStorage.removeItem(GALLERY_NAVIGATION_PROOF_KEY);
+  } catch {
+    // No cleanup is needed when sessionStorage itself is unavailable.
+  }
+}
+
+function isSameTabGalleryNavigation(event, link) {
+  const target = link.getAttribute("target")?.toLowerCase();
+
+  return (
+    event.button === 0 &&
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    !event.altKey &&
+    (!target || target === "_self") &&
+    !link.hasAttribute("download")
+  );
+}
+
 function initializeExperience() {
   const supportedLocales = Object.keys(EXPERIENCE_CONFIG.locales);
-  const requestedLocale = new URLSearchParams(window.location.search).get("lang");
+  const initialUrl = new URL(window.location.href);
+  const requestedLocale = initialUrl.searchParams.get("lang");
+  const savedGalleryScroll = Number(window.history.state?.[GALLERY_RETURN_STATE_KEY]?.scrollY);
+  const isGalleryReturn =
+    initialUrl.searchParams.get("from") === "gallery" ||
+    Number.isFinite(savedGalleryScroll);
+  let galleryReturnRestorationScheduled = false;
   let currentLocale = supportedLocales.includes(requestedLocale)
     ? requestedLocale
     : EXPERIENCE_CONFIG.defaultLocale;
+
+  function restoreGalleryReturnScroll() {
+    if (galleryReturnRestorationScheduled) {
+      return;
+    }
+
+    const savedScroll = Number(window.history.state?.[GALLERY_RETURN_STATE_KEY]?.scrollY);
+
+    if (!Number.isFinite(savedScroll) || savedScroll < 0) {
+      return;
+    }
+
+    galleryReturnRestorationScheduled = true;
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const documentElement = document.documentElement;
+        const previousInlineScrollBehavior = documentElement.style.scrollBehavior;
+
+        documentElement.style.scrollBehavior = "auto";
+        window.scrollTo({
+          top: savedScroll,
+          left: 0,
+          behavior: "auto"
+        });
+        const nextHistoryState = { ...(window.history.state ?? {}) };
+
+        delete nextHistoryState[GALLERY_RETURN_STATE_KEY];
+        window.history.replaceState(nextHistoryState, "", window.location.href);
+        window.requestAnimationFrame(() => {
+          if (previousInlineScrollBehavior) {
+            documentElement.style.scrollBehavior = previousInlineScrollBehavior;
+          } else {
+            documentElement.style.removeProperty("scroll-behavior");
+          }
+
+          galleryReturnRestorationScheduled = false;
+        });
+      });
+    });
+  }
 
   function setLocale(locale, { updateUrl = true } = {}) {
     currentLocale = supportedLocales.includes(locale)
@@ -42,15 +156,47 @@ function initializeExperience() {
   setupPhotoGallery();
   setupPhotoLightbox();
 
-  const scratchController = setupScratch({
-    completeRatio: EXPERIENCE_SETTINGS.scratchCompleteRatio,
-    brushSize: EXPERIENCE_SETTINGS.scratchBrushSize,
-    gestureDistance: EXPERIENCE_SETTINGS.scratchGestureDistance,
-    revealDelay: EXPERIENCE_SETTINGS.scratchRevealDelay,
-    onReveal(locale) {
-      setLocale(locale);
+  document.querySelector("[data-gallery-link]")?.addEventListener("click", (event) => {
+    const link = event.currentTarget;
+    const galleryUrl = new URL(link.href, window.location.href);
+
+    galleryUrl.searchParams.set("from", "main");
+    clearGalleryNavigationProof();
+
+    if (isSameTabGalleryNavigation(event, link)) {
+      rememberGalleryNavigation(galleryUrl);
+    } else {
+      galleryUrl.searchParams.delete(GALLERY_NAVIGATION_PROOF_PARAM);
+    }
+
+    link.href = galleryUrl;
+    window.history.replaceState(
+      {
+        ...(window.history.state ?? {}),
+        [GALLERY_RETURN_STATE_KEY]: { scrollY: window.scrollY }
+      },
+      "",
+      window.location.href
+    );
+  });
+
+  window.addEventListener("pageshow", () => {
+    if (Number.isFinite(Number(window.history.state?.[GALLERY_RETURN_STATE_KEY]?.scrollY))) {
+      restoreGalleryReturnScroll();
     }
   });
+
+  const scratchController = isGalleryReturn
+    ? null
+    : setupScratch({
+        completeRatio: EXPERIENCE_SETTINGS.scratchCompleteRatio,
+        brushSize: EXPERIENCE_SETTINGS.scratchBrushSize,
+        gestureDistance: EXPERIENCE_SETTINGS.scratchGestureDistance,
+        revealDelay: EXPERIENCE_SETTINGS.scratchRevealDelay,
+        onReveal(locale) {
+          setLocale(locale);
+        }
+      });
 
   const languageSwitch = document.querySelector("[data-language-switch]");
 
@@ -66,15 +212,27 @@ function initializeExperience() {
     }
   });
 
-  setupCurtain({
-    introDelay: EXPERIENCE_SETTINGS.curtainIntroDelay,
-    preludeDuration: EXPERIENCE_SETTINGS.curtainPreludeDuration,
-    openDuration: EXPERIENCE_SETTINGS.curtainOpenDuration,
-    holdDuration: EXPERIENCE_SETTINGS.curtainOpenHoldDuration,
-    onComplete() {
-      scratchController.activate(currentLocale);
+  if (isGalleryReturn) {
+    document.body.classList.add("is-curtain-opened");
+
+    if (languageSwitch) {
+      languageSwitch.hidden = false;
     }
-  });
+
+    initialUrl.searchParams.delete("from");
+    window.history.replaceState(window.history.state, "", initialUrl);
+    restoreGalleryReturnScroll();
+  } else {
+    setupCurtain({
+      introDelay: EXPERIENCE_SETTINGS.curtainIntroDelay,
+      preludeDuration: EXPERIENCE_SETTINGS.curtainPreludeDuration,
+      openDuration: EXPERIENCE_SETTINGS.curtainOpenDuration,
+      holdDuration: EXPERIENCE_SETTINGS.curtainOpenHoldDuration,
+      onComplete() {
+        scratchController?.activate(currentLocale);
+      }
+    });
+  }
 }
 
 initializeExperience();

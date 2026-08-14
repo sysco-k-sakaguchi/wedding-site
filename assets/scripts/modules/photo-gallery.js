@@ -44,6 +44,8 @@ export function setupPhotoGallery() {
     const dots = Array.from(gallery.querySelectorAll("[data-photo-dot]"));
     const current = gallery.querySelector("[data-photo-current]");
     const total = gallery.querySelector("[data-photo-total]");
+    const status = gallery.querySelector("[data-photo-status]");
+    const autoplayButton = gallery.querySelector("[data-photo-autoplay]");
 
     if (!viewport || sourceSlides.length === 0) {
       return;
@@ -115,6 +117,8 @@ export function setupPhotoGallery() {
     let pendingDragFrame = 0;
     let pendingDragOffset = 0;
     let velocitySamples = [];
+    let autoplayEnabled = !prefersReducedMotion;
+    let pointerHovering = false;
 
     function setTimer(callback, delay) {
       return window.setTimeout(callback, delay);
@@ -123,20 +127,44 @@ export function setupPhotoGallery() {
     function stopAutoLoop() {
       window.clearTimeout(autoTimer);
       window.clearTimeout(resumeTimer);
+      autoTimer = 0;
+      resumeTimer = 0;
+    }
+
+    function canRunAutoLoop() {
+      return (
+        autoplayEnabled &&
+        !document.hidden &&
+        !dragging &&
+        !pointerHovering &&
+        !gallery.contains(document.activeElement) &&
+        !document.body.classList.contains("is-photo-lightbox-open")
+      );
+    }
+
+    function updateAutoplayPresentation() {
+      if (autoplayButton) {
+        autoplayButton.setAttribute("aria-pressed", String(autoplayEnabled));
+      }
+
+      if (status) {
+        status.setAttribute("aria-live", canRunAutoLoop() ? "off" : "polite");
+      }
     }
 
     function queueAutoLoop(delay = autoplayDelay) {
-      if (
-        prefersReducedMotion ||
-        document.body.classList.contains("is-photo-lightbox-open")
-      ) {
+      stopAutoLoop();
+      updateAutoplayPresentation();
+
+      if (!canRunAutoLoop()) {
         return;
       }
 
-      stopAutoLoop();
-
       autoTimer = setTimer(() => {
-        if (document.body.classList.contains("is-photo-lightbox-open")) {
+        autoTimer = 0;
+
+        if (!canRunAutoLoop()) {
+          updateAutoplayPresentation();
           return;
         }
 
@@ -149,8 +177,9 @@ export function setupPhotoGallery() {
 
     function pauseAutoLoop() {
       stopAutoLoop();
+      updateAutoplayPresentation();
 
-      if (prefersReducedMotion) {
+      if (!autoplayEnabled) {
         return;
       }
 
@@ -256,12 +285,36 @@ export function setupPhotoGallery() {
         }
       });
 
+      const activeSlide = sourceSlides[activeIndex];
+      const activeTrigger = activeSlide?.querySelector("[data-photo-expand]");
+      const focusedSlide = document.activeElement?.closest?.("[data-photo-slide]");
+
+      if (focusedSlide && focusedSlide !== activeSlide && activeTrigger) {
+        activeSlide.removeAttribute("aria-hidden");
+        activeTrigger.tabIndex = 0;
+        activeTrigger.focus({ preventScroll: true });
+      }
+
       sourceSlides.forEach((slide, index) => {
         const expandButton = slide.querySelector("[data-photo-expand]");
+        const isActive = index === activeIndex;
+
+        if (isActive) {
+          slide.removeAttribute("aria-hidden");
+        } else {
+          slide.setAttribute("aria-hidden", "true");
+        }
 
         if (expandButton) {
-          expandButton.tabIndex = index === activeIndex ? 0 : -1;
+          expandButton.tabIndex = isActive ? 0 : -1;
         }
+      });
+    }
+
+    function resumeAutoLoopAfterLightbox() {
+      stopAutoLoop();
+      window.requestAnimationFrame(() => {
+        queueAutoLoop(interactionResumeDelay);
       });
     }
 
@@ -457,6 +510,18 @@ export function setupPhotoGallery() {
       });
     });
 
+    autoplayButton?.addEventListener("click", () => {
+      autoplayEnabled = !autoplayEnabled;
+
+      if (autoplayEnabled) {
+        queueAutoLoop();
+        return;
+      }
+
+      stopAutoLoop();
+      updateAutoplayPresentation();
+    });
+
     viewport.addEventListener("pointerdown", (event) => {
       if (event.pointerType === "mouse" && event.button !== 0) {
         return;
@@ -482,6 +547,7 @@ export function setupPhotoGallery() {
       ];
 
       stopAutoLoop();
+      updateAutoplayPresentation();
     });
 
     window.addEventListener("pointermove", handlePointerMove);
@@ -525,27 +591,47 @@ export function setupPhotoGallery() {
       queueAutoLoop();
     });
 
-    gallery.addEventListener("mouseenter", stopAutoLoop);
-    gallery.addEventListener("mouseleave", () => {
-      queueAutoLoop();
-    });
-    gallery.addEventListener("focusin", stopAutoLoop);
-    gallery.addEventListener("focusout", () => {
-      if (gallery.contains(document.activeElement)) {
+    gallery.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "mouse") {
         return;
       }
 
+      pointerHovering = true;
+      stopAutoLoop();
+      updateAutoplayPresentation();
+    });
+    gallery.addEventListener("pointerleave", (event) => {
+      if (event.pointerType !== "mouse") {
+        return;
+      }
+
+      pointerHovering = false;
       queueAutoLoop();
+    });
+    gallery.addEventListener("focusin", () => {
+      stopAutoLoop();
+      updateAutoplayPresentation();
+    });
+    gallery.addEventListener("focusout", () => {
+      window.requestAnimationFrame(() => {
+        queueAutoLoop();
+      });
     });
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         stopAutoLoop();
+        updateAutoplayPresentation();
         return;
       }
 
       queueAutoLoop();
     });
+
+    document.querySelector("[data-photo-lightbox]")?.addEventListener(
+      "close",
+      resumeAutoLoopAfterLightbox
+    );
 
     window.addEventListener("resize", measure, {
       passive: true

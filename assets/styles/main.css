@@ -1679,6 +1679,27 @@ body.is-curtain-opened .section--hero .hero__summary {
   color: var(--text-faint);
 }
 
+.photo-section__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.35rem;
+}
+
+.photo-gallery-link {
+  display: grid;
+  min-width: min(100%, 18rem);
+  justify-items: center;
+  gap: 0.12rem;
+  text-align: center;
+}
+
+.photo-gallery-link small {
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+
 .photo-expand {
   position: relative;
   display: block;
@@ -1897,12 +1918,26 @@ body.is-curtain-opened .section--hero .hero__summary {
 }
 
 .photo-slide__frame--mirror img,
-.photo-slide__frame--portrait img {
+.photo-slide__frame--portrait img,
+.photo-slide__frame--groom-portrait img,
+.photo-slide__frame--bride-portrait img {
   object-fit: contain;
 }
 
 .photo-slide__frame--portrait img {
   object-position: 50% 55%;
+}
+
+.photo-slide__frame--groom-portrait img {
+  object-position: 50% 44%;
+}
+
+.photo-slide__frame--bride-portrait img {
+  object-position: 50% 52%;
+}
+
+.photo-slide__frame--chapel-wide img {
+  object-position: 50% 58%;
 }
 
 .photo-slide__frame--wide-beach img {
@@ -2022,6 +2057,14 @@ body.is-curtain-opened .section--hero .hero__summary {
   color: var(--accent-deep);
 }
 
+.photo-carousel__controls {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
 .photo-carousel__dots {
   display: flex;
   align-items: center;
@@ -2064,6 +2107,69 @@ body.is-curtain-opened .section--hero .hero__summary {
   outline-offset: 4px;
 }
 
+.photo-carousel__autoplay {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(108, 87, 70, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.34);
+  color: var(--accent-deep);
+  cursor: pointer;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color 220ms ease,
+    background-color 220ms ease,
+    transform 220ms ease;
+}
+
+.photo-carousel__autoplay-icon {
+  position: relative;
+  display: block;
+  width: 0.72rem;
+  height: 0.82rem;
+}
+
+.photo-carousel__autoplay[aria-pressed="true"] .photo-carousel__autoplay-icon::before,
+.photo-carousel__autoplay[aria-pressed="true"] .photo-carousel__autoplay-icon::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.18rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.photo-carousel__autoplay[aria-pressed="true"] .photo-carousel__autoplay-icon::before {
+  left: 0.08rem;
+}
+
+.photo-carousel__autoplay[aria-pressed="true"] .photo-carousel__autoplay-icon::after {
+  right: 0.08rem;
+}
+
+.photo-carousel__autoplay[aria-pressed="false"] .photo-carousel__autoplay-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-top: 0.43rem solid transparent;
+  border-bottom: 0.43rem solid transparent;
+  border-left: 0.65rem solid currentColor;
+  transform: translate(-42%, -50%);
+}
+
+.photo-carousel__autoplay:focus-visible {
+  outline: 2px solid #6c5746;
+  outline-offset: 4px;
+}
+
 body.is-photo-lightbox-open {
   overflow: hidden;
 }
@@ -2085,6 +2191,7 @@ body.is-photo-lightbox-open {
   border: 0;
   background: transparent;
   color: #fff;
+  cursor: zoom-out;
 }
 
 .photo-lightbox[open] {
@@ -2100,13 +2207,26 @@ body.is-photo-lightbox-open {
 .photo-lightbox__content {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(3rem, 1fr) minmax(0, 80rem) minmax(3rem, 1fr);
   width: min(100%, 90rem);
   height: 100%;
   min-height: 0;
+  gap: clamp(0.35rem, 2vw, 1.2rem);
   place-items: center;
+  touch-action: pan-y pinch-zoom;
 }
 
-.photo-lightbox__content img {
+.photo-lightbox__figure {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  max-height: 100%;
+  gap: 0.7rem;
+  justify-items: center;
+}
+
+.photo-lightbox__figure img {
   width: auto;
   max-width: 100%;
   height: auto;
@@ -2114,6 +2234,46 @@ body.is-photo-lightbox-open {
   object-fit: contain;
   border-radius: clamp(0.75rem, 2vw, 1.2rem);
   box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.36);
+  cursor: default;
+}
+
+.photo-lightbox__status {
+  display: flex;
+  gap: 0.48rem;
+  align-items: center;
+  min-height: 1.6rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.photo-lightbox__nav {
+  display: grid;
+  width: clamp(3rem, 5vw, 3.6rem);
+  height: clamp(3rem, 5vw, 3.6rem);
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  background: rgba(17, 20, 24, 0.52);
+  backdrop-filter: blur(10px);
+  font-size: clamp(2rem, 5vw, 2.7rem);
+  font-weight: 200;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+}
+
+.photo-lightbox__nav--previous {
+  grid-column: 1;
+}
+
+.photo-lightbox__figure {
+  grid-column: 2;
+}
+
+.photo-lightbox__nav--next {
+  grid-column: 3;
 }
 
 .photo-lightbox__close {
@@ -2137,7 +2297,8 @@ body.is-photo-lightbox-open {
   cursor: pointer;
 }
 
-.photo-lightbox__close:focus-visible {
+.photo-lightbox__close:focus-visible,
+.photo-lightbox__nav:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 4px;
 }
@@ -2563,6 +2724,12 @@ body.is-photo-lightbox-open {
     background: rgba(108, 87, 70, 0.44);
   }
 
+  .photo-carousel__autoplay:hover {
+    transform: translateY(-1px);
+    border-color: rgba(108, 87, 70, 0.38);
+    background: rgba(255, 255, 255, 0.58);
+  }
+
   .photo-expand:hover::after {
     transform: scale(1.06);
     background: rgba(35, 31, 29, 0.46);
@@ -2570,6 +2737,11 @@ body.is-photo-lightbox-open {
 
   .photo-expand:hover img {
     transform: scale(1.015);
+  }
+
+  .photo-lightbox__nav:hover,
+  .photo-lightbox__close:hover {
+    background: rgba(17, 20, 24, 0.78);
   }
 
   .chapter-index__item:hover .chapter-index__count,
@@ -2602,6 +2774,46 @@ body.is-photo-lightbox-open {
   .ceremony-guide,
   .ceremony-detail-flow {
     margin-top: 2.4rem;
+  }
+
+  .photo-lightbox {
+    padding-inline:
+      max(0.55rem, env(safe-area-inset-left, 0px))
+      max(0.55rem, env(safe-area-inset-right, 0px));
+  }
+
+  .photo-lightbox__content {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    gap: 0.65rem 1rem;
+  }
+
+  .photo-lightbox__figure {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .photo-lightbox__figure img {
+    max-height: min(76dvh, calc(100dvh - 9.5rem));
+  }
+
+  .photo-lightbox__nav {
+    position: relative;
+    grid-row: 2;
+    width: 3.35rem;
+    height: 3.35rem;
+  }
+
+  .photo-lightbox__nav--previous {
+    grid-column: 1;
+    justify-self: end;
+  }
+
+  .photo-lightbox__nav--next {
+    grid-column: 2;
+    justify-self: start;
   }
 
   .site-footer__credit {
@@ -2669,6 +2881,11 @@ body.is-photo-lightbox-open {
 
   .photo-carousel__dots {
     justify-content: flex-start;
+  }
+
+  .photo-carousel__controls {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .section-block,
