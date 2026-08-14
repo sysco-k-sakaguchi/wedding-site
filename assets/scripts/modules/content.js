@@ -10,6 +10,14 @@ function fillAttribute(selector, attribute, value) {
   });
 }
 
+function setIframeSourceIfChanged(selector, value) {
+  document.querySelectorAll(selector).forEach((iframe) => {
+    if (iframe.getAttribute("src") !== value) {
+      iframe.setAttribute("src", value);
+    }
+  });
+}
+
 function renderSchedule(scheduleItems = []) {
   const lists = document.querySelectorAll("[data-schedule-list]");
 
@@ -183,15 +191,13 @@ export function bindContent(config, locale = config.defaultLocale) {
   fillText("[data-language-switch-label]", copy.languageSwitchLabel);
   fillAttribute("[data-language-switch]", "aria-label", copy.languageSwitchAria);
 
-  document.querySelectorAll("[data-map-embed]").forEach((mapEmbed) => {
-    mapEmbed.src = localized.mapEmbedUrl;
-  });
+  setIframeSourceIfChanged("[data-map-embed]", localized.mapEmbedUrl);
 
   document.querySelectorAll("[data-map-link]").forEach((link) => {
     link.href = config.shared.mapExternalUrl;
   });
 
-  fillAttribute("[data-dining-map-embed]", "src", localized.dining.mapEmbedUrl);
+  setIframeSourceIfChanged("[data-dining-map-embed]", localized.dining.mapEmbedUrl);
   fillAttribute("[data-dining-map-link]", "href", localized.dining.mapExternalUrl);
   fillAttribute("[data-dining-venue-page-link]", "href", localized.dining.venuePageUrl);
 

@@ -1,6 +1,7 @@
-import { setupPhotoLightbox } from "./modules/photo-lightbox.js?v=20260814-4";
+import { setupPhotoLightbox } from "./modules/photo-lightbox.js?v=20260814-5";
 
 const GALLERY_NAVIGATION_PROOF_KEY = "weddingGalleryNavigationProof:v1";
+const GALLERY_RETURN_REQUEST_KEY = "weddingGalleryReturnRequest:v1";
 const GALLERY_NAVIGATION_PROOF_PARAM = "returnToken";
 const GALLERY_RETURN_HISTORY_KEY = "weddingGalleryReturnProof:v1";
 const GALLERY_NAVIGATION_PROOF_MAX_AGE = 24 * 60 * 60 * 1000;
@@ -23,16 +24,25 @@ function isValidReturnRecord(record, currentGalleryUrl, expectedToken = null) {
   }
 
   try {
-    const createdAt = Number(record.createdAt);
+    const createdAt = record.createdAt;
     const proofAge = Date.now() - createdAt;
+    const scrollY = record.scrollY;
     const sourceUrl = new URL(record.source);
     const targetUrl = normalizeGalleryUrl(record.target);
 
     return (
+      typeof record.token === "string" &&
+      record.token.length > 0 &&
       (!expectedToken || record.token === expectedToken) &&
+      typeof record.source === "string" &&
+      typeof record.target === "string" &&
       sourceUrl.origin === window.location.origin &&
       targetUrl.origin === window.location.origin &&
       targetUrl.href === currentGalleryUrl.href &&
+      typeof scrollY === "number" &&
+      Number.isFinite(scrollY) &&
+      scrollY >= 0 &&
+      typeof createdAt === "number" &&
       Number.isFinite(createdAt) &&
       proofAge >= 0 &&
       proofAge <= GALLERY_NAVIGATION_PROOF_MAX_AGE
@@ -64,15 +74,42 @@ function readHistoryReturnRecord() {
   return window.history.state?.[GALLERY_RETURN_HISTORY_KEY] ?? null;
 }
 
-function canUseHistoryReturn() {
-  return (
-    openedFromMain &&
-    window.history.length >= 2 &&
-    isValidReturnRecord(
-      readHistoryReturnRecord(),
-      normalizeGalleryUrl(window.location.href)
-    )
-  );
+function getValidHistoryReturnRecord() {
+  const record = readHistoryReturnRecord();
+
+  return openedFromMain && isValidReturnRecord(record, currentGalleryUrl)
+    ? record
+    : null;
+}
+
+function storeReturnRequest(record) {
+  try {
+    window.sessionStorage.setItem(GALLERY_RETURN_REQUEST_KEY, JSON.stringify(record));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function createVerifiedWeddingTopUrl(record) {
+  if (!isValidReturnRecord(record, currentGalleryUrl)) {
+    return null;
+  }
+
+  try {
+    const url = new URL(record.source);
+
+    if (url.origin !== window.location.origin) {
+      return null;
+    }
+
+    url.searchParams.set("from", "gallery");
+    url.searchParams.set(GALLERY_NAVIGATION_PROOF_PARAM, record.token);
+    url.hash = "okinawa";
+    return url;
+  } catch {
+    return null;
+  }
 }
 
 const currentGalleryUrl = normalizeGalleryUrl(window.location.href);
@@ -80,7 +117,6 @@ const storedProof = readStoredNavigationProof();
 const hasValidStoredProof = Boolean(
   openedFromMain &&
   returnToken &&
-  window.history.length >= 2 &&
   isValidReturnRecord(storedProof, currentGalleryUrl, returnToken)
 );
 
@@ -99,7 +135,6 @@ if (hasValidStoredProof) {
 
 clearStoredNavigationProof();
 
-let canReturnWithHistory = hasValidStoredProof || canUseHistoryReturn();
 let returnNavigationPending = false;
 
 function getWeddingTopHref() {
@@ -135,36 +170,19 @@ document.querySelectorAll("[data-gallery-back]").forEach((link) => {
       return;
     }
 
-    if (!canReturnWithHistory) {
-      return;
-    }
+    const returnRecord = getValidHistoryReturnRecord();
+    const verifiedReturnUrl = createVerifiedWeddingTopUrl(returnRecord);
+    const destinationUrl = verifiedReturnUrl && storeReturnRequest(returnRecord)
+      ? verifiedReturnUrl.href
+      : link.href;
 
     event.preventDefault();
-    canReturnWithHistory = false;
     returnNavigationPending = true;
-
-    const galleryUrlBeforeBack = window.location.href;
-    const fallbackUrl = link.href;
-    let fallbackTimer;
-    const cancelFallback = () => {
-      window.clearTimeout(fallbackTimer);
-    };
-
-    window.addEventListener("pagehide", cancelFallback, { once: true });
-    fallbackTimer = window.setTimeout(() => {
-      window.removeEventListener("pagehide", cancelFallback);
-
-      if (window.location.href === galleryUrlBeforeBack) {
-        window.location.replace(fallbackUrl);
-      }
-    }, 1500);
-
-    window.history.back();
+    window.location.replace(destinationUrl);
   });
 });
 
 window.addEventListener("pageshow", () => {
-  canReturnWithHistory = canUseHistoryReturn();
   returnNavigationPending = false;
 });
 

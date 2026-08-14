@@ -1,14 +1,16 @@
-import { EXPERIENCE_CONFIG, EXPERIENCE_SETTINGS, PLACEHOLDER_URL } from "./config.js?v=20260814-4";
-import { bindContent, getLocaleConfig, setupPlaceholderLinks } from "./modules/content.js?v=20260814-4";
-import { setupCurtain } from "./modules/curtain.js?v=20260814-4";
-import { setupPhotoGallery } from "./modules/photo-gallery.js?v=20260814-4";
-import { setupPhotoLightbox } from "./modules/photo-lightbox.js?v=20260814-4";
-import { setupRevealObserver } from "./modules/reveal.js?v=20260814-4";
-import { setupScratch } from "./modules/scratch.js?v=20260814-4";
+import { EXPERIENCE_CONFIG, EXPERIENCE_SETTINGS, PLACEHOLDER_URL } from "./config.js?v=20260814-5";
+import { bindContent, getLocaleConfig, setupPlaceholderLinks } from "./modules/content.js?v=20260814-5";
+import { setupCurtain } from "./modules/curtain.js?v=20260814-5";
+import { setupPhotoGallery } from "./modules/photo-gallery.js?v=20260814-5";
+import { setupPhotoLightbox } from "./modules/photo-lightbox.js?v=20260814-5";
+import { setupRevealObserver } from "./modules/reveal.js?v=20260814-5";
+import { setupScratch } from "./modules/scratch.js?v=20260814-5";
 
 const GALLERY_RETURN_STATE_KEY = "weddingGalleryReturn";
 const GALLERY_NAVIGATION_PROOF_KEY = "weddingGalleryNavigationProof:v1";
+const GALLERY_RETURN_REQUEST_KEY = "weddingGalleryReturnRequest:v1";
 const GALLERY_NAVIGATION_PROOF_PARAM = "returnToken";
+const GALLERY_NAVIGATION_PROOF_MAX_AGE = 24 * 60 * 60 * 1000;
 
 function createGalleryNavigationToken() {
   if (typeof window.crypto?.randomUUID === "function") {
@@ -31,6 +33,9 @@ function rememberGalleryNavigation(galleryUrl) {
   const token = createGalleryNavigationToken();
   const sourceUrl = new URL(window.location.href);
   const targetUrl = new URL(galleryUrl);
+  const scrollY = Number.isFinite(window.scrollY)
+    ? Math.max(0, window.scrollY)
+    : 0;
 
   sourceUrl.hash = "";
   targetUrl.hash = "";
@@ -42,6 +47,7 @@ function rememberGalleryNavigation(galleryUrl) {
         token,
         source: sourceUrl.href,
         target: targetUrl.href,
+        scrollY,
         createdAt: Date.now()
       })
     );
@@ -49,6 +55,65 @@ function rememberGalleryNavigation(galleryUrl) {
   } catch {
     // Storage can be unavailable in restricted browsing modes. The Gallery
     // back link will safely fall back to an explicit Wedding Top URL.
+  }
+}
+
+function normalizeWeddingTopUrl(value) {
+  const url = new URL(value, window.location.href);
+
+  url.searchParams.delete("from");
+  url.searchParams.delete(GALLERY_NAVIGATION_PROOF_PARAM);
+  url.hash = "";
+  return url;
+}
+
+function readGalleryReturnRequest() {
+  try {
+    const storedRequest = window.sessionStorage.getItem(GALLERY_RETURN_REQUEST_KEY);
+
+    return storedRequest ? JSON.parse(storedRequest) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearGalleryReturnRequest() {
+  try {
+    window.sessionStorage.removeItem(GALLERY_RETURN_REQUEST_KEY);
+  } catch {
+    // No cleanup is needed when sessionStorage itself is unavailable.
+  }
+}
+
+function isValidGalleryReturnRequest(record, destinationUrl, expectedToken) {
+  if (!record || typeof record !== "object" || !expectedToken) {
+    return false;
+  }
+
+  try {
+    const createdAt = record.createdAt;
+    const proofAge = Date.now() - createdAt;
+    const scrollY = record.scrollY;
+    const sourceUrl = normalizeWeddingTopUrl(record.source);
+    const normalizedDestination = normalizeWeddingTopUrl(destinationUrl);
+
+    return (
+      typeof record.token === "string" &&
+      record.token.length > 0 &&
+      record.token === expectedToken &&
+      typeof record.source === "string" &&
+      sourceUrl.origin === window.location.origin &&
+      sourceUrl.href === normalizedDestination.href &&
+      typeof scrollY === "number" &&
+      Number.isFinite(scrollY) &&
+      scrollY >= 0 &&
+      typeof createdAt === "number" &&
+      Number.isFinite(createdAt) &&
+      proofAge >= 0 &&
+      proofAge <= GALLERY_NAVIGATION_PROOF_MAX_AGE
+    );
+  } catch {
+    return false;
   }
 }
 
@@ -78,6 +143,28 @@ function initializeExperience() {
   const supportedLocales = Object.keys(EXPERIENCE_CONFIG.locales);
   const initialUrl = new URL(window.location.href);
   const requestedLocale = initialUrl.searchParams.get("lang");
+  const expectedReturnToken = initialUrl.searchParams.get(GALLERY_NAVIGATION_PROOF_PARAM);
+  const galleryReturnRequest = readGalleryReturnRequest();
+  const hasValidGalleryReturnRequest = Boolean(
+    initialUrl.searchParams.get("from") === "gallery" &&
+    isValidGalleryReturnRequest(galleryReturnRequest, initialUrl, expectedReturnToken)
+  );
+
+  if (hasValidGalleryReturnRequest) {
+    window.history.replaceState(
+      {
+        ...(window.history.state ?? {}),
+        [GALLERY_RETURN_STATE_KEY]: {
+          scrollY: galleryReturnRequest.scrollY
+        }
+      },
+      "",
+      window.location.href
+    );
+  }
+
+  clearGalleryReturnRequest();
+
   const galleryReturnState = window.history.state?.[GALLERY_RETURN_STATE_KEY];
   const savedGalleryScroll = Number(galleryReturnState?.scrollY);
   const isGalleryReturn =
@@ -223,6 +310,12 @@ function initializeExperience() {
     }
 
     initialUrl.searchParams.delete("from");
+    initialUrl.searchParams.delete(GALLERY_NAVIGATION_PROOF_PARAM);
+
+    if (hasValidGalleryReturnRequest) {
+      initialUrl.hash = "";
+    }
+
     const galleryReturnHistoryState = { ...(window.history.state ?? {}) };
 
     if (!galleryReturnHistoryState[GALLERY_RETURN_STATE_KEY]) {
