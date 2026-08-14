@@ -58,7 +58,9 @@ if (returnToken) {
 document.querySelectorAll("[data-gallery-back]").forEach((link) => {
   link.setAttribute(
     "href",
-    requestedLanguage === "en" ? "/?lang=en&from=gallery" : "/?lang=ja&from=gallery"
+    requestedLanguage === "en"
+      ? "./?lang=en&from=gallery#okinawa"
+      : "./?lang=ja&from=gallery#okinawa"
   );
 
   link.addEventListener("click", (event) => {

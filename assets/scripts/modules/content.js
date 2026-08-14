@@ -89,7 +89,7 @@ function localizePhotoLabels(copy, locale) {
   });
 
   document.querySelectorAll("[data-gallery-link]").forEach((link) => {
-    const url = new URL(link.getAttribute("href") || "/gallery", window.location.href);
+    const url = new URL(link.getAttribute("href") || "gallery.html", window.location.href);
 
     url.searchParams.set("lang", locale);
     link.setAttribute("href", `${url.pathname}${url.search}${url.hash}`);
