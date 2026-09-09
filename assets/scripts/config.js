@@ -51,7 +51,7 @@ export const EXPERIENCE_CONFIG = {
           note: "詳細は決まり次第ご案内します"
         }
       },
-      photoShareNote: "写真共有は挙式後にご案内します",
+      photoShareNote: "結婚式当日の思い出を、みんなで集めるアルバムです",
       mapEmbedUrl: "https://maps.google.com/maps?hl=ja&q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&z=16&output=embed",
       rsvpDeadline: "2026年6月30日(火)",
       closingMessage: "皆さまにお会いできる日を心より楽しみにしております",
@@ -122,6 +122,7 @@ export const EXPERIENCE_CONFIG = {
         diningMapTitle: "会食会場地図",
         scheduleHeading: "当日の流れ",
         informationHeading: "ご案内",
+        photoShareCta: "写真を見る・追加する",
         rsvpDeadlinePrefix: "ご返信は",
         rsvpDeadlineSuffix: "までにお願いいたします",
         partyFactsAria: "友人の集い編の情報",
@@ -172,7 +173,7 @@ export const EXPERIENCE_CONFIG = {
           note: "Further details will follow"
         }
       },
-      photoShareNote: "Details about photo sharing will be provided after the ceremony.",
+      photoShareNote: "A shared album where everyone can collect memories from our wedding day.",
       mapEmbedUrl: "https://maps.google.com/maps?hl=en&q=%E6%A2%A8%E6%9C%A8%E7%A5%9E%E7%A4%BE%20%E4%BA%AC%E9%83%BD&z=16&output=embed",
       rsvpDeadline: "Tuesday, June 30, 2026",
       closingMessage: "We look forward to celebrating with you.",
@@ -243,6 +244,7 @@ export const EXPERIENCE_CONFIG = {
         diningMapTitle: "Dining venue map",
         scheduleHeading: "Order of the Day",
         informationHeading: "Information",
+        photoShareCta: "View and add photos",
         rsvpDeadlinePrefix: "Please respond by",
         rsvpDeadlineSuffix: ".",
         partyFactsAria: "Friends gathering details",

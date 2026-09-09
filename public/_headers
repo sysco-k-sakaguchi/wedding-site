@@ -1,0 +1,12 @@
+# Build-generated root assets include a content hash and are safe to cache forever.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# These source-managed files keep stable URLs, so browsers must revalidate them.
+/assets/scripts/*
+  ! Cache-Control
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/styles/*
+  ! Cache-Control
+  Cache-Control: public, max-age=0, must-revalidate

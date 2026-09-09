@@ -1,6 +1,7 @@
 import { EXPERIENCE_CONFIG, EXPERIENCE_SETTINGS, PLACEHOLDER_URL } from "./config.js?v=20260814-5";
 import { bindContent, getLocaleConfig, setupPlaceholderLinks } from "./modules/content.js?v=20260814-5";
 import { setupCurtain } from "./modules/curtain.js?v=20260814-5";
+import { setupBusMapDialog } from "./modules/bus-map-dialog.js?v=20260907-1";
 import { setupPhotoGallery } from "./modules/photo-gallery.js?v=20260814-5";
 import { setupPhotoLightbox } from "./modules/photo-lightbox.js?v=20260814-5";
 import { setupRevealObserver } from "./modules/reveal.js?v=20260814-5";
@@ -244,6 +245,7 @@ function initializeExperience() {
 
   setupPhotoGallery();
   setupPhotoLightbox();
+  setupBusMapDialog();
 
   document.querySelector("[data-gallery-link]")?.addEventListener("click", (event) => {
     const link = event.currentTarget;

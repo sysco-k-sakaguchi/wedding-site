@@ -3,10 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wedding Invitation</title>
+  <title>Masato &amp; Haruka | Wedding Invitation</title>
   <meta
     name="description"
-    content="挙式と会食をはじめ各日のご案内を落ち着いた余白と色合いで見やすくまとめたウェディングサイトです"
+    content="2026年10月12日の挙式・会食、送迎バス、みんなの写真をご案内するウェディングサイトです"
+  >
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Masato &amp; Haruka | Wedding Invitation">
+  <meta
+    property="og:description"
+    content="2026年10月12日の挙式・会食、送迎バス、みんなの写真をご案内します"
+  >
+  <meta
+    property="og:url"
+    content="https://masato-haruka-wedding-2026.keiwansaka.chatgpt.site/"
+  >
+  <meta
+    property="og:image"
+    content="https://masato-haruka-wedding-2026.keiwansaka.chatgpt.site/og.png"
+  >
+  <meta property="og:image:width" content="1734">
+  <meta property="og:image:height" content="907">
+  <meta property="og:image:alt" content="Masato and Haruka Wedding Invitation">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Masato &amp; Haruka | Wedding Invitation">
+  <meta
+    name="twitter:description"
+    content="2026年10月12日の挙式・会食、送迎バス、みんなの写真をご案内します"
+  >
+  <meta
+    name="twitter:image"
+    content="https://masato-haruka-wedding-2026.keiwansaka.chatgpt.site/og.png"
   >
   <meta name="theme-color" content="#ece3d6">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -714,13 +742,142 @@
                   </div>
                 </div>
 
-                <div class="info-list__item">
-                  <small>Photo</small>
-                  <p data-photo-share-note>写真共有は挙式後にご案内します</p>
+                <div class="info-list__item info-list__item--cta">
+                  <div class="rsvp-card">
+                    <small>Guest Album</small>
+                    <p data-photo-share-note>
+                      結婚式当日の思い出を、みんなで集めるアルバムです
+                    </p>
+                    <a class="button-link button-link--primary" href="/photos">
+                      <span data-i18n="photoShareCta">写真を見る・追加する</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </section>
           </div>
+
+          <section class="section-block bus-guide" id="shuttle-bus" lang="ja" aria-labelledby="shuttle-bus-title">
+            <div class="section-heading section-heading--left">
+              <p class="section-tag">Shuttle Bus</p>
+              <h3 id="shuttle-bus-title">送迎バスのご案内</h3>
+            </div>
+
+            <div class="bus-guide__intro">
+              <time class="bus-guide__date" datetime="2026-10-12">2026年10月12日（月）</time>
+              <p>都ホテル京都八条と梨木神社付近を結ぶ送迎バスをご用意しています。</p>
+            </div>
+
+            <div class="bus-schedule" aria-label="送迎バスの運行予定">
+              <section class="bus-trip" aria-labelledby="bus-outbound-title">
+                <h4 id="bus-outbound-title">行き：ホテル → 梨木神社付近</h4>
+                <ol class="bus-trip__stops">
+                  <li class="bus-trip__stop bus-trip__stop--departure">
+                    <time datetime="10:30">10:30</time>
+                    <span>
+                      <strong>都ホテル京都八条</strong>
+                      <small>出発</small>
+                    </span>
+                  </li>
+                  <li class="bus-trip__stop">
+                    <time datetime="11:00">11:00</time>
+                    <span>
+                      <strong>梨木神社付近</strong>
+                      <small>到着</small>
+                    </span>
+                  </li>
+                </ol>
+              </section>
+
+              <section class="bus-trip" aria-labelledby="bus-inbound-title">
+                <h4 id="bus-inbound-title">帰り：梨木神社付近 → ホテル</h4>
+                <ol class="bus-trip__stops">
+                  <li class="bus-trip__stop bus-trip__stop--departure">
+                    <time datetime="12:30">12:30</time>
+                    <span>
+                      <strong>梨木神社付近</strong>
+                      <small>出発</small>
+                    </span>
+                  </li>
+                  <li class="bus-trip__stop">
+                    <time datetime="13:00">13:00</time>
+                    <span>
+                      <strong>都ホテル京都八条</strong>
+                      <small>到着</small>
+                    </span>
+                  </li>
+                </ol>
+              </section>
+            </div>
+
+            <p class="bus-guide__note">記載の時刻は運行予定です。</p>
+
+            <div class="bus-boarding-grid">
+              <article class="bus-boarding-card" aria-labelledby="hotel-boarding-title">
+                <div class="bus-boarding-card__copy">
+                  <h4 id="hotel-boarding-title">都ホテル京都八条の乗降場所</h4>
+                  <p class="bus-boarding-card__location">ホテル内ロータリー</p>
+                  <p>ホテル内ロータリーにて乗り降りします。下の地図をご確認ください。</p>
+                </div>
+                <figure class="bus-map">
+                  <button
+                    class="bus-map__trigger"
+                    type="button"
+                    data-bus-map-expand
+                    data-bus-map-title="都ホテル京都八条の乗降場所"
+                    data-bus-map-full-src="assets/images/bus/hotel-boarding-full.png"
+                    data-bus-map-width="1875"
+                    data-bus-map-height="1249"
+                    aria-label="都ホテル京都八条の乗降場所の地図を拡大"
+                    aria-controls="bus-map-dialog"
+                    aria-haspopup="dialog"
+                  >
+                    <img
+                      src="assets/images/bus/hotel-boarding-preview.webp"
+                      alt="都ホテル京都八条のホテル内ロータリーを、配車場所の吹き出しで示した地図"
+                      width="1440"
+                      height="959"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    <span class="bus-map__action" aria-hidden="true">タップで拡大</span>
+                  </button>
+                </figure>
+              </article>
+
+              <article class="bus-boarding-card" aria-labelledby="shrine-boarding-title">
+                <div class="bus-boarding-card__copy">
+                  <h4 id="shrine-boarding-title">梨木神社付近の乗降場所</h4>
+                  <p class="bus-boarding-card__location">「府立医大病院前」付近</p>
+                  <p>目印は「府立医大病院前」付近です。神社の入口とは場所が異なりますので、下の地図の「乗降場所」をご確認ください。</p>
+                </div>
+                <figure class="bus-map">
+                  <button
+                    class="bus-map__trigger"
+                    type="button"
+                    data-bus-map-expand
+                    data-bus-map-title="梨木神社付近の乗降場所"
+                    data-bus-map-full-src="assets/images/bus/shrine-boarding-full.png"
+                    data-bus-map-width="1290"
+                    data-bus-map-height="807"
+                    aria-label="梨木神社付近の乗降場所の地図を拡大"
+                    aria-controls="bus-map-dialog"
+                    aria-haspopup="dialog"
+                  >
+                    <img
+                      src="assets/images/bus/shrine-boarding-preview.webp"
+                      alt="梨木神社の位置と、府立医大病院前付近の送迎バス乗降場所をそれぞれ示した地図"
+                      width="1290"
+                      height="807"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    <span class="bus-map__action" aria-hidden="true">タップで拡大</span>
+                  </button>
+                </figure>
+              </article>
+            </div>
+          </section>
         </article>
       </div>
     </section>
@@ -820,9 +977,42 @@
         </button>
       </div>
     </dialog>
+
+    <dialog
+      id="bus-map-dialog"
+      class="bus-map-dialog"
+      lang="ja"
+      data-bus-map-dialog
+      aria-labelledby="bus-map-dialog-title"
+    >
+      <div class="bus-map-dialog__panel">
+        <header class="bus-map-dialog__header">
+          <h2 id="bus-map-dialog-title" data-bus-map-dialog-title></h2>
+          <div class="bus-map-dialog__actions">
+            <a
+              class="bus-map-dialog__original"
+              data-bus-map-dialog-original
+              target="_blank"
+              rel="noopener noreferrer"
+            >画像を別タブで開く</a>
+            <button
+              class="bus-map-dialog__close"
+              type="button"
+              data-bus-map-dialog-close
+              aria-label="地図の拡大表示を閉じる"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+        </header>
+        <div class="bus-map-dialog__image-wrap">
+          <img data-bus-map-dialog-image alt="">
+        </div>
+      </div>
+    </dialog>
     </div>
   </main>
 
-  <script type="module" src="assets/scripts/app.js?v=20260814-5"></script>
+  <script type="module" src="assets/scripts/app.js?v=20260907-1"></script>
 </body>
 </html>

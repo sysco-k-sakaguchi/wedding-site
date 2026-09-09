@@ -1,47 +1,38 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import "./globals.css";
 
 const title = "Masato & Haruka | Wedding Invitation";
 const description =
-  "挙式と会食をはじめ各日のご案内をまとめた Masato と Haruka のウェディング招待状です";
+  "2026年10月12日の挙式・会食、送迎バス、みんなの写真をご案内するウェディングサイトです";
+const siteUrl = new URL("https://masato-haruka-wedding-2026.keiwansaka.chatgpt.site/");
+const socialImageUrl = new URL("/og.png", siteUrl);
 
-export async function generateMetadata(): Promise<Metadata> {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const forwardedProtocol = requestHeaders.get("x-forwarded-proto");
-  const protocol =
-    forwardedProtocol ?? (host?.startsWith("localhost") ? "http" : "https");
-  const imageUrl = host ? `${protocol}://${host}/og.png` : undefined;
-
-  return {
+export const metadata: Metadata = {
+  metadataBase: siteUrl,
+  title,
+  description,
+  openGraph: {
+    type: "website",
+    url: siteUrl,
     title,
     description,
-    openGraph: {
-      type: "website",
-      title,
-      description,
-      locale: "ja_JP",
-      images: imageUrl
-        ? [
-            {
-              url: imageUrl,
-              width: 1734,
-              height: 907,
-              alt: "Masato and Haruka wedding invitation framed by burgundy curtains",
-            },
-          ]
-        : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: imageUrl ? [imageUrl] : undefined,
-    },
-  };
-}
+    locale: "ja_JP",
+    images: [
+      {
+        url: socialImageUrl,
+        width: 1734,
+        height: 907,
+        alt: "Masato and Haruka wedding invitation framed by burgundy curtains",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [socialImageUrl],
+  },
+};
 
 export const viewport: Viewport = {
   themeColor: "#ece3d6",
@@ -63,6 +54,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
+        <link rel="icon" type="image/webp" href="/images/wedding/01_beach_smile-640.webp" />
         <link rel="stylesheet" href="/assets/styles/main.css" />
       </head>
       <body suppressHydrationWarning>{children}</body>

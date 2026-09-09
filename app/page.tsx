@@ -5,7 +5,7 @@ function extractInvitationMarkup(documentSource: string) {
   const body = documentSource.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] ?? "";
 
   return body.replace(
-    /<script\s+type="module"\s+src="assets\/scripts\/app\.js"><\/script>/i,
+    /<script\s+type="module"\s+src="assets\/scripts\/app\.js(?:\?[^\"]*)?"><\/script>/i,
     ""
   );
 }
@@ -21,7 +21,7 @@ export default function Home() {
       />
       <Script
         id="wedding-experience"
-        src="/assets/scripts/app.js"
+        src="/assets/scripts/app.js?v=20260907-1"
         type="module"
         strategy="afterInteractive"
       />
