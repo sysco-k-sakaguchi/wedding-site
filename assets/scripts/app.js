@@ -223,6 +223,12 @@ function initializeExperience() {
       : EXPERIENCE_CONFIG.defaultLocale;
 
     bindContent(EXPERIENCE_CONFIG, currentLocale);
+    const albumLink = document.querySelector("[data-photo-album-link]");
+    if (albumLink) {
+      const albumUrl = new URL(albumLink.href);
+      albumUrl.searchParams.set("lang", currentLocale);
+      albumLink.href = albumUrl.href;
+    }
 
     if (updateUrl) {
       const url = new URL(window.location.href);

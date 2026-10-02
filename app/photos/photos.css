@@ -1,4 +1,8 @@
 .photos-page {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.7;
+  --text-soft: #5b5147;
   min-height: 100svh;
   padding-bottom: max(4rem, calc(env(safe-area-inset-bottom) + 3rem));
   color: var(--text);
@@ -46,7 +50,7 @@
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.38);
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--accent-deep);
 }
@@ -54,13 +58,13 @@
 .photos-intro {
   width: min(100% - 2rem, 48rem);
   margin: auto;
-  padding: clamp(4.5rem, 12vw, 8rem) 0 clamp(3rem, 8vw, 5rem);
+  padding: 2.25rem 0 2rem;
   text-align: center;
 }
 
 .photos-eyebrow {
   margin-bottom: 0.75rem;
-  font-size: 0.76rem;
+  font-size: 1rem;
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -69,7 +73,7 @@
 
 .photos-intro h1 {
   font-family: var(--font-heading);
-  font-size: clamp(2.75rem, 10vw, 5.8rem);
+  font-size: clamp(2rem, 7vw, 3.3rem);
   font-weight: 500;
   line-height: 1.18;
   letter-spacing: 0.02em;
@@ -77,7 +81,7 @@
 
 .photos-lead {
   margin-top: 1.5rem;
-  font-size: clamp(0.92rem, 2.4vw, 1.04rem);
+  font-size: 1.125rem;
   color: var(--text-soft);
 }
 
@@ -235,7 +239,7 @@
 
 .photos-access-form > label,
 .photos-upload-fields label > span {
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--accent-deep);
@@ -308,7 +312,7 @@
 }
 
 .photos-toolbar__primary span {
-  font-size: 0.82rem;
+  font-size: 1rem;
   color: var(--text-soft);
 }
 
@@ -345,7 +349,7 @@
   padding: 0.05rem 0.3rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.26);
-  font-size: 0.72rem;
+  font-size: 1rem;
   text-align: center;
 }
 
@@ -373,7 +377,7 @@
 
 .photos-gallery-section {
   width: min(100% - 2rem, 72rem);
-  margin: clamp(3.5rem, 9vw, 6rem) auto 0;
+  margin: 2.5rem auto 0;
 }
 
 .photos-gallery-heading {
@@ -392,7 +396,7 @@
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.48);
-  font-size: 0.82rem;
+  font-size: 1rem;
 }
 
 .photos-grid {
@@ -419,7 +423,7 @@
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
   padding: 0;
   overflow: hidden;
   border: 0;
@@ -440,7 +444,7 @@
   height: 100%;
   padding: 1rem;
   place-items: center;
-  font-size: 0.82rem;
+  font-size: 1rem;
   text-align: center;
   color: var(--text-soft);
 }
@@ -481,14 +485,14 @@
 }
 
 .photos-card__meta strong {
-  font-size: 0.78rem;
+  font-size: 1rem;
   color: var(--accent-deep);
 }
 
 .photos-card__meta span {
   grid-column: 1;
   overflow: hidden;
-  font-size: 0.7rem;
+  font-size: 1rem;
   color: var(--text-soft);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -498,11 +502,12 @@
   display: grid;
   grid-column: 2;
   grid-row: 1 / 3;
-  width: 2.75rem;
-  height: 2.75rem;
+  min-width: 3.75rem;
+  min-height: 3rem;
+  padding: 0.35rem 0.6rem;
   place-items: center;
   border: 1px solid var(--line);
-  border-radius: 50%;
+  border-radius: 0.65rem;
   background: rgba(255, 255, 255, 0.72);
   font-weight: 700;
 }
@@ -555,7 +560,7 @@
 .photos-footer a {
   min-height: 2.75rem;
   padding: 0.5rem 0.8rem;
-  font-size: 0.78rem;
+  font-size: 1rem;
   text-decoration: underline;
   text-underline-offset: 0.25em;
   color: var(--text-soft);
@@ -674,7 +679,7 @@
 }
 
 .photos-drop-zone small {
-  font-size: 0.73rem;
+  font-size: 1rem;
 }
 
 .photos-drop-zone button {
@@ -724,14 +729,14 @@
 
 .photos-upload-item__body strong {
   overflow: hidden;
-  font-size: 0.75rem;
+  font-size: 1rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .photos-upload-item__body small,
 .photos-upload-item__status {
-  font-size: 0.68rem;
+  font-size: 1rem;
   color: var(--text-soft);
 }
 
@@ -796,7 +801,7 @@
 }
 
 .photos-overall-progress p {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--text-soft);
 }
 
@@ -967,7 +972,7 @@
   padding: 0.25rem 0.6rem;
   border-radius: 999px;
   background: rgba(28, 23, 21, 0.7);
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #fff;
 }
 
@@ -1003,7 +1008,7 @@
 }
 
 .photos-admin-card dt {
-  font-size: 0.78rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--accent-deep);
 }
@@ -1158,4 +1163,46 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Guest album controls stay readable on phones and at enlarged text sizes. */
+.photos-header { flex-wrap: wrap; padding-bottom: 1rem; }
+.photos-language-switch { display: flex; gap: 0.4rem; }
+.photos-language-switch button { min-height: 3rem; padding: 0.5rem 0.85rem; border: 1px solid #917452; border-radius: 0.65rem; background: #fff; font-size: 1rem; font-weight: 700; color: #493a27; cursor: pointer; }
+.photos-language-switch button[aria-pressed="true"] { background: #493a27; color: #fff; }
+.photos-upload-dialog, .photos-lightbox { font-family: var(--font-body); font-size: 1.125rem; line-height: 1.6; }
+.photos-primary-button, .photos-access-form button, .photos-drop-zone button { min-height: 3.5rem; background: #efbf32; border-color: #bb870c; color: #33270c; font-size: 1.125rem; }
+.photos-secondary-button { font-size: 1rem; min-height: 3.25rem; }
+.photos-toolbar__primary .photos-primary-button span { color: inherit; font-size: 1.5rem; }
+.photos-card__meta { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; padding: 0.75rem; }
+.photos-card__meta span { white-space: normal; overflow-wrap: anywhere; }
+.photos-card__meta a { grid-column: 1; grid-row: auto; width: 100%; background: #fff; color: #493a27; }
+.photos-upload-fields { padding-top: 1rem; }
+.photos-upload-details summary, .photos-save-help summary { min-height: 3rem; padding: 0.65rem 0; cursor: pointer; font-size: 1rem; font-weight: 700; }
+.photos-help, .photos-help-row, .photos-save-help { font-size: 1rem; color: #5b5147; }
+.photos-help-row, .photos-save-help { width: min(100% - 2rem, 62rem); margin: 1rem auto 0; }
+.photos-help-row { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.photos-help-row p { flex: 1 1 18rem; }
+.photos-selection-help { flex-basis: 100%; font-size: 1rem; }
+.photos-save-help p { padding-bottom: 0.75rem; }
+.photos-drop-zone small { font-size: 1rem; overflow-wrap: anywhere; }
+.photos-upload-item__status { overflow-wrap: anywhere; }
+.photos-dialog-header h2 { font-family: var(--font-body); font-weight: 700; font-size: 1.5rem; }
+.photos-dialog-footer { gap: 0.65rem; padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.photos-lightbox__meta .photos-primary-button { background: #efbf32; color: #33270c; }
+.photos-filters { flex-wrap: wrap; overflow: visible; }
+@media (max-width: 480px) {
+  .photos-header { gap: 0.65rem; }
+  .photos-brand { width: 100%; }
+  .photos-back { font-size: 1rem; padding: 0.5rem 0.65rem; }
+  .photos-language-switch { margin-left: auto; }
+  .photos-language-switch button { padding-inline: 0.65rem; }
+  .photos-dialog-footer { flex-wrap: wrap; }
+  .photos-dialog-footer > button { flex: 1 1 10rem; }
+  .photos-access-card, .photos-toolbar { padding: 1.25rem; }
+  .photos-filters { margin-inline: 0; padding-inline: 0; }
+  .photos-selection-bar > button { width: 100%; }
+}
+@media (max-width: 340px) {
+  .photos-grid, .photos-upload-preview { grid-template-columns: 1fr; }
 }

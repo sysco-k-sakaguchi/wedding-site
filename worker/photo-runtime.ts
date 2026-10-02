@@ -63,6 +63,7 @@ export interface PhotoEnv {
   DB: D1Database;
   PHOTOS: R2Bucket;
   IMAGES?: ImagesBinding;
+  PHOTO_LOCAL_SETUP?: string;
   PHOTO_ACCESS_CODE?: string;
   PHOTO_ADMIN_CODE?: string;
   PHOTO_SESSION_SECRET?: string;

@@ -418,7 +418,8 @@ async function handleAccess(
     );
   }
   const body = await readJson(request);
-  const code = typeof body.code === "string" ? body.code : "";
+  const inputCode = typeof body.code === "string" ? body.code : "";
+  const code = admin ? inputCode : inputCode.normalize("NFKC").trim();
   const expected = admin ? config.adminCode : config.accessCode;
   if (!(await secureCredentialEqual(code, expected))) {
     await rateLimit(repository, request, config, {

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="referrer" content="no-referrer">
+    <title>みんなの写真 | Masato &amp; Haruka</title>
+    <style>body{font:18px/1.8 system-ui,sans-serif;color:#392b0a;background:#faf6ef;max-width:34rem;margin:4rem auto;padding:1.25rem}a{display:block;padding:1rem;background:#efbf32;border:1px solid #bb870c;border-radius:1rem;color:inherit;text-align:center;font-weight:700}p{margin:1.5rem 0}</style>
+  </head>
+  <body>
+    <h1>みんなの写真 / Guest photo album</h1>
+    <p>写真アルバムへ移動しています。<br>Opening the photo album…</p>
+    <a id="album-link" href="https://masato-haruka-wedding-2026.keiwansaka.chatgpt.site/photos?lang=ja">アルバムを開く / Open album</a>
+    <script>
+      const language = new URL(location.href).searchParams.get("lang") === "en" ? "en" : "ja";
+      const album = new URL(document.getElementById("album-link").href);
+      album.searchParams.set("lang", language);
+      document.getElementById("album-link").href = album.href;
+      location.replace(album.href);
+    </script>
+  </body>
+</html>

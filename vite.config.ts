@@ -53,6 +53,7 @@ export default defineConfig(async ({ mode }) => {
   const localRuntimeVars =
     mode === "development"
       ? {
+          PHOTO_LOCAL_SETUP: "1",
           PHOTO_ACCESS_CODE: readRuntimeValue("PHOTO_ACCESS_CODE"),
           PHOTO_ADMIN_CODE: readRuntimeValue("PHOTO_ADMIN_CODE"),
           PHOTO_SESSION_SECRET: readRuntimeValue("PHOTO_SESSION_SECRET"),

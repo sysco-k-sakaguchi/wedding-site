@@ -80,10 +80,10 @@ export function ensurePhotoSchema(database: D1Database) {
 }
 
 export class PhotoRepository {
-  constructor(private readonly database: D1Database) {}
+  constructor(private readonly database: D1Database, private readonly initializeLocalSchema = false) {}
 
   async ready() {
-    await ensurePhotoSchema(this.database);
+    if (this.initializeLocalSchema) await ensurePhotoSchema(this.database);
   }
 
   async createBatch(batch: PhotoUploadBatch) {
@@ -377,7 +377,7 @@ export class R2PhotoObjectStorage implements PhotoObjectStorage {
 
 export function createPhotoServices(env: PhotoEnv) {
   return {
-    repository: new PhotoRepository(env.DB),
+    repository: new PhotoRepository(env.DB, env.PHOTO_LOCAL_SETUP === "1"),
     objects: new R2PhotoObjectStorage(env.PHOTOS),
   };
 }
