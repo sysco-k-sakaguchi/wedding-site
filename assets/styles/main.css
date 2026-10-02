@@ -3358,3 +3358,11 @@ body.is-bus-map-dialog-open {
     transition: none;
   }
 }
+
+/* Only the guest-album entrance uses the requested stronger yellow. */
+.button-link--album {
+  background: linear-gradient(180deg, #f5ca43, #e8b321);
+  border-color: #bd880d;
+  color: #392b0a;
+}
+.button-link--album:hover { background: #edba27; }

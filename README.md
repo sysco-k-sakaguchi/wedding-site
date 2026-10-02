@@ -49,6 +49,17 @@ npm run dev
 
 バックアップする場合はdev serverを停止し、`.wrangler/state` を日時付きの別ディレクトリへコピーしてください。初期化は、そのバックアップを確認したうえで `.wrangler` を退避してから行います。`public/images` は静的同期時に再生成されるため、投稿写真の保存先には使用していません。
 
+## 2026-10-02 の更新
+
+独自ドメイン `masato-haruka-wedding.com` は GitHub Pages の `main` / ルートを静的配信しています。`/photos` の React ページと Worker API はこの配信方式では実行されず、共有ボタンのリンク先が404になります。招待状はそのまま保持し、共有アプリを既存 Sites プロジェクトに配置して、専用ボタンだけを絶対URLへ接続する構成です。
+
+- 招待状の変更は共有ボタンの濃い黄色、共有アプリへのリンク、および既存の日英選択の引き継ぎのみ。
+- ゲスト画面は本文18px、明示的な「追加」「保存」、日本語 / English、複数選択、任意項目の折りたたみ、通信切断時の再送に対応。
+- ゲストのパスワードはホスティングの secret `PHOTO_ACCESS_CODE` で設定。ソースに実値を埋め込みません。全角数字と前後の空白にも対応します。
+- 本番D1のスキーマ作成はデプロイ時のSQL migrationが担当。ローカル開発のみ `PHOTO_LOCAL_SETUP=1` により初期化します。
+- Sitesの既存公開範囲は本人限定です。ゲストを案内する前に、所有者の明示的な承認で「リンクからアクセス可」に変更する必要があります。写真/API自体は共有パスワードと署名Cookieで保護されます。
+- 本番の `original` モードは1枚5MB、1回10枚、40MP、1時間60枚。ローカルに既存の投稿があっても、それらは自動的に本番へ送られません。
+
 ## 写真機能
 
 - JPEG / PNG / WebP、1枚20MB、1回20枚が初期値です。
@@ -121,17 +132,17 @@ npm run test:integration
 
 2026-09-01時点で `npm audit --omit=dev` は0件です。全依存監査には、現行vinextが利用する `image-size` のhigh 2件が残ります。修正にはvinext 1.0 betaへの破壊的移行が必要なため `--force` は使っていません。本番公開前にvinextの互換性確認を伴う更新を行ってください。
 
-設計判断は [docs/shared-photo-gallery-design.md](docs/shared-photo-gallery-design.md) にあります。実ブラウザ確認画像はローカルの `docs/screenshots` に保存し、Git対象外としています。
+設計判断は [docs/shared-photo-gallery-design.md](docs/shared-photo-gallery-design.md)、バス案内の注意点は [docs/bus-source-notes.md](docs/bus-source-notes.md) にあります。
 
-## 本番化（未実施）
+## 本番運用の設定
 
-今回、外部サービスの契約、認証情報の作成、本番デプロイ、pushは行っていません。本番化時に次を実施します。
+公開先の準備では、以下の設定を確認します。本人限定での公開と、ゲストへの公開範囲の変更は区別してください。
 
 1. 対象ホスティング環境で非公開D1データベースとR2バケットを作成し、`.openai/hosting.json` の `DB` / `PHOTOS` バインディングを実リソースへ接続します。
 2. `drizzle/0001_shared_photo_gallery.sql` を本番D1へ適用します。ローカルでは初回アクセス時にも同一スキーマを安全に作成します。
 3. Cloudflare Images Binding `IMAGES` が利用できる環境では `PHOTO_VARIANT_MODE=transform`、利用できないSites環境では `PHOTO_VARIANT_MODE=original` を設定します。`original`ではサムネイル・表示画像も原本相当となるため、ファイル上限とEXIFの扱いに注意してください。
 4. `PHOTO_ACCESS_CODE`、別の十分長い `PHOTO_ADMIN_CODE`、32文字以上の `PHOTO_SESSION_SECRET` をホスティング側のsecret bindingとして登録します。共有コードを含む実値はGitへ入れません。production buildではローカル `.env` をinline `vars` へ展開しません。
-   Sitesで`original`モードを使う場合は、確認済みの運用値として `PHOTO_MAX_FILE_BYTES=5000000`、`PHOTO_MAX_FILES_PER_BATCH=10`、`PHOTO_MAX_PIXELS=40000000`、`PHOTO_UPLOADS_PER_HOUR=20` を併せて設定します。
+   Sitesで`original`モードを使う場合は、確認済みの運用値として `PHOTO_MAX_FILE_BYTES=5000000`、`PHOTO_MAX_FILES_PER_BATCH=10`、`PHOTO_MAX_PIXELS=40000000`、`PHOTO_UPLOADS_PER_HOUR=60` を併せて設定します。
 5. 独自ドメインとHTTPS、Cookie、CSP、`robots.txt`、実端末からのアクセスを確認します。
 6. R2の容量上限・ライフサイクル、D1/R2のバックアップ、復元訓練、監視、保持期間、費用アラートを決めます。
 7. D1とR2を定期照合し、不確定commit時に安全側で残した孤立オブジェクトを監査・整理するreconcilerを用意します。

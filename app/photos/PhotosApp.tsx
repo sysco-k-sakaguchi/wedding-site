@@ -10,6 +10,8 @@ import {
   type FormEvent,
 } from "react";
 
+import { PhotoLocaleContext, usePhotoText, categoryLabel, photoErrorMessage, type PhotoLocale } from "./photo-i18n";
+
 interface Category {
   id: string;
   label: string;
@@ -63,19 +65,22 @@ interface UploadItem {
 }
 
 export async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    credentials: "same-origin",
-    ...init,
-  });
-  const payload = (await response.json().catch(() => ({}))) as T & ApiErrorBody;
-
-  if (!response.ok) {
-    throw new Error(
-      payload.error?.message ?? "処理を完了できませんでした。もう一度お試しください。",
-    );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+  const locale = (): PhotoLocale => typeof document !== "undefined" && document.documentElement.lang === "en" ? "en" : "ja";
+  try {
+    const response = await fetch(url, { credentials: "same-origin", signal: controller.signal, ...init });
+    const payload = (await response.json().catch(() => ({}))) as T & ApiErrorBody;
+    if (!response.ok) throw new Error(photoErrorMessage(payload.error?.code, payload.error?.message, locale()));
+    return payload;
+  } catch (caught) {
+    if (controller.signal.aborted || caught instanceof TypeError) {
+      throw new Error(locale() === "en" ? "Connection interrupted. Please try again." : "通信が途切れました。もう一度お試しください。");
+    }
+    throw caught;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return payload;
 }
 
 function startBrowserDownload(url: string) {
@@ -87,8 +92,8 @@ function startBrowserDownload(url: string) {
   link.remove();
 }
 
-export function formatDate(value: string) {
-  return new Intl.DateTimeFormat("ja-JP", {
+export function formatDate(value: string, locale: PhotoLocale = "ja") {
+  return new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "ja-JP", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -103,11 +108,11 @@ export function formatFileSize(bytes: number) {
     : `${Math.max(1, Math.round(bytes / 1_000))}KB`;
 }
 
-function makePhotoAlt(photo: Photo, categories: Category[]) {
-  const category = categories.find((item) => item.id === photo.category)?.label ?? "結婚式";
-  return photo.uploaderName
-    ? `${category}の写真（${photo.uploaderName}さんより）`
-    : `${category}の写真`;
+function makePhotoAlt(photo: Photo, categories: Category[], locale: PhotoLocale) {
+  const item = categories.find((item) => item.id === photo.category);
+  const category = categoryLabel(photo.category, item?.label ?? "結婚式", locale);
+  if (locale === "en") return `${category} photo${photo.uploaderName ? ` by ${photo.uploaderName}` : ""}`;
+  return photo.uploaderName ? `${category}の写真（${photo.uploaderName}さんより）` : `${category}の写真`;
 }
 
 function AccessPanel({
@@ -117,6 +122,7 @@ function AccessPanel({
   configured: boolean;
   onAuthenticated: (csrfToken: string) => void;
 }) {
+  const { t } = usePhotoText();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -131,12 +137,12 @@ function AccessPanel({
       const result = await apiJson<{ csrfToken: string }>("/api/photos/access", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code: code.normalize("NFKC").trim() }),
       });
       onAuthenticated(result.csrfToken);
       setCode("");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "共有コードを確認してください。");
+      setError(caught instanceof Error ? caught.message : t("共有コードを確認してください。", "Please check the password."));
     } finally {
       setSubmitting(false);
     }
@@ -147,18 +153,18 @@ function AccessPanel({
       <div>
         <p className="photos-eyebrow">For Our Guests</p>
         <h2 id="photos-access-title">
-          {configured ? "共有コードを入力" : "アクセス設定が必要です"}
+          {configured ? t("パスワードを入力", "Enter the password") : t("アルバムは準備中です", "The album will be ready soon")}
         </h2>
         <p>
           {configured
-            ? "招待状と一緒にお知らせした共有コードを入力してください。"
-            : "環境変数の設定後に、写真の追加と閲覧をご利用いただけます。"}
+            ? t("新郎新婦からお知らせしたパスワードを入力してください。", "Enter the password shared by Masato and Haruka.")
+            : t("準備中です。時間をおいてもう一度お試しください。", "Please try again later or contact the hosts.")}
         </p>
       </div>
 
       {configured ? (
         <form className="photos-access-form" onSubmit={submit}>
-          <label htmlFor="photo-access-code">共有コード</label>
+          <label htmlFor="photo-access-code">{t("パスワード", "Password")}</label>
           <div className="photos-access-form__row">
             <input
               id="photo-access-code"
@@ -167,12 +173,15 @@ function AccessPanel({
               onChange={(event) => setCode(event.target.value)}
               autoComplete="one-time-code"
               inputMode="numeric"
+              maxLength={16}
+              aria-describedby="photo-password-help"
               required
             />
             <button type="submit" disabled={submitting || !code}>
-              {submitting ? "確認中…" : "アルバムを開く"}
+              {submitting ? t("確認中…", "Checking…") : t("アルバムを開く", "Open album")}
             </button>
           </div>
+          <p id="photo-password-help" className="photos-help">{t("新郎新婦からお知らせした4桁のパスワードです。", "Use the four-digit password shared by the hosts.")}</p>
           {error ? (
             <p className="photos-form-error" role="alert">
               <span aria-hidden="true">!</span> {error}
@@ -181,7 +190,7 @@ function AccessPanel({
         </form>
       ) : (
         <p className="photos-setup-note" role="status">
-          管理者向けの設定手順はリポジトリの README に記載しています。
+          {t("準備ができていない場合は、新郎新婦へお知らせください。", "Please contact the hosts if the album is unavailable.")}
         </p>
       )}
     </section>
@@ -199,12 +208,13 @@ function UploadDialog({
   onClose: () => void;
   onPhoto: (photo: Photo) => void;
 }) {
+  const { locale, t } = usePhotoText();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadGuard = useRef(false);
   const previewUrls = useRef(new Set<string>());
   const [items, setItems] = useState<UploadItem[]>([]);
-  const [category, setCategory] = useState(session.categories[0]?.id ?? "other");
+  const [category, setCategory] = useState("other");
   const [uploaderName, setUploaderName] = useState("");
   const [comment, setComment] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -249,20 +259,20 @@ function UploadDialog({
   function validateFile(file: File) {
     const lowerName = file.name.toLowerCase();
     if (/\.(heic|heif)$/.test(lowerName) || /heic|heif/.test(file.type)) {
-      return "HEIC／HEIFには現在対応していません。JPEGへ変換してください。";
+      return t("HEIC／HEIFには現在対応していません。JPEGへ変換してください。", "Please choose a JPEG, PNG or WebP photo. HEIC / HEIF is not supported.");
     }
     if (
       file.type &&
       file.type !== "application/octet-stream" &&
       !session.supportedTypes.includes(file.type)
     ) {
-      return "JPEG、PNG、WebPの画像を選んでください。";
+      return t("JPEG、PNG、WebPの画像を選んでください。", "Please choose a JPEG, PNG or WebP photo.");
     }
     if (file.size > session.limits.maxFileBytes) {
-      return `1枚あたり${Math.floor(session.limits.maxFileBytes / 1_000_000)}MBまでです。`;
+      return t(`1枚あたり${Math.floor(session.limits.maxFileBytes / 1_000_000)}MBまでです。`, `Please choose a photo under ${Math.floor(session.limits.maxFileBytes / 1_000_000)}MB.`);
     }
     if (file.size < 1) {
-      return "空のファイルは追加できません。";
+      return t("空のファイルは追加できません。", "This file is empty. Please choose another photo.");
     }
     return "";
   }
@@ -274,7 +284,7 @@ function UploadDialog({
       const available = Math.max(0, session.limits.maxFilesPerBatch - current.length);
       const accepted = files.slice(0, available);
       if (files.length > available) {
-        setBatchError(`写真は1回につき${session.limits.maxFilesPerBatch}枚まで選べます。`);
+        setBatchError(t(`写真は1回につき${session.limits.maxFilesPerBatch}枚まで選べます。`, `You can choose up to ${session.limits.maxFilesPerBatch} photos at a time.`));
       }
 
       const next = accepted.map((file) => {
@@ -327,6 +337,7 @@ function UploadDialog({
 
       request.open("POST", `/api/photos?${query}`);
       request.withCredentials = true;
+      request.timeout = 120_000;
       request.setRequestHeader("X-CSRF-Token", session.csrfToken ?? "");
       request.setRequestHeader(
         "Content-Type",
@@ -338,7 +349,7 @@ function UploadDialog({
           updateItem(item.id, {
             status: "uploading",
             progress: Math.round((event.loaded / event.total) * 100),
-            message: "アップロード中",
+            message: t("アップロード中", "Sending…"),
           });
         }
       });
@@ -359,20 +370,20 @@ function UploadDialog({
           updateItem(item.id, {
             status: payload.duplicate ? "duplicate" : "success",
             progress: 100,
-            message: payload.duplicate ? "登録済み" : "追加しました",
+            message: payload.duplicate ? t("登録済み", "Already shared") : t("追加しました", "Added"),
           });
           onPhoto(payload.photo);
         } else if (request.status === 409 && payload.error?.code === "duplicate_photo") {
           updateItem(item.id, {
             status: "duplicate",
             progress: 100,
-            message: payload.error.message ?? "同じ写真は登録済みです",
+            message: t("同じ写真は登録済みです", "This photo is already shared."),
           });
         } else {
           updateItem(item.id, {
             status: "error",
             progress: 100,
-            message: payload.error?.message ?? "アップロードできませんでした。",
+            message: photoErrorMessage(payload.error?.code, payload.error?.message, locale),
           });
         }
         resolve();
@@ -381,19 +392,26 @@ function UploadDialog({
         updateItem(item.id, {
           status: "error",
           progress: 100,
-          message: "通信できませんでした。もう一度お試しください。",
+          message: t("通信できませんでした。もう一度お試しください。", "Connection lost. Please try again."),
         });
         resolve();
       });
+      for (const event of ["timeout", "abort"]) {
+        request.addEventListener(event, () => {
+          updateItem(item.id, { status: "error", progress: 0, message: t("通信が途切れました。「もう一度追加する」で再送できます。", "Connection interrupted. Use Retry to send this photo again.") });
+          resolve();
+        });
+      }
+      updateItem(item.id, { status: "uploading", progress: 0, message: t("追加しています…", "Sending…") });
       request.send(item.file);
     });
   }
 
   async function startUpload() {
     if (uploadGuard.current || uploading) return;
-    const uploadable = items.filter((item) => item.status === "queued");
+    const uploadable = items.filter((item) => item.status === "queued" || (item.status === "error" && !validateFile(item.file)));
     if (uploadable.length < 1) {
-      setBatchError("アップロードできる写真を選んでください。");
+      setBatchError(t("アップロードできる写真を選んでください。", "Please choose photos to add."));
       return;
     }
 
@@ -429,7 +447,7 @@ function UploadDialog({
       setComplete(true);
     } catch (caught) {
       setBatchError(
-        caught instanceof Error ? caught.message : "アップロードを開始できませんでした。",
+        caught instanceof Error ? caught.message : t("アップロードを開始できませんでした。", "Photos could not be sent. Please try again."),
       );
     } finally {
       uploadGuard.current = false;
@@ -442,6 +460,7 @@ function UploadDialog({
     : items.length > 0
       ? Math.round(items.reduce((total, item) => total + item.progress, 0) / items.length)
       : 0;
+  const retryableCount = items.filter((item) => item.status === "error" && !validateFile(item.file)).length;
   const successCount = items.filter((item) => item.status === "success").length;
   const duplicateCount = items.filter((item) => item.status === "duplicate").length;
   const errorCount = items.filter((item) => item.status === "error").length;
@@ -462,14 +481,14 @@ function UploadDialog({
       <div className="photos-dialog-header">
         <div>
           <p className="photos-eyebrow">Add Photos</p>
-          <h2 id="upload-dialog-title">写真を追加する</h2>
+          <h2 id="upload-dialog-title">{t("写真を追加する", "Add photos")}</h2>
         </div>
         <button
           className="photos-icon-button"
           type="button"
           onClick={requestClose}
           disabled={uploading}
-          aria-label="写真追加画面を閉じる"
+          aria-label={t("写真追加画面を閉じる", "Close photo upload")}
         >
           ×
         </button>
@@ -494,7 +513,7 @@ function UploadDialog({
             ref={fileInputRef}
             className="sr-only"
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             multiple
             disabled={uploading || items.length >= session.limits.maxFilesPerBatch}
             onChange={(event) => {
@@ -503,31 +522,30 @@ function UploadDialog({
             }}
           />
           <span className="photos-drop-zone__mark" aria-hidden="true">＋</span>
-          <strong>写真を選ぶ</strong>
-          <p>スマートフォンから選択、またはPCからドラッグ＆ドロップ</p>
+          <strong>{t("写真を選ぶ", "Choose photos")}</strong>
+          <p>{t("スマートフォンの写真から選べます。", "Choose from your phone. On a computer, you can also drag photos here.")}</p>
           <small>
-            JPEG・PNG・WebP / 1枚{Math.floor(session.limits.maxFileBytes / 1_000_000)}MBまで / 最大
-            {session.limits.maxFilesPerBatch}枚
+            {t(`JPEG・PNG・WebP ／ 1枚${Math.floor(session.limits.maxFileBytes / 1_000_000)}MBまで ／ 1回${session.limits.maxFilesPerBatch}枚まで`, `JPEG, PNG or WebP · Up to ${Math.floor(session.limits.maxFileBytes / 1_000_000)}MB each · ${session.limits.maxFilesPerBatch} photos at a time`)}
           </small>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading || items.length >= session.limits.maxFilesPerBatch}
           >
-            ファイルを選択
+            {t("写真を選ぶ", "Choose photos")}
           </button>
           </div>
 
           <p className="sr-only" aria-live="polite" aria-atomic="true">
             {items.length > 0
-              ? `${items.length}枚を選択中。エラー${errorCount}枚。`
-              : "写真は選択されていません。"}
+              ? t(`${items.length}枚を選択中。エラー${errorCount}枚。`, `${items.length} selected. ${errorCount} could not be added.`)
+              : t("写真は選択されていません。", "No photos selected.")}
           </p>
 
         {items.length > 0 ? (
           <div
             className="photos-upload-preview"
-            aria-label="選択した写真"
+            aria-label={t("選択した写真", "Selected photos")}
             aria-busy={uploading}
           >
             {items.map((item) => (
@@ -535,21 +553,21 @@ function UploadDialog({
                 <div className="photos-upload-item__image">
                   {/* Browser previews are local-only and are never treated as saved data. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.previewUrl} alt={`${item.file.name}のプレビュー`} />
+                  <img src={item.previewUrl} alt={t(`${item.file.name}のプレビュー`, `Preview of ${item.file.name}`)} />
                 </div>
                 <div className="photos-upload-item__body">
                   <strong title={item.file.name}>{item.file.name}</strong>
                   <small>{formatFileSize(item.file.size)}</small>
                   {item.status === "uploading" ? (
-                    <progress value={item.progress} max="100" aria-label={`${item.file.name}の進捗`} />
+                    <progress value={item.progress} max="100" aria-label={t(`${item.file.name}の進捗`, `Progress for ${item.file.name}`)} />
                   ) : null}
                   <span className="photos-upload-item__status">
                     {item.status === "success" ? "✓ " : item.status === "error" ? "! " : ""}
-                    {item.message || "待機中"}
+                    {item.message || t("待機中", "Ready to send")}
                   </span>
                 </div>
                 {!uploading && item.status !== "success" ? (
-                  <button type="button" onClick={() => removeItem(item.id)} aria-label={`${item.file.name}を選択から外す`}>
+                  <button type="button" onClick={() => removeItem(item.id)} aria-label={t(`${item.file.name}を選択から外す`, `Remove ${item.file.name}`)}>
                     ×
                   </button>
                 ) : null}
@@ -558,48 +576,52 @@ function UploadDialog({
           </div>
         ) : null}
 
+        <details className="photos-upload-details">
+          <summary>{t("場面・名前・コメントをつける（任意）", "Add a category, name or message (optional)")}</summary>
         <div className="photos-upload-fields">
           <label>
-            <span>場面</span>
+            <span>{t("場面", "Category")}</span>
             <select value={category} onChange={(event) => setCategory(event.target.value)} disabled={uploading}>
               {session.categories.map((item) => (
-                <option key={item.id} value={item.id}>{item.label}</option>
+                <option key={item.id} value={item.id}>{categoryLabel(item.id, item.label, locale)}</option>
               ))}
             </select>
           </label>
           <label>
-            <span>投稿者名 <small>任意</small></span>
+            <span>{t("投稿者名", "Your name")} <small>{t("任意", "Optional")}</small></span>
             <input
               type="text"
               value={uploaderName}
               onChange={(event) => setUploaderName(event.target.value)}
               maxLength={60}
               disabled={uploading}
-              placeholder="例：はるかの友人"
+              placeholder={t("例：はるかの友人", "e.g. Haruka’s friend")}
             />
           </label>
           <label className="photos-upload-fields__comment">
-            <span>コメント <small>任意</small></span>
+            <span>{t("コメント", "Comment")} <small>{t("任意", "Optional")}</small></span>
             <textarea
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               maxLength={300}
               rows={3}
               disabled={uploading}
-              placeholder="写真にまつわるひとこと"
+              placeholder={t("写真にまつわるひとこと", "A message about these photos")}
             />
           </label>
         </div>
 
+        </details>
+
         {uploading || complete ? (
           <div className="photos-overall-progress" aria-live="polite">
             <div>
-              <strong>{uploading ? "アップロードしています" : "アップロードが完了しました"}</strong>
+              <strong>{uploading ? t("アップロードしています", "Sending your photos…") : errorCount > 0 ? t("追加できなかった写真があります", "Some photos could not be added") : t("アップロードが完了しました", "Your photos have been added")}</strong>
               <span>{overallProgress}%</span>
             </div>
-            <progress value={overallProgress} max="100" aria-label="アップロード全体の進捗" />
+            <progress value={overallProgress} max="100" aria-label={t("アップロード全体の進捗", "Overall upload progress")} />
             {complete ? (
-              <p>成功 {successCount}枚 / 登録済み {duplicateCount}枚 / エラー {errorCount}枚</p>
+              <p>{t(`${successCount}枚追加 ／ ${duplicateCount}枚は登録済み ／ ${errorCount}枚は追加できませんでした`, `${successCount} added · ${duplicateCount} already shared · ${errorCount} could not be added`)}</p>
             ) : null}
           </div>
         ) : null}
@@ -611,16 +633,16 @@ function UploadDialog({
 
       <div className="photos-dialog-footer">
         <button type="button" className="photos-secondary-button" onClick={requestClose} disabled={uploading}>
-          {complete ? "完了" : "キャンセル"}
+          {complete ? t("完了", "Done") : t("キャンセル", "Cancel")}
         </button>
-        {!complete ? (
+        {!complete || retryableCount > 0 ? (
           <button
             type="button"
             className="photos-primary-button"
             onClick={startUpload}
-            disabled={uploading || items.every((item) => item.status !== "queued")}
+            disabled={uploading || (items.every((item) => item.status !== "queued") && retryableCount < 1)}
           >
-            {uploading ? "追加しています…" : `${items.filter((item) => item.status === "queued").length}枚を追加する`}
+            {uploading ? t("追加しています…", "Sending…") : complete ? t("失敗した写真をもう一度追加する", "Retry failed photos") : t(`${items.filter((item) => item.status === "queued").length}枚を追加する`, `Add ${items.filter((item) => item.status === "queued").length} photos`)}
           </button>
         ) : null}
       </div>
@@ -641,6 +663,7 @@ function PhotoLightbox({
   onChange: (photo: Photo) => void;
   onClose: () => void;
 }) {
+  const { locale, t } = usePhotoText();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [failedPhotoId, setFailedPhotoId] = useState<string | null>(null);
@@ -682,7 +705,7 @@ function PhotoLightbox({
     <dialog
       ref={dialogRef}
       className="photos-lightbox"
-      aria-label="写真の拡大表示"
+      aria-label={t("写真の拡大表示", "Photo viewer")}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -693,16 +716,16 @@ function PhotoLightbox({
     >
       {photo ? (
         <div className="photos-lightbox__layout">
-          <button ref={closeRef} className="photos-lightbox__close" type="button" onClick={onClose} aria-label="拡大表示を閉じる">×</button>
+          <button ref={closeRef} className="photos-lightbox__close" type="button" onClick={onClose} aria-label={t("拡大表示を閉じる", "Close photo viewer")}>×</button>
           <div className="photos-lightbox__image-wrap">
             {imageFailed ? (
-              <p role="alert">画像を読み込めませんでした。</p>
+              <p role="alert">{t("画像を読み込めませんでした。", "This photo could not be loaded.")}</p>
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={photo.id}
                 src={photo.viewUrl}
-                alt={makePhotoAlt(photo, categories)}
+                alt={makePhotoAlt(photo, categories, locale)}
                 onError={() => setFailedPhotoId(photo.id)}
               />
             )}
@@ -713,26 +736,26 @@ function PhotoLightbox({
                 className="photos-lightbox__nav photos-lightbox__nav--previous"
                 type="button"
                 onClick={() => onChange(photos[(index - 1 + photos.length) % photos.length])}
-                aria-label="前の写真を表示"
+                aria-label={t("前の写真を表示", "Previous photo")}
               >←</button>
               <button
                 className="photos-lightbox__nav photos-lightbox__nav--next"
                 type="button"
                 onClick={() => onChange(photos[(index + 1) % photos.length])}
-                aria-label="次の写真を表示"
+                aria-label={t("次の写真を表示", "Next photo")}
               >→</button>
             </>
           ) : null}
           <aside className="photos-lightbox__meta">
             <div>
               <span>{index + 1} / {photos.length}</span>
-              <strong>{categories.find((item) => item.id === photo.category)?.label}</strong>
+              <strong>{categoryLabel(photo.category, categories.find((item) => item.id === photo.category)?.label ?? "", locale)}</strong>
             </div>
-            {photo.uploaderName ? <p>{photo.uploaderName}さんより</p> : null}
+            {photo.uploaderName ? <p>{t(`${photo.uploaderName}さんより`, `Shared by ${photo.uploaderName}`)}</p> : null}
             {photo.comment ? <p className="photos-lightbox__comment">{photo.comment}</p> : null}
-            <small>{formatDate(photo.createdAt)} · {formatFileSize(photo.fileSize)}</small>
+            <small>{formatDate(photo.createdAt, locale)} · {formatFileSize(photo.fileSize)}</small>
             <a className="photos-primary-button" href={photo.downloadUrl} download>
-              原本をダウンロード
+              {t("この写真を保存", "Save this photo")}
             </a>
           </aside>
         </div>
@@ -742,6 +765,26 @@ function PhotoLightbox({
 }
 
 export function PhotosApp() {
+  const [locale, setLocale] = useState<PhotoLocale>("ja");
+  const t = (ja: string, en: string) => locale === "en" ? en : ja;
+
+  function changeLocale(next: PhotoLocale) {
+    setLocale(next);
+    document.documentElement.lang = next;
+    document.title = next === "en" ? "Guest photo album | Masato & Haruka" : "みんなの写真 | Masato & Haruka";
+    const url = new URL(window.location.href);
+    url.searchParams.set("lang", next);
+    window.history.replaceState(window.history.state, "", url);
+    try { localStorage.setItem("wedding-photo-language", next); } catch {}
+  }
+
+  useEffect(() => {
+    const requested = new URL(window.location.href).searchParams.get("lang");
+    let stored: string | null = null;
+    try { stored = localStorage.getItem("wedding-photo-language"); } catch {}
+    const initial = requested ?? stored ?? (navigator.language.startsWith("ja") ? "ja" : "en");
+    changeLocale(initial === "en" ? "en" : "ja");
+  }, []);
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [sessionError, setSessionError] = useState("");
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -761,12 +804,13 @@ export function PhotosApp() {
     try {
       const result = await apiJson<{ photos: Photo[] }>("/api/photos");
       setPhotos(result.photos);
+      setBrokenImages(new Set());
       setSelected((current) => {
         const available = new Set(result.photos.map((photo) => photo.id));
         return new Set([...current].filter((id) => available.has(id)));
       });
     } catch (caught) {
-      setGalleryError(caught instanceof Error ? caught.message : "写真を読み込めませんでした。");
+      setGalleryError(caught instanceof Error ? caught.message : t("写真を読み込めませんでした。", "Photos could not be loaded. Please try again."));
     } finally {
       setLoadingPhotos(false);
     }
@@ -783,7 +827,7 @@ export function PhotosApp() {
       })
       .catch((caught) => {
         if (!cancelled) {
-          setSessionError(caught instanceof Error ? caught.message : "ページを準備できませんでした。");
+          setSessionError(caught instanceof Error ? caught.message : t("ページを準備できませんでした。", "The album could not be loaded. Please try again."));
         }
       });
     return () => {
@@ -828,7 +872,7 @@ export function PhotosApp() {
       startBrowserDownload(result.downloadUrl);
       await new Promise((resolve) => window.setTimeout(resolve, 3_000));
     } catch (caught) {
-      setGalleryError(caught instanceof Error ? caught.message : "ダウンロードできませんでした。");
+      setGalleryError(caught instanceof Error ? caught.message : t("ダウンロードできませんでした。", "Photos could not be saved. Please try again."));
     } finally {
       setDownloading(false);
     }
@@ -849,44 +893,48 @@ export function PhotosApp() {
       startBrowserDownload(result.downloadUrl);
       await new Promise((resolve) => window.setTimeout(resolve, 3_000));
     } catch (caught) {
-      setGalleryError(caught instanceof Error ? caught.message : "ダウンロードできませんでした。");
+      setGalleryError(caught instanceof Error ? caught.message : t("ダウンロードできませんでした。", "Photos could not be saved. Please try again."));
     } finally {
       setDownloading(false);
     }
   }
 
   return (
-    <main className="photos-page">
+    <PhotoLocaleContext.Provider value={locale}>
+    <main className="photos-page" lang={locale}>
       <header className="photos-header">
         {/* vinext serves the existing invitation as raw HTML; a plain document
             navigation preserves its opening/return-state behavior. */}
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-        <a className="photos-brand" href="/" aria-label="Masato and Haruka Wedding Top">
+        <a className="photos-brand" href={`https://masato-haruka-wedding.com/?lang=${locale}`} aria-label="Masato and Haruka Wedding Top">
           Masato <i>&amp;</i> Haruka
         </a>
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-        <a className="photos-back" href="/?from=photos#ceremony">
-          <span aria-hidden="true">←</span> Wedding Topへ戻る
+        <a className="photos-back" href={`https://masato-haruka-wedding.com/?lang=${locale}&from=photos#ceremony`}>
+          <span aria-hidden="true">←</span> {t("招待状へ戻る", "Back to invitation")}
         </a>
+        <div className="photos-language-switch" role="group" aria-label="言語 / Language">
+          <button type="button" aria-pressed={locale === "ja"} onClick={() => changeLocale("ja")}>日本語</button>
+          <button type="button" aria-pressed={locale === "en"} onClick={() => changeLocale("en")}>English</button>
+        </div>
       </header>
 
       <section className="photos-intro" aria-labelledby="photos-title">
         <p className="photos-eyebrow">Guest Album</p>
-        <h1 id="photos-title">みんなの写真</h1>
+        <h1 id="photos-title">{t("みんなの写真", "Guest photo album")}</h1>
         <p className="photos-lead">
-          結婚式当日の思い出を、みんなで集めるアルバムです。<br />
-          撮影した写真を、ぜひこちらに追加してください。
+          {t("撮った写真を追加。気に入った写真を保存。みんなで思い出を共有しましょう。", "Add your photos. Save your favorites. Share memories of our day.")}
         </p>
       </section>
 
       {sessionError ? (
         <section className="photos-message-card" role="alert">
-          <strong>ページを準備できませんでした</strong><p>{sessionError}</p>
-          <button type="button" onClick={() => window.location.reload()}>再読み込み</button>
+          <strong>{t("ページを準備できませんでした", "The album could not be loaded")}</strong><p>{sessionError}</p>
+          <button type="button" onClick={() => window.location.reload()}>{t("再読み込み", "Reload")}</button>
         </section>
       ) : !session ? (
         <section className="photos-message-card" aria-live="polite">
-          <span className="photos-spinner" aria-hidden="true" /><p>アルバムを準備しています…</p>
+          <span className="photos-spinner" aria-hidden="true" /><p>{t("アルバムを準備しています…", "Opening your album…")}</p>
         </section>
       ) : !session.authenticated ? (
         <AccessPanel
@@ -898,19 +946,19 @@ export function PhotosApp() {
         />
       ) : (
         <>
-          <section className="photos-toolbar" aria-label="写真アルバムの操作">
+          <section className="photos-toolbar" aria-label={t("写真アルバムの操作", "Album actions")}>
             <div className="photos-toolbar__primary">
               <button className="photos-primary-button" type="button" onClick={() => setUploadOpen(true)}>
-                <span aria-hidden="true">＋</span> 写真を追加する
+                <span aria-hidden="true">＋</span> {t("写真を追加する", "Add photos")}
               </button>
               <div>
-                <strong>{photos.length}枚の思い出</strong>
-                <span>新しい写真から表示しています</span>
+                <strong>{t(`${photos.length}枚の写真`, `${photos.length} photos`)}</strong>
+                <span>{t("新しい写真から表示しています", "Newest photos first")}</span>
               </div>
             </div>
 
-            <div className="photos-filters" role="group" aria-label="場面で絞り込む">
-              {[{ id: "all", label: "すべて" }, ...session.categories].map((category) => (
+            <div className="photos-filters" role="group" aria-label={t("場面で絞り込む", "Filter photos")}>
+              {[{ id: "all", label: t("すべて", "All") }, ...session.categories].map((category) => (
                 <button
                   key={category.id}
                   type="button"
@@ -918,7 +966,7 @@ export function PhotosApp() {
                   aria-pressed={activeCategory === category.id}
                   onClick={() => setActiveCategory(category.id)}
                 >
-                  {category.label}
+                  {categoryLabel(category.id, category.label, locale)}
                   <span>{category.id === "all" ? photos.length : photos.filter((photo) => photo.category === category.id).length}</span>
                 </button>
               ))}
@@ -932,25 +980,35 @@ export function PhotosApp() {
                 aria-pressed={selectionMode}
                 disabled={photos.length < 1}
               >
-                {selectionMode ? "選択を終える" : "選択する"}
+                {selectionMode ? t("選択を終える", "Finish selecting") : t("選択する", "Choose photos to save")}
               </button>
               {selectionMode ? (
                 <>
-                  <strong aria-live="polite">{selected.size}枚選択中</strong>
+                  <p className="photos-selection-help">{t("保存したい写真をタップして選んでください。", "Tap the photos you want to save.")}</p>
+                  <strong aria-live="polite">{t(`${selected.size}枚選択中`, `${selected.size} selected`)}</strong>
                   <button type="button" className="photos-text-button" onClick={() => setSelected(new Set())} disabled={selected.size < 1}>
-                    選択を解除
+                    {t("選択を解除", "Clear selection")}
                   </button>
                   <button type="button" className="photos-primary-button" onClick={downloadSelected} disabled={selected.size < 1 || downloading}>
-                    {downloading ? "準備中…" : "選択した写真をダウンロード"}
+                    {downloading ? t("準備中…", "Preparing…") : t("選んだ写真をまとめて保存", "Save selected photos")}
                   </button>
                 </>
               ) : (
                 <button type="button" className="photos-secondary-button" onClick={downloadAll} disabled={photos.length < 1 || downloading}>
-                  {downloading ? "準備中…" : "すべてダウンロード"}
+                  {downloading ? t("準備中…", "Preparing…") : t("すべてまとめて保存", "Save all photos")}
                 </button>
               )}
             </div>
           </section>
+
+          <div className="photos-help-row">
+            <p>{t("写真をタップすると大きく見られます。「保存」で1枚ずつ保存できます。", "Tap a photo to view it. Use Save to download one photo at a time.")}</p>
+            <button className="photos-secondary-button" type="button" onClick={() => void loadPhotos()} disabled={loadingPhotos}>{t("最新の写真を表示", "Refresh photos")}</button>
+          </div>
+          <details className="photos-save-help">
+            <summary>{t("保存した写真はどこにある？", "Where are my saved photos?")}</summary>
+            <p>{t("スマートフォンでは「ファイル」や「ダウンロード」に保存されます。写真アプリに入れるときは、保存した写真の共有メニューから「画像を保存」を選んでください。まとめて保存したZIPは開いて展開できます。", "On your phone, look in Files or Downloads. To add a photo to your Photos app, open the downloaded photo and choose Save Image from its share menu. Open a ZIP file to extract photos saved together.")}</p>
+          </details>
 
           {galleryError ? (
             <p className="photos-gallery-error" role="alert"><span aria-hidden="true">!</span> {galleryError}</p>
@@ -958,35 +1016,35 @@ export function PhotosApp() {
 
           <section className="photos-gallery-section" aria-labelledby="photo-list-title">
             <div className="photos-gallery-heading">
-              <div><p className="photos-eyebrow">Shared Memories</p><h2 id="photo-list-title">写真一覧</h2></div>
-              <span>{filteredPhotos.length}枚</span>
+              <div><p className="photos-eyebrow">Shared Memories</p><h2 id="photo-list-title">{t("写真一覧", "Photos")}</h2></div>
+              <span>{t(`${filteredPhotos.length}枚`, `${filteredPhotos.length} photos`)}</span>
             </div>
 
             {loadingPhotos ? (
-              <div className="photos-empty-state" aria-live="polite"><span className="photos-spinner" aria-hidden="true" /><p>写真を読み込んでいます…</p></div>
+              <div className="photos-empty-state" aria-live="polite"><span className="photos-spinner" aria-hidden="true" /><p>{t("写真を読み込んでいます…", "Loading photos…")}</p></div>
             ) : filteredPhotos.length < 1 ? (
               <div className="photos-empty-state">
                 <span className="photos-empty-state__mark" aria-hidden="true">◇</span>
-                <h3>{photos.length < 1 ? "最初の一枚をお待ちしています" : "この場面の写真はまだありません"}</h3>
-                <p>撮影した写真を追加して、みんなで思い出を集めましょう。</p>
-                <button className="photos-primary-button" type="button" onClick={() => setUploadOpen(true)}>写真を追加する</button>
+                <h3>{photos.length < 1 ? t("最初の一枚をお待ちしています", "No photos yet") : t("この場面の写真はまだありません", "No photos in this category yet")}</h3>
+                <p>{t("撮影した写真を、ぜひ追加してください。", "Share a photo from the wedding to start the album.")}</p>
+                <button className="photos-primary-button" type="button" onClick={() => setUploadOpen(true)}>{t("写真を追加する", "Add photos")}</button>
               </div>
             ) : (
               <div className="photos-grid">
                 {filteredPhotos.map((photo) => {
                   const isSelected = selected.has(photo.id);
-                  const label = makePhotoAlt(photo, session.categories);
+                  const label = makePhotoAlt(photo, session.categories, locale);
                   return (
                     <article className={`photos-card${isSelected ? " is-selected" : ""}`} key={photo.id}>
                       <button
                         className="photos-card__image-button"
                         type="button"
                         onClick={() => selectionMode ? toggleSelected(photo.id) : setLightboxPhoto(photo)}
-                        aria-label={selectionMode ? `${label}を${isSelected ? "選択解除" : "選択"}` : `${label}を拡大表示`}
+                        aria-label={selectionMode ? t(`${label}を${isSelected ? "選択解除" : "選択"}`, `${isSelected ? "Deselect" : "Select"} ${label}`) : t(`${label}を拡大表示`, `View ${label}`)}
                         aria-pressed={selectionMode ? isSelected : undefined}
                       >
                         {brokenImages.has(photo.id) ? (
-                          <span className="photos-card__broken">画像を読み込めません</span>
+                          <span className="photos-card__broken">{t("画像を読み込めません", "Photo unavailable")}</span>
                         ) : (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -1002,9 +1060,9 @@ export function PhotosApp() {
                         {selectionMode ? <span className="photos-card__check" aria-hidden="true">{isSelected ? "✓" : ""}</span> : <span className="photos-card__zoom" aria-hidden="true">＋</span>}
                       </button>
                       <div className="photos-card__meta">
-                        <strong>{session.categories.find((item) => item.id === photo.category)?.label}</strong>
-                        <span>{photo.uploaderName ? `${photo.uploaderName}さん` : formatDate(photo.createdAt)}</span>
-                        <a href={photo.downloadUrl} download aria-label={`${label}の原本をダウンロード`}>↓</a>
+                        <strong>{categoryLabel(photo.category, session.categories.find((item) => item.id === photo.category)?.label ?? "", locale)}</strong>
+                        <span>{photo.uploaderName ? t(`${photo.uploaderName}さん`, photo.uploaderName) : formatDate(photo.createdAt, locale)}</span>
+                        <a href={photo.downloadUrl} download aria-label={t(`${label}を保存`, `Save ${label}`)}>{t("保存", "Save")}</a>
                       </div>
                     </article>
                   );
@@ -1015,7 +1073,7 @@ export function PhotosApp() {
 
           <footer className="photos-footer">
             <p>Thank you for sharing our day.</p>
-            <a href="/photos/admin">管理者の方はこちら</a>
+            <a href={`/photos/admin?lang=${locale}`}>{t("管理者の方はこちら", "For the hosts")}</a>
           </footer>
 
           <UploadDialog
@@ -1034,5 +1092,6 @@ export function PhotosApp() {
         </>
       )}
     </main>
+    </PhotoLocaleContext.Provider>
   );
 }
