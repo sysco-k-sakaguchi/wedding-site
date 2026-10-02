@@ -109,12 +109,14 @@ function makePhotoAlt(photo: Photo, categories: Category[], locale: PhotoLocale)
   return photo.uploaderName ? `${category}の写真（${photo.uploaderName}さんより）` : `${category}の写真`;
 }
 
-function AccessPanel({
+export function AccessPanel({
   configured,
   onAuthenticated,
+  actionLabel,
 }: {
   configured: boolean;
   onAuthenticated: (csrfToken: string) => void;
+  actionLabel?: string;
 }) {
   const { t } = usePhotoText();
   const [code, setCode] = useState("");
@@ -172,7 +174,7 @@ function AccessPanel({
               required
             />
             <button type="submit" disabled={submitting || !code}>
-              {submitting ? t("確認中…", "Checking…") : t("アルバムを開く", "Open album")}
+              {submitting ? t("確認中…", "Checking…") : actionLabel ?? t("アルバムを開く", "Open album")}
             </button>
           </div>
           <p id="photo-password-help" className="photos-help">{t("新郎新婦からお知らせした4桁のパスワードです。", "Use the four-digit password shared by the hosts.")}</p>
@@ -464,10 +466,11 @@ function UploadDialog({
   );
 }
 
-function UploadPhotoCard({ item, onView, onSave, onSelect, selectionMode, selected }: {
+function UploadPhotoCard({ item, onView, onSave, onSelect, selectionMode, selected, keepAlbumOpen }: {
   item: UploadItem;
   onView: (photo: Photo) => void;
   onSave: (photo: Photo) => void;
+  keepAlbumOpen: boolean;
   onSelect: (id: string) => void;
   selectionMode: boolean;
   selected: boolean;
@@ -503,7 +506,7 @@ function UploadPhotoCard({ item, onView, onSave, onSelect, selectionMode, select
       <div className="photos-card__meta">
         <strong className="photos-pending-card__status">{ready ? "✓ " : ""}{status}</strong>
         <span title={item.file.name}>{item.file.name}</span>
-        {ready && item.photo ? <PhotoSaveButton photo={item.photo} onFallback={onSave} /> : item.status === "error" ? <p className="photos-pending-card__error">{item.message}</p> : <span className="photos-pending-card__hint">{t("完了したら開けます", "View when ready")}</span>}
+        {ready && item.photo ? <PhotoSaveButton photo={item.photo} onFallback={onSave} keepAlbumOpen={keepAlbumOpen} /> : item.status === "error" ? <p className="photos-pending-card__error">{item.message}</p> : <span className="photos-pending-card__hint">{t("完了したら開けます", "View when ready")}</span>}
       </div>
     </article>
   );
@@ -517,6 +520,7 @@ function PhotoLightbox({
   onClose,
   saveHelp,
   onSaveHelp,
+  keepAlbumOpen,
 }: {
   photo: Photo | null;
   photos: Photo[];
@@ -525,6 +529,7 @@ function PhotoLightbox({
   onClose: () => void;
   saveHelp: boolean;
   onSaveHelp: () => void;
+  keepAlbumOpen: boolean;
 }) {
   const { locale, t } = usePhotoText();
   const device = usePhotoSaveDevice();
@@ -620,16 +625,16 @@ function PhotoLightbox({
             <small>{formatDate(photo.createdAt, locale)} · {formatFileSize(photo.fileSize)}</small>
             {device !== "desktop" ? (
               <div className="photos-native-save-help" role={saveHelp ? "status" : undefined}>
-                <strong>{saveHelp ? t("写真を長押しして保存", "Touch and hold the photo to save") : t("写真アプリへ保存", "Save to your photo app")}</strong>
+                <strong>{device === "ios" ? t("Safariから写真を保存", "Save a photo from Safari") : saveHelp ? t("写真を長押しして保存", "Touch and hold the photo to save") : t("写真アプリへ保存", "Save to your photo app")}</strong>
                 <p>{saveHelp
                   ? device === "ios" ? t("上の写真を長押しし、「写真に保存」（または「画像を保存」）を選んでください。", "Touch and hold the photo above, then choose Save to Photos or Save Image.")
                     : t("上の写真を長押しし、スマホの「画像を保存」メニューを使ってください。", "Touch and hold the photo above and use your phone’s Save Image menu.")
-                  : device === "ios" ? t("下のボタンを押し、スマホのメニューで「画像を保存」を選んでください。", "Tap below, then choose Save Image from your phone’s menu.")
+                  : device === "ios" ? t("下のボタンで保存画面を開き、写真を長押しして「写真に保存」を選んでください。", "Open the save screen below, then touch and hold the photo and choose Save to Photos.")
                     : t("下のボタンからスマホのメニューを開き、写真アプリを選んでください。", "Tap below, then select your photo app from your phone’s menu.")}</p>
               </div>
             ) : null}
-            <PhotoSaveButton key={photo.id} photo={photo} className="photos-primary-button" expanded onFallback={onSaveHelp} />
-            {device !== "desktop" ? <button className="photos-text-button" type="button" onClick={onSaveHelp}>{t("保存メニューが出ないとき", "If the save option is missing")}</button> : null}
+            <PhotoSaveButton key={photo.id} photo={photo} className="photos-primary-button" expanded onFallback={onSaveHelp} keepAlbumOpen={keepAlbumOpen} />
+            {device !== "desktop" ? <a className="photos-text-button" href={photo.originalUrl} target={keepAlbumOpen ? "_blank" : undefined} rel={keepAlbumOpen ? "noopener" : undefined}>{t("写真だけを開く", "Open image only")}</a> : null}
           </aside>
         </div>
       ) : null}
@@ -981,12 +986,12 @@ function PhotosAlbum() {
           </section>
 
           <div className="photos-help-row">
-            <p>{device === "desktop" ? t("写真をタップすると大きく見られます。「保存」で1枚ずつ保存できます。", "Tap a photo to view it. Use Save to download one photo at a time.") : t("「写真に保存」でスマホの保存メニューを開けます。写真をタップすると大きく見られます。", "Use Save photo to open your phone’s menu. Tap a photo to view it.")}</p>
+            <p>{device === "desktop" ? t("写真をタップすると大きく見られます。「保存」で1枚ずつ保存できます。", "Tap a photo to view it. Use Save to download one photo at a time.") : device === "ios" ? t("「写真を保存」で保存画面を開けます。写真を長押しして「写真に保存」を選んでください。", "Open the save screen, then touch and hold the photo and choose Save to Photos.") : t("「写真に保存」でスマホの保存メニューを開けます。写真をタップすると大きく見られます。", "Use Save photo to open your phone’s menu. Tap a photo to view it.")}</p>
             <button className="photos-secondary-button" type="button" onClick={() => void loadPhotos()} disabled={loadingPhotos}>{t("最新の写真を表示", "Refresh photos")}</button>
           </div>
           <details className="photos-save-help">
             <summary>{t("写真アプリに保存するには？", "How do I save to my photo app?")}</summary>
-            <p>{t("iPhoneでは「写真に保存」を押し、スマホのメニューで「画像を保存」を選んでください。Androidでは保存先の写真アプリを選びます。メニューが使えないときは原本を表示し、写真を長押しできます。ZIPでまとめて保存した写真は「ファイル」や「ダウンロード」に入ります。", "On iPhone, tap Save photo and choose Save Image from your phone’s menu. On Android, select your photo app. If the menu is unavailable, open the original photo and touch and hold it. ZIP downloads go to Files or Downloads.")}</p>
+            <p>{t("iPhoneでは「写真を保存」で保存画面を開き、写真を長押しして「写真に保存」を選んでください。保存後は写真アプリの「最近保存した項目」で確認できます。Androidでは端末の保存メニューを使います。ZIPでまとめて保存した写真は「ファイル」や「ダウンロード」に入ります。", "On iPhone, open the save screen, touch and hold the photo, and choose Save to Photos. Check Recently Saved in Photos afterward. On Android, use your phone’s save menu. ZIP downloads go to Files or Downloads.")}</p>
           </details>
 
           {galleryError ? (
@@ -1027,7 +1032,7 @@ function PhotosAlbum() {
             ) : (
               <div className="photos-grid">
                 {visibleUploads.map((item) => (
-                  <UploadPhotoCard key={item.id} item={item} onView={openPhoto} onSave={openForSaving} onSelect={toggleSelected}
+                  <UploadPhotoCard key={item.id} item={item} onView={openPhoto} onSave={openForSaving} onSelect={toggleSelected} keepAlbumOpen={uploading}
                     selectionMode={selectionMode} selected={item.photo ? selected.has(item.photo.id) : false} />
                 ))}
                 {otherPhotos.map((photo) => {
@@ -1061,7 +1066,7 @@ function PhotosAlbum() {
                       <div className="photos-card__meta">
                         <strong>{categoryLabel(photo.category, session.categories.find((item) => item.id === photo.category)?.label ?? "", locale)}</strong>
                         <span>{photo.uploaderName ? t(`${photo.uploaderName}さん`, photo.uploaderName) : formatDate(photo.createdAt, locale)}</span>
-                        <PhotoSaveButton photo={photo} onFallback={openForSaving} />
+                        <PhotoSaveButton photo={photo} onFallback={openForSaving} keepAlbumOpen={uploading} />
                       </div>
                     </article>
                   );
@@ -1088,6 +1093,7 @@ function PhotosAlbum() {
             onChange={openPhoto}
             onClose={() => setLightboxPhoto(null)}
             saveHelp={saveHelp}
+            keepAlbumOpen={uploading}
             onSaveHelp={() => setSaveHelp(true)}
           />
         </>

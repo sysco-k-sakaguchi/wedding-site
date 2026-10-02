@@ -311,6 +311,7 @@ try {
   assert.equal(inlineOriginal.status, 200);
   assert.equal(inlineOriginal.headers.get("content-type"), "image/jpeg");
   assert.match(inlineOriginal.headers.get("content-disposition") ?? "", /^inline;/);
+  assert.match(inlineOriginal.headers.get("content-disposition") ?? "", /filename="photo-[a-f0-9-]+\.jpg";/);
   assert.equal(inlineOriginal.headers.get("cache-control"), "private, no-store");
   assert.deepEqual(new Uint8Array(await inlineOriginal.arrayBuffer()), firstBytes);
 

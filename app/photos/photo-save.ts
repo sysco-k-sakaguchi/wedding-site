@@ -4,6 +4,16 @@ export function photoDevice(userAgent: string, maxTouchPoints: number): PhotoDev
   return /Android/.test(userAgent) ? "android" : "desktop";
 }
 
+export function photoSavePageUrl(id: string, locale: "ja" | "en") {
+  return `/photos/save/${encodeURIComponent(id)}?lang=${locale}`;
+}
+
+export function photoSaveMethod(device: PhotoDevice, nativeShare: boolean, shareOnly = false): "image" | "share" | "download" {
+  if (shareOnly) return nativeShare ? "share" : "image";
+  if (device === "ios" || (device === "android" && !nativeShare)) return "image";
+  return device === "desktop" ? "download" : "share";
+}
+
 interface SavePhoto {
   id: string;
   originalName: string;
