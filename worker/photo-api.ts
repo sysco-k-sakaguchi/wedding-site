@@ -777,7 +777,7 @@ async function handlePhotoResource(
     const headers = binaryHeaders(photo.mime_type, "private, no-store");
     headers.set(
       "Content-Disposition",
-      `${resource === "original" ? "inline" : "attachment"}; filename="photo-${photo.id.slice(0, 8)}"; filename*=UTF-8''${encodeURIComponent(safeName)}`,
+      `${resource === "original" ? "inline" : "attachment"}; filename="photo-${photo.id.slice(0, 8)}.${extension}"; filename*=UTF-8''${encodeURIComponent(safeName)}`,
     );
     headers.set("Content-Length", String(object.size));
     return new Response(object.body, { headers });

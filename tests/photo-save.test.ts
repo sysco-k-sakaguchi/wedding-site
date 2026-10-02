@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createPhotoFileCache, fetchPhotoFile, openPhotoSaveMenu, photoDevice } from "../app/photos/photo-save";
+import { createPhotoFileCache, fetchPhotoFile, openPhotoSaveMenu, photoDevice, photoSaveMethod, photoSavePageUrl } from "../app/photos/photo-save";
 
 const photo = (id: string) => ({ id, originalName: `${id}.jpg`, originalUrl: `/api/photos/${id}/original` });
 const file = (id: string, bytes = 4) => new File(["x".repeat(bytes)], `${id}.jpg`, { type: "image/jpeg" });
@@ -11,6 +11,17 @@ test("iPhone・iPadのデスクトップ表示・Androidを判別する", () => 
   assert.equal(photoDevice("Mozilla Macintosh", 5), "ios");
   assert.equal(photoDevice("Mozilla Android", 5), "android");
   assert.equal(photoDevice("Mozilla Macintosh", 0), "desktop");
+});
+
+test("iPhoneの通常保存はFile共有を通らず、長押し用の保存画面へ進む", () => {
+  assert.equal(photoSaveMethod("ios", true), "image");
+  assert.equal(photoSaveMethod("ios", false), "image");
+  assert.equal(photoSaveMethod("ios", true, true), "share");
+  assert.equal(photoSaveMethod("android", true), "share");
+  assert.equal(photoSaveMethod("android", false), "image");
+  assert.equal(photoSaveMethod("desktop", true), "download");
+  assert.equal(photoSavePageUrl("photo-id", "en"), "/photos/save/photo-id?lang=en");
+  assert.equal(photoSavePageUrl("a/b", "ja"), "/photos/save/a%2Fb?lang=ja");
 });
 
 test("原本取得を共有し、同時取得を2件に抑える。キャンセル後の同じIDは二重送信しない", async () => {
