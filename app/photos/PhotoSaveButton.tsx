@@ -50,6 +50,7 @@ export function PhotoSaveButton({ photo, onFallback, className = "", expanded = 
     function prepare() {
       if (interested) return;
       interested = true;
+      setReady(Boolean(cache.peek(photo.id)));
       setPreparing(true);
       ticket = cache.prepare(photo);
       void ticket.promise.then(() => { if (!cancelled && interested) setReady(true); })
