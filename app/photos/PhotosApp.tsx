@@ -14,6 +14,8 @@ import { PhotoLocaleContext, usePhotoText, categoryLabel, photoErrorMessage, typ
 
 import { runUploadQueue, sendPhoto, PhotoUploadError, type UploadItem, type UploadDetails } from "./photo-uploads";
 
+import { PhotoSaveProvider, PhotoSaveButton, usePhotoSaveDevice } from "./PhotoSaveButton";
+
 interface Category {
   id: string;
   label: string;
@@ -33,6 +35,7 @@ export interface Photo {
   thumbnailUrl: string;
   viewUrl: string;
   downloadUrl: string;
+  originalUrl: string;
 }
 
 export interface SessionInfo {
@@ -461,9 +464,10 @@ function UploadDialog({
   );
 }
 
-function UploadPhotoCard({ item, onView, onSelect, selectionMode, selected }: {
+function UploadPhotoCard({ item, onView, onSave, onSelect, selectionMode, selected }: {
   item: UploadItem;
   onView: (photo: Photo) => void;
+  onSave: (photo: Photo) => void;
   onSelect: (id: string) => void;
   selectionMode: boolean;
   selected: boolean;
@@ -499,7 +503,7 @@ function UploadPhotoCard({ item, onView, onSelect, selectionMode, selected }: {
       <div className="photos-card__meta">
         <strong className="photos-pending-card__status">{ready ? "✓ " : ""}{status}</strong>
         <span title={item.file.name}>{item.file.name}</span>
-        {ready && item.photo ? <a href={item.photo.downloadUrl} download>{t("保存", "Save")}</a> : item.status === "error" ? <p className="photos-pending-card__error">{item.message}</p> : <span className="photos-pending-card__hint">{t("完了したら開けます", "View when ready")}</span>}
+        {ready && item.photo ? <PhotoSaveButton photo={item.photo} onFallback={onSave} /> : item.status === "error" ? <p className="photos-pending-card__error">{item.message}</p> : <span className="photos-pending-card__hint">{t("完了したら開けます", "View when ready")}</span>}
       </div>
     </article>
   );
@@ -511,14 +515,19 @@ function PhotoLightbox({
   categories,
   onChange,
   onClose,
+  saveHelp,
+  onSaveHelp,
 }: {
   photo: Photo | null;
   photos: Photo[];
   categories: Category[];
   onChange: (photo: Photo) => void;
   onClose: () => void;
+  saveHelp: boolean;
+  onSaveHelp: () => void;
 }) {
   const { locale, t } = usePhotoText();
+  const device = usePhotoSaveDevice();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [failedPhotoId, setFailedPhotoId] = useState<string | null>(null);
@@ -579,7 +588,7 @@ function PhotoLightbox({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={photo.id}
-                src={photo.viewUrl}
+                src={device !== "desktop" ? photo.originalUrl : photo.viewUrl}
                 alt={makePhotoAlt(photo, categories, locale)}
                 onError={() => setFailedPhotoId(photo.id)}
               />
@@ -609,9 +618,18 @@ function PhotoLightbox({
             {photo.uploaderName ? <p>{t(`${photo.uploaderName}さんより`, `Shared by ${photo.uploaderName}`)}</p> : null}
             {photo.comment ? <p className="photos-lightbox__comment">{photo.comment}</p> : null}
             <small>{formatDate(photo.createdAt, locale)} · {formatFileSize(photo.fileSize)}</small>
-            <a className="photos-primary-button" href={photo.downloadUrl} download>
-              {t("この写真を保存", "Save this photo")}
-            </a>
+            {device !== "desktop" ? (
+              <div className="photos-native-save-help" role={saveHelp ? "status" : undefined}>
+                <strong>{saveHelp ? t("写真を長押しして保存", "Touch and hold the photo to save") : t("写真アプリへ保存", "Save to your photo app")}</strong>
+                <p>{saveHelp
+                  ? device === "ios" ? t("上の写真を長押しし、「写真に保存」（または「画像を保存」）を選んでください。", "Touch and hold the photo above, then choose Save to Photos or Save Image.")
+                    : t("上の写真を長押しし、スマホの「画像を保存」メニューを使ってください。", "Touch and hold the photo above and use your phone’s Save Image menu.")
+                  : device === "ios" ? t("下のボタンを押し、スマホのメニューで「画像を保存」を選んでください。", "Tap below, then choose Save Image from your phone’s menu.")
+                    : t("下のボタンからスマホのメニューを開き、写真アプリを選んでください。", "Tap below, then select your photo app from your phone’s menu.")}</p>
+              </div>
+            ) : null}
+            <PhotoSaveButton key={photo.id} photo={photo} className="photos-primary-button" expanded onFallback={onSaveHelp} />
+            {device !== "desktop" ? <button className="photos-text-button" type="button" onClick={onSaveHelp}>{t("保存メニューが出ないとき", "If the save option is missing")}</button> : null}
           </aside>
         </div>
       ) : null}
@@ -619,7 +637,7 @@ function PhotoLightbox({
   );
 }
 
-export function PhotosApp() {
+function PhotosAlbum() {
   const [locale, setLocale] = useState<PhotoLocale>("ja");
   const t = (ja: string, en: string) => locale === "en" ? en : ja;
 
@@ -638,7 +656,8 @@ export function PhotosApp() {
     let stored: string | null = null;
     try { stored = localStorage.getItem("wedding-photo-language"); } catch {}
     const initial = requested ?? stored ?? (navigator.language.startsWith("ja") ? "ja" : "en");
-    changeLocale(initial === "en" ? "en" : "ja");
+    const frame = requestAnimationFrame(() => changeLocale(initial === "en" ? "en" : "ja"));
+    return () => cancelAnimationFrame(frame);
   }, []);
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [sessionError, setSessionError] = useState("");
@@ -656,10 +675,13 @@ export function PhotosApp() {
   const uploadGuard = useRef(false);
   const uploadItemsRef = useRef<UploadItem[]>([]);
   const uploadDetails = useRef<UploadDetails>({ category: "other", uploaderName: "", comment: "" });
+  const [uploadCategory, setUploadCategory] = useState("other");
   const uploadController = useRef<AbortController | null>(null);
   const uploadPreviewUrls = useRef(new Set<string>());
   const galleryRef = useRef<HTMLElement>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
+  const [saveHelp, setSaveHelp] = useState(false);
+  const device = usePhotoSaveDevice();
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
   const loadPhotos = useCallback(async (quiet = false) => {
@@ -782,6 +804,7 @@ export function PhotosApp() {
     if (uploadGuard.current) return;
     clearUploadQueue();
     uploadDetails.current = details;
+    setUploadCategory(details.category);
     for (const item of items) uploadPreviewUrls.current.add(item.previewUrl);
     uploadItemsRef.current = items;
     setUploadItems(items);
@@ -793,9 +816,12 @@ export function PhotosApp() {
     }));
   }
 
+  function openForSaving(photo: Photo) { setSaveHelp(true); setLightboxPhoto(photo); }
+  function openPhoto(photo: Photo) { setSaveHelp(false); setLightboxPhoto(photo); }
+
   const completedUploads = uploadItems.filter((item) => item.status === "success" || item.status === "duplicate").length;
   const unfinishedUploads = uploadItems.length - completedUploads;
-  const visibleUploads = uploadItems.filter((item) => activeCategory === "all" || (item.photo?.category ?? uploadDetails.current.category) === activeCategory);
+  const visibleUploads = uploadItems.filter((item) => activeCategory === "all" || (item.photo?.category ?? uploadCategory) === activeCategory);
   const queuePhotoIds = new Set(visibleUploads.flatMap((item) => item.photo ? [item.photo.id] : []));
   const otherPhotos = filteredPhotos.filter((photo) => !queuePhotoIds.has(photo.id));
   const visibleCount = visibleUploads.length + otherPhotos.length;
@@ -943,24 +969,24 @@ export function PhotosApp() {
                     {t("選択を解除", "Clear selection")}
                   </button>
                   <button type="button" className="photos-primary-button" onClick={downloadSelected} disabled={selected.size < 1 || downloading}>
-                    {downloading ? t("準備中…", "Preparing…") : t("選んだ写真をまとめて保存", "Save selected photos")}
+                    {downloading ? t("準備中…", "Preparing…") : device === "desktop" ? t("選んだ写真をまとめて保存", "Save selected photos") : t("選んだ写真をZIPで保存", "Download selected as ZIP")}
                   </button>
                 </>
               ) : (
                 <button type="button" className="photos-secondary-button" onClick={downloadAll} disabled={photos.length < 1 || downloading}>
-                  {downloading ? t("準備中…", "Preparing…") : t("すべてまとめて保存", "Save all photos")}
+                  {downloading ? t("準備中…", "Preparing…") : device === "desktop" ? t("すべてまとめて保存", "Save all photos") : t("すべてZIPで保存", "Download all as ZIP")}
                 </button>
               )}
             </div>
           </section>
 
           <div className="photos-help-row">
-            <p>{t("写真をタップすると大きく見られます。「保存」で1枚ずつ保存できます。", "Tap a photo to view it. Use Save to download one photo at a time.")}</p>
+            <p>{device === "desktop" ? t("写真をタップすると大きく見られます。「保存」で1枚ずつ保存できます。", "Tap a photo to view it. Use Save to download one photo at a time.") : t("「写真に保存」でスマホの保存メニューを開けます。写真をタップすると大きく見られます。", "Use Save photo to open your phone’s menu. Tap a photo to view it.")}</p>
             <button className="photos-secondary-button" type="button" onClick={() => void loadPhotos()} disabled={loadingPhotos}>{t("最新の写真を表示", "Refresh photos")}</button>
           </div>
           <details className="photos-save-help">
-            <summary>{t("保存した写真はどこにある？", "Where are my saved photos?")}</summary>
-            <p>{t("スマートフォンでは「ファイル」や「ダウンロード」に保存されます。写真アプリに入れるときは、保存した写真の共有メニューから「画像を保存」を選んでください。まとめて保存したZIPは開いて展開できます。", "On your phone, look in Files or Downloads. To add a photo to your Photos app, open the downloaded photo and choose Save Image from its share menu. Open a ZIP file to extract photos saved together.")}</p>
+            <summary>{t("写真アプリに保存するには？", "How do I save to my photo app?")}</summary>
+            <p>{t("iPhoneでは「写真に保存」を押し、スマホのメニューで「画像を保存」を選んでください。Androidでは保存先の写真アプリを選びます。メニューが使えないときは原本を表示し、写真を長押しできます。ZIPでまとめて保存した写真は「ファイル」や「ダウンロード」に入ります。", "On iPhone, tap Save photo and choose Save Image from your phone’s menu. On Android, select your photo app. If the menu is unavailable, open the original photo and touch and hold it. ZIP downloads go to Files or Downloads.")}</p>
           </details>
 
           {galleryError ? (
@@ -1001,7 +1027,7 @@ export function PhotosApp() {
             ) : (
               <div className="photos-grid">
                 {visibleUploads.map((item) => (
-                  <UploadPhotoCard key={item.id} item={item} onView={setLightboxPhoto} onSelect={toggleSelected}
+                  <UploadPhotoCard key={item.id} item={item} onView={openPhoto} onSave={openForSaving} onSelect={toggleSelected}
                     selectionMode={selectionMode} selected={item.photo ? selected.has(item.photo.id) : false} />
                 ))}
                 {otherPhotos.map((photo) => {
@@ -1012,7 +1038,7 @@ export function PhotosApp() {
                       <button
                         className="photos-card__image-button"
                         type="button"
-                        onClick={() => selectionMode ? toggleSelected(photo.id) : setLightboxPhoto(photo)}
+                        onClick={() => selectionMode ? toggleSelected(photo.id) : openPhoto(photo)}
                         aria-label={selectionMode ? t(`${label}を${isSelected ? "選択解除" : "選択"}`, `${isSelected ? "Deselect" : "Select"} ${label}`) : t(`${label}を拡大表示`, `View ${label}`)}
                         aria-pressed={selectionMode ? isSelected : undefined}
                       >
@@ -1035,7 +1061,7 @@ export function PhotosApp() {
                       <div className="photos-card__meta">
                         <strong>{categoryLabel(photo.category, session.categories.find((item) => item.id === photo.category)?.label ?? "", locale)}</strong>
                         <span>{photo.uploaderName ? t(`${photo.uploaderName}さん`, photo.uploaderName) : formatDate(photo.createdAt, locale)}</span>
-                        <a href={photo.downloadUrl} download aria-label={t(`${label}を保存`, `Save ${label}`)}>{t("保存", "Save")}</a>
+                        <PhotoSaveButton photo={photo} onFallback={openForSaving} />
                       </div>
                     </article>
                   );
@@ -1059,12 +1085,18 @@ export function PhotosApp() {
             photo={lightboxPhoto}
             photos={filteredPhotos}
             categories={session.categories}
-            onChange={setLightboxPhoto}
+            onChange={openPhoto}
             onClose={() => setLightboxPhoto(null)}
+            saveHelp={saveHelp}
+            onSaveHelp={() => setSaveHelp(true)}
           />
         </>
       )}
     </main>
     </PhotoLocaleContext.Provider>
   );
+}
+
+export function PhotosApp() {
+  return <PhotoSaveProvider><PhotosAlbum /></PhotoSaveProvider>;
 }

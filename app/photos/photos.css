@@ -1235,3 +1235,11 @@
 .photos-pending-card.is-success .photos-upload-overlay,
 .photos-pending-card.is-duplicate .photos-upload-overlay { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .photos-upload-overlay { transition: none !important; } }
+
+.photos-card__meta .photos-save-button { width: 100%; min-height: 3rem; padding: .65rem .5rem; border: 1px solid var(--line-soft); border-radius: .75rem; background: #fff; color: #493a27; font-size: 1rem; font-weight: 700; cursor: pointer; }
+.photos-card__meta .photos-save-button:disabled { cursor: default; color: #6a6358; }
+.photos-lightbox__meta > .photos-native-save-help { display: block; padding: .8rem 1rem; border-radius: .85rem; background: #fff4ce; color: #33270c; font-size: 1rem; line-height: 1.6; }
+.photos-native-save-help strong { display: block; font-size: 1.125rem; }
+.photos-native-save-help p { margin: .35rem 0 0; color: #493a27; }
+.photos-lightbox__image-wrap img { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; }
+.photos-lightbox__meta .photos-text-button { color: #fff3d0; min-height: 44px; }
