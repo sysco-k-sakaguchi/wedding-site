@@ -166,8 +166,17 @@ npm run test:integration
 | `GET` | `/api/photos/:id/thumbnail` | サムネイル（`transform`時はWebP、`original`時は入力形式） |
 | `GET` | `/api/photos/:id/view` | 拡大表示画像（`transform`時はWebP、`original`時は入力形式） |
 | `GET` | `/api/photos/:id/download` | 原本ダウンロード |
+| `GET` | `/api/photos/:id/original` | スマホの保存・共有用の原本表示（認証必須、inline） |
 | `POST` | `/api/photos/download` | 選択写真を検証し、10分有効・1回限りの短期URLを発行 |
 | `GET` | `/api/photos/download/:jobId` | jobに固定したZIPをストリーミング取得 |
 | `POST` | `/api/photos/download-all` | 全表示写真を検証し、同じ短期URLを発行 |
 | `GET` | `/api/admin/photos` | 非表示を含む管理一覧 |
 | `PATCH` / `DELETE` | `/api/admin/photos/:id` | 公開状態変更 / 完全削除 |
+
+## スマートフォンの写真保存
+
+iPhone / iPad / Androidでは、写真を表示範囲の近くで準備し、「写真に保存」から端末の共有メニューを開きます。iPhoneは「画像を保存」を選びます。Androidの保存先・共有先は端末やインストール済みアプリによって異なります。端末メニューが使えない場合は、原本を拡大して長押しする案内へ進みます。サイト独自の確認ダイアログはありません。Webサイトから写真ライブラリへ無確認で書き込むことはできません。
+
+準備は同時2件・最大6枚 / 30MBのキャッシュで行い、クリック内で非同期取得を待たずにWeb Share APIを呼び出します。パソコンの個別ダウンロードとZIP保存は従来通りです。ZIPは写真アプリへの保存ではなくファイル保存なので、スマホではボタンにも「ZIP」と明記しています。
+
+写真専用ドメイン `photos.masato-haruka-wedding.com` をSitesに登録済みです。DNS検証・HTTPSが有効になるまでは現在の公開URLを使用します。新ドメインの `/` は `/photos` へ移動し、既存の招待状ドメインは維持します。

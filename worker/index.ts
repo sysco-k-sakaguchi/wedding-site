@@ -19,6 +19,11 @@ const worker = {
   async fetch(request: Request, env: PhotoEnv, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    if (url.hostname === "photos.masato-haruka-wedding.com" && (url.pathname === "/" || url.pathname === "/index.html")) {
+      url.pathname = "/photos";
+      return new Response(null, { status: 302, headers: { Location: url.href, "Cache-Control": "no-store" } });
+    }
+
     const photoApiResponse = await handlePhotoApi(request, env);
     if (photoApiResponse) {
       return photoApiResponse;

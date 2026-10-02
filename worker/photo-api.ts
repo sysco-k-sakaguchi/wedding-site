@@ -244,6 +244,7 @@ function photoPayload(photo: PhotoRow, admin = false) {
     thumbnailUrl: `/api/photos/${photo.id}/thumbnail`,
     viewUrl: `/api/photos/${photo.id}/view`,
     downloadUrl: `/api/photos/${photo.id}/download`,
+    originalUrl: `/api/photos/${photo.id}/original`,
     ...(admin ? { isVisible: photo.is_visible === 1 } : {}),
   };
 }
@@ -756,7 +757,7 @@ async function handlePhotoResource(
     });
   }
 
-  if (resource === "download") {
+  if (resource === "download" || resource === "original") {
     const object = await objects.getOriginalStream(photo.object_key);
     if (!object) {
       throw new PhotoApiError(404, "image_not_found", "原本を読み込めませんでした。");
@@ -776,7 +777,7 @@ async function handlePhotoResource(
     const headers = binaryHeaders(photo.mime_type, "private, no-store");
     headers.set(
       "Content-Disposition",
-      `attachment; filename="photo-${photo.id.slice(0, 8)}"; filename*=UTF-8''${encodeURIComponent(safeName)}`,
+      `${resource === "original" ? "inline" : "attachment"}; filename="photo-${photo.id.slice(0, 8)}"; filename*=UTF-8''${encodeURIComponent(safeName)}`,
     );
     headers.set("Content-Length", String(object.size));
     return new Response(object.body, { headers });
@@ -1101,7 +1102,7 @@ export async function handlePhotoApi(request: Request, env: PhotoEnv) {
     }
 
     const photoMatch = url.pathname.match(
-      /^\/api\/photos\/([0-9a-f-]{36})(?:\/(thumbnail|view|download))?$/i,
+      /^\/api\/photos\/([0-9a-f-]{36})(?:\/(thumbnail|view|download|original))?$/i,
     );
     if (photoMatch) {
       return await handlePhotoResource(

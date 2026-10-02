@@ -305,6 +305,15 @@ try {
   assert.equal(original.status, 200);
   assert.deepEqual(new Uint8Array(await original.arrayBuffer()), firstBytes);
 
+  const inlineUrl = `/api/photos/${createdIds[0]}/original`;
+  assert.equal((await request(inlineUrl, {}, anonymousCookies)).status, 401);
+  const inlineOriginal = await request(inlineUrl, {}, guestCookies);
+  assert.equal(inlineOriginal.status, 200);
+  assert.equal(inlineOriginal.headers.get("content-type"), "image/jpeg");
+  assert.match(inlineOriginal.headers.get("content-disposition") ?? "", /^inline;/);
+  assert.equal(inlineOriginal.headers.get("cache-control"), "private, no-store");
+  assert.deepEqual(new Uint8Array(await inlineOriginal.arrayBuffer()), firstBytes);
+
   const duplicateBatch = await createBatch(guest.csrfToken, 1);
   const duplicate = await upload(
     guest.csrfToken,
@@ -482,7 +491,7 @@ try {
     await request("/api/photos", {}, guestCookies),
   );
   assert.equal(guestAfterHide.photos.some((photo) => photo.id === createdIds[0]), false);
-  for (const suffix of ["", "/thumbnail", "/view", "/download"]) {
+  for (const suffix of ["", "/thumbnail", "/view", "/download", "/original"]) {
     const hiddenResource = await request(
       `/api/photos/${createdIds[0]}${suffix}`,
       {},
