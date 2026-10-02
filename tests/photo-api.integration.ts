@@ -146,7 +146,7 @@ let adminCsrf = "";
 try {
   const initialSession = await json<{
     configured: boolean;
-    limits: { maxFileBytes: number };
+    limits: { maxFileBytes: number; maxFilesPerBatch: number; uploadsPerHour: number };
   }>(
     await request("/api/photos/session"),
   );
@@ -189,8 +189,14 @@ try {
   assert.equal(invalidCsrf.status, 403);
   assert.equal(await errorCode(invalidCsrf), "invalid_csrf");
 
-  const tooMany = await createBatch(guest.csrfToken, 21);
+  const tooMany = await createBatch(guest.csrfToken, initialSession.limits.maxFilesPerBatch + 1);
   assert.equal(tooMany.response.status, 400);
+
+  const boundaryBatch = await createBatch(guest.csrfToken, initialSession.limits.maxFilesPerBatch);
+  assert.equal(boundaryBatch.response.status, 201);
+  const invalidIndex = await upload(guest.csrfToken, boundaryBatch.body.batchId!, initialSession.limits.maxFilesPerBatch, new Uint8Array(), "out-of-range.jpg");
+  assert.equal(invalidIndex.status, 400);
+  assert.equal(await errorCode(invalidIndex), "invalid_batch");
 
   const firstBytes = uniqueJpeg(
     new Uint8Array(await readFile(resolve("images/01_beach_smile.jpeg"))),
@@ -231,6 +237,17 @@ try {
   }>(retryUpload);
   assert.equal(retryBody.duplicate, true);
   assert.equal(retryBody.photo.id, firstPhoto.photo.id);
+
+  if (initialSession.limits.uploadsPerHour === 0) {
+    // Exercise the former 60/hour barrier using idempotent requests: no extra
+    // objects are created, and this test only cleans up its own photos.
+    for (let index = 0; index < 65; index++) {
+      const replay = await upload(guest.csrfToken, batch.body.batchId!, 0, new Uint8Array(), "replay.jpg");
+      assert.equal(replay.status, 200, `request ${index + 1} must not hit a count quota`);
+      assert.equal((await json<{ photo: { id: string } }>(replay)).photo.id, firstPhoto.photo.id);
+    }
+  }
+
 
   const secondUpload = await upload(
     guest.csrfToken,
@@ -297,6 +314,7 @@ try {
     "duplicate.jpeg",
   );
   assert.equal(duplicate.status, 409);
+  assert.equal((await json<{ photo: { id: string } }>(duplicate)).photo.id, firstPhoto.photo.id);
 
   const mismatchBatch = await createBatch(guest.csrfToken, 1);
   const mismatch = await upload(

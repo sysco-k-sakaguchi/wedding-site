@@ -56,3 +56,10 @@ test("アクセスコード比較と必須設定を確認する", async () => {
   } as never);
   assert.equal(sharedCredential.configured, false);
 });
+
+ test("投稿枚数の0設定は無制限で、正の設定と認証保護は維持する", () => {
+  assert.equal(getPhotoRuntimeConfig({ PHOTO_UPLOADS_PER_HOUR: "0" } as never).uploadsPerHour, 0);
+  assert.equal(getPhotoRuntimeConfig({ PHOTO_UPLOADS_PER_HOUR: "120" } as never).uploadsPerHour, 120);
+  assert.equal(getPhotoRuntimeConfig({ PHOTO_UPLOADS_PER_HOUR: "-1" } as never).uploadsPerHour, 60);
+  assert.equal(getPhotoRuntimeConfig({ PHOTO_UPLOADS_PER_HOUR: "0" } as never).configured, false);
+});

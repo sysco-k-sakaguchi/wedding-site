@@ -22,6 +22,7 @@ const englishErrors: Record<string, string> = {
   rate_limited: "Please wait a while before trying again.",
   not_configured: "The album is not ready yet. Please contact the hosts.",
   invalid_photo: "This photo could not be read. Please choose a JPEG, PNG or WebP photo within the size limit.",
+  photo_hidden: "This photo cannot currently be shared. Please contact the hosts.",
   duplicate_photo: "This photo is already in the album.",
   file_too_large: "This photo is too large. Please choose a smaller file.",
   invalid_category: "Please choose a photo category.",
@@ -40,5 +41,6 @@ const englishErrors: Record<string, string> = {
 
 export function photoErrorMessage(code: string | undefined, message: string | undefined, locale: PhotoLocale) {
   if (locale === "en") return englishErrors[code ?? ""] ?? "Something went wrong. Please try again. If it continues, contact the hosts.";
-  return message ?? "処理を完了できませんでした。もう一度お試しください。";
+  if (code === "photo_hidden") return "この写真は現在追加できません。新郎新婦へお知らせください。";
+  return message || "処理を完了できませんでした。もう一度お試しください。";
 }

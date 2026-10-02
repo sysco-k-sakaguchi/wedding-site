@@ -59,11 +59,11 @@ npm run dev
 - 公開アーカイブは `.openai/hosting.json`、`dist/server`、`dist/client` に加えて、ソースの `drizzle` をアーカイブ直下へ収録します。ビルド内の `.openai/drizzle` だけでは本番migrationが検出されません。
 - 本番D1のスキーマ作成はデプロイ時のSQL migrationが担当。ローカル開発のみ `PHOTO_LOCAL_SETUP=1` により初期化します。
 - Sitesの共有画面は所有者の承認により「リンクからアクセス可」で公開します。写真/API自体は共有パスワードと署名Cookieで保護されます。
-- 本番の `original` モードは1枚5MB、1回10枚、40MP、1時間60枚。ローカルに既存の投稿があっても、それらは自動的に本番へ送られません。
+- 本番の `original` モードは1枚5MB、40MP。選択枚数・1時間の投稿枚数は無制限（内部バッチは10枚ずつ）。ローカルに既存の投稿があっても、それらは自動的に本番へ送られません。
 
 ## 写真機能
 
-- JPEG / PNG / WebP、1枚20MB、1回20枚が初期値です。
+- JPEG / PNG / WebP、1枚20MB、内部バッチ20枚が初期値です。選択総数に制限はなく、必要なときにバッチを分けて同時2件で送ります。
 - スマートフォンの写真ライブラリ、PCのファイル選択、ドラッグ＆ドロップ、複数選択に対応します。
 - アップロード前プレビュー、場面、任意の投稿者名・コメント、ファイル別進捗・成否を表示します。
 - 画像本体は1枚ずつraw bodyで送り、Content-Lengthに依存しない上限付きストリーム読込を行います。magic bytes、MIME、寸法、総画素数、実デコードで検証し、検出MIMEから安全な拡張子を付けます。入力ファイル名を保存キーには使いません。
@@ -84,7 +84,7 @@ JPEGのEXIF Orientationは寸法検査で考慮し、Cloudflare Imagesが表示�
 - ゲストコードと管理コードは環境変数で分離します。同じ値の場合は設定不備として写真機能をfail-closedにします。
 - 認証後はHMAC署名・期限付きの `HttpOnly` / `SameSite=Strict` Cookieを使用します。HTTPS時は `Secure` も付きます。
 - 更新系APIは同一Origin、`Sec-Fetch-Site`、CSRFトークンを検査します。
-- 認証失敗はD1のIPハッシュ単位で15分あたり10回、アップロードはnonce付き署名セッション単位と高めのIP副次上限の両方でレート制限します。共有回線でゲスト全員を巻き込みにくくしつつ、再認証やCSRF Cookie書換えだけでは無制限に回避できません。
+- 認証失敗はD1のIPハッシュ単位で15分あたり10回、アップロードは `PHOTO_UPLOADS_PER_HOUR` が正のときnonce付き署名セッション単位と高めのIP副次上限の両方でレート制限します。共有回線でゲスト全員を巻き込みにくくしつつ、再認証やCSRF Cookie書換えだけでは無制限に回避できません。
 - 管理者は投稿者名・コメントを確認し、公開中の写真を非表示・再表示できます。
 - 「完全に削除」は確認後、まず非表示にしてからD1メタデータとR2の原本・派生画像を削除します。復元できないため、必要なら事前にバックアップしてください。
 
@@ -98,9 +98,9 @@ JPEGのEXIF Orientationは寸法検査で考慮し、Cloudflare Imagesが表示�
 | `PHOTO_ADMIN_CODE` | 必須 | 管理者専用コード |
 | `PHOTO_SESSION_SECRET` | 必須 | Cookie署名。32文字以上 |
 | `PHOTO_MAX_FILE_BYTES` | 任意 | `20000000`。Images Binding上限に合わせ最大20MB |
-| `PHOTO_MAX_FILES_PER_BATCH` | 任意 | `20` |
+| `PHOTO_MAX_FILES_PER_BATCH` | 任意 | 内部バッチサイズ `20`（選択総数の上限ではありません） |
 | `PHOTO_MAX_PIXELS` | 任意 | `100000000` |
-| `PHOTO_UPLOADS_PER_HOUR` | 任意 | 署名セッション単位で `60` |
+| `PHOTO_UPLOADS_PER_HOUR` | 任意 | 省略時は署名セッション単位で `60`。`0`で投稿・バッチ作成の回数制限を解除 |
 | `PHOTO_VARIANT_MODE` | 任意 | `transform`。Images Bindingがない環境では明示的に`original` |
 
 カテゴリーは [worker/photo-utils.ts](worker/photo-utils.ts) の定義をAPIから画面へ渡しており、追加時に表示箇所を個別修正する必要はありません。
@@ -143,7 +143,7 @@ npm run test:integration
 2. `drizzle/0001_shared_photo_gallery.sql` を本番D1へ適用します。ローカルでは初回アクセス時にも同一スキーマを安全に作成します。
 3. Cloudflare Images Binding `IMAGES` が利用できる環境では `PHOTO_VARIANT_MODE=transform`、利用できないSites環境では `PHOTO_VARIANT_MODE=original` を設定します。`original`ではサムネイル・表示画像も原本相当となるため、ファイル上限とEXIFの扱いに注意してください。
 4. `PHOTO_ACCESS_CODE`、別の十分長い `PHOTO_ADMIN_CODE`、32文字以上の `PHOTO_SESSION_SECRET` をホスティング側のsecret bindingとして登録します。共有コードを含む実値はGitへ入れません。production buildではローカル `.env` をinline `vars` へ展開しません。
-   Sitesで`original`モードを使う場合は、確認済みの運用値として `PHOTO_MAX_FILE_BYTES=5000000`、`PHOTO_MAX_FILES_PER_BATCH=10`、`PHOTO_MAX_PIXELS=40000000`、`PHOTO_UPLOADS_PER_HOUR=60` を併せて設定します。
+   Sitesで`original`モードを使う場合は、確認済みの運用値として `PHOTO_MAX_FILE_BYTES=5000000`、`PHOTO_MAX_FILES_PER_BATCH=10`、`PHOTO_MAX_PIXELS=40000000`、`PHOTO_UPLOADS_PER_HOUR=0` を併せて設定します。
 5. 独自ドメインとHTTPS、Cookie、CSP、`robots.txt`、実端末からのアクセスを確認します。
 6. R2の容量上限・ライフサイクル、D1/R2のバックアップ、復元訓練、監視、保持期間、費用アラートを決めます。
 7. D1とR2を定期照合し、不確定commit時に安全側で残した孤立オブジェクトを監査・整理するreconcilerを用意します。
