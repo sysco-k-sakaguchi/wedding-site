@@ -65,7 +65,7 @@ export function getPhotoRuntimeConfig(env: PhotoEnv): PhotoRuntimeConfig {
       100_000_000,
       160_000_000,
     ),
-    uploadsPerHour: parsePositiveInteger(
+    uploadsPerHour: env.PHOTO_UPLOADS_PER_HOUR?.trim() === "0" ? 0 : parsePositiveInteger(
       env.PHOTO_UPLOADS_PER_HOUR,
       60,
       1_000,

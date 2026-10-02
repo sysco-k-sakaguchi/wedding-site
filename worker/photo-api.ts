@@ -386,6 +386,7 @@ async function handleSession(request: Request, env: PhotoEnv) {
       limits: {
         maxFileBytes: config.maxFileBytes,
         maxFilesPerBatch: config.maxFilesPerBatch,
+        uploadsPerHour: config.uploadsPerHour,
       },
       supportedTypes: ["image/jpeg", "image/png", "image/webp"],
     },
@@ -490,17 +491,19 @@ async function handleCreateBatch(
   assertMethod(request, ["POST"]);
   assertGuest(session);
   assertCsrf(request, session);
-  await rateLimit(repository, request, config, {
-    kind: "batch-session",
-    windowMs: 60 * 60 * 1000,
-    limit: 120,
-    identity: session.rateIdentity ?? undefined,
-  });
-  await rateLimit(repository, request, config, {
-    kind: "batch-ip",
-    windowMs: 60 * 60 * 1000,
-    limit: 2_000,
-  });
+  if (config.uploadsPerHour > 0) {
+    await rateLimit(repository, request, config, {
+      kind: "batch-session",
+      windowMs: 60 * 60 * 1000,
+      limit: 120,
+      identity: session.rateIdentity ?? undefined,
+    });
+    await rateLimit(repository, request, config, {
+      kind: "batch-ip",
+      windowMs: 60 * 60 * 1000,
+      limit: 2_000,
+    });
+  }
   const body = await readJson(request);
   const count = Number(body.count);
   const category = typeof body.category === "string" ? body.category : "";
@@ -543,17 +546,19 @@ async function handleUpload(
   assertMethod(request, ["POST"]);
   assertGuest(session);
   assertCsrf(request, session);
-  await rateLimit(repository, request, config, {
-    kind: "upload-session",
-    windowMs: 60 * 60 * 1000,
-    limit: config.uploadsPerHour,
-    identity: session.rateIdentity ?? undefined,
-  });
-  await rateLimit(repository, request, config, {
-    kind: "upload-ip",
-    windowMs: 60 * 60 * 1000,
-    limit: Math.min(Math.max(config.uploadsPerHour * 10, 1_000), 10_000),
-  });
+  if (config.uploadsPerHour > 0) {
+    await rateLimit(repository, request, config, {
+      kind: "upload-session",
+      windowMs: 60 * 60 * 1000,
+      limit: config.uploadsPerHour,
+      identity: session.rateIdentity ?? undefined,
+    });
+    await rateLimit(repository, request, config, {
+      kind: "upload-ip",
+      windowMs: 60 * 60 * 1000,
+      limit: Math.min(Math.max(config.uploadsPerHour * 10, 1_000), 10_000),
+    });
+  }
 
   const uploadUrl = new URL(request.url);
   const batchId = uploadUrl.searchParams.get("batchId");
@@ -629,11 +634,10 @@ async function handleUpload(
   const hash = await sha256Hex(bytes);
   const duplicate = await repository.findByHash(hash);
   if (duplicate) {
-    throw new PhotoApiError(
-      409,
-      "duplicate_photo",
-      "同じ写真はすでにアルバムへ追加されています。",
-    );
+    return jsonResponse({
+      error: { code: "duplicate_photo", message: "同じ写真はすでにアルバムへ追加されています。" },
+      ...(duplicate.is_visible === 1 || session.admin ? { photo: photoPayload(duplicate) } : {}),
+    }, 409);
   }
 
   const thumbnail = await processVariant(
@@ -699,11 +703,10 @@ async function handleUpload(
   });
 
   if (persisted.duplicate) {
-    throw new PhotoApiError(
-      409,
-      "duplicate_photo",
-      "同じ写真はすでにアルバムへ追加されています。",
-    );
+    return jsonResponse({
+      error: { code: "duplicate_photo", message: "同じ写真はすでにアルバムへ追加されています。" },
+      ...(persisted.photo.is_visible === 1 || session.admin ? { photo: photoPayload(persisted.photo) } : {}),
+    }, 409);
   }
   return jsonResponse({ photo: photoPayload(persisted.photo), duplicate: false }, 201);
 }

@@ -12,6 +12,8 @@ import {
 
 import { PhotoLocaleContext, usePhotoText, categoryLabel, photoErrorMessage, type PhotoLocale } from "./photo-i18n";
 
+import { runUploadQueue, sendPhoto, PhotoUploadError, type UploadItem, type UploadDetails } from "./photo-uploads";
+
 interface Category {
   id: string;
   label: string;
@@ -51,17 +53,6 @@ interface ApiErrorBody {
     code?: string;
     message?: string;
   };
-}
-
-type UploadStatus = "queued" | "uploading" | "success" | "duplicate" | "error";
-
-interface UploadItem {
-  id: string;
-  file: File;
-  previewUrl: string;
-  progress: number;
-  status: UploadStatus;
-  message: string;
 }
 
 export async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -201,26 +192,22 @@ function UploadDialog({
   open,
   session,
   onClose,
-  onPhoto,
+  onStart,
 }: {
   open: boolean;
   session: SessionInfo;
   onClose: () => void;
-  onPhoto: (photo: Photo) => void;
+  onStart: (items: UploadItem[], details: UploadDetails) => void;
 }) {
   const { locale, t } = usePhotoText();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadGuard = useRef(false);
   const previewUrls = useRef(new Set<string>());
   const [items, setItems] = useState<UploadItem[]>([]);
   const [category, setCategory] = useState("other");
   const [uploaderName, setUploaderName] = useState("");
   const [comment, setComment] = useState("");
   const [dragging, setDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [batchError, setBatchError] = useState("");
-  const [complete, setComplete] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -246,12 +233,9 @@ function UploadDialog({
     setItems([]);
     setUploaderName("");
     setComment("");
-    setBatchError("");
-    setComplete(false);
   }, []);
 
   function requestClose() {
-    if (uploading) return;
     reset();
     onClose();
   }
@@ -278,16 +262,8 @@ function UploadDialog({
   }
 
   function addFiles(files: File[]) {
-    setBatchError("");
-    setComplete(false);
     setItems((current) => {
-      const available = Math.max(0, session.limits.maxFilesPerBatch - current.length);
-      const accepted = files.slice(0, available);
-      if (files.length > available) {
-        setBatchError(t(`写真は1回につき${session.limits.maxFilesPerBatch}枚まで選べます。`, `You can choose up to ${session.limits.maxFilesPerBatch} photos at a time.`));
-      }
-
-      const next = accepted.map((file) => {
+      const next = files.map((file) => {
         const previewUrl = URL.createObjectURL(file);
         previewUrls.current.add(previewUrl);
         const message = validateFile(file);
@@ -318,162 +294,28 @@ function UploadDialog({
   function onDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDragging(false);
-    if (!uploading) addFiles(Array.from(event.dataTransfer.files));
+    addFiles(Array.from(event.dataTransfer.files));
   }
 
-  function updateItem(id: string, patch: Partial<UploadItem>) {
-    setItems((current) =>
-      current.map((item) => (item.id === id ? { ...item, ...patch } : item)),
-    );
+  function startUpload() {
+    const valid = items.filter((item) => !validateFile(item.file));
+    if (!valid.length) return;
+    // Transfer URL ownership to the album before closing the selection dialog.
+    for (const item of valid) previewUrls.current.delete(item.previewUrl);
+    onStart(valid, { category, uploaderName, comment });
+    reset();
+    onClose();
   }
 
-  function uploadOne(item: UploadItem, batchId: string, fileIndex: number): Promise<void> {
-    return new Promise((resolve) => {
-      const request = new XMLHttpRequest();
-      const query = new URLSearchParams({
-        batchId,
-        fileIndex: String(fileIndex),
-      });
-
-      request.open("POST", `/api/photos?${query}`);
-      request.withCredentials = true;
-      request.timeout = 120_000;
-      request.setRequestHeader("X-CSRF-Token", session.csrfToken ?? "");
-      request.setRequestHeader(
-        "Content-Type",
-        item.file.type || "application/octet-stream",
-      );
-      request.setRequestHeader("X-Photo-Filename", encodeURIComponent(item.file.name));
-      request.upload.addEventListener("progress", (event) => {
-        if (event.lengthComputable) {
-          updateItem(item.id, {
-            status: "uploading",
-            progress: Math.round((event.loaded / event.total) * 100),
-            message: t("アップロード中", "Sending…"),
-          });
-        }
-      });
-      request.addEventListener("load", () => {
-        const payload = (() => {
-          try {
-            return JSON.parse(request.responseText) as {
-              photo?: Photo;
-              duplicate?: boolean;
-              error?: { code?: string; message?: string };
-            };
-          } catch {
-            return {};
-          }
-        })();
-
-        if (request.status >= 200 && request.status < 300 && payload.photo) {
-          updateItem(item.id, {
-            status: payload.duplicate ? "duplicate" : "success",
-            progress: 100,
-            message: payload.duplicate ? t("登録済み", "Already shared") : t("追加しました", "Added"),
-          });
-          onPhoto(payload.photo);
-        } else if (request.status === 409 && payload.error?.code === "duplicate_photo") {
-          updateItem(item.id, {
-            status: "duplicate",
-            progress: 100,
-            message: t("同じ写真は登録済みです", "This photo is already shared."),
-          });
-        } else {
-          updateItem(item.id, {
-            status: "error",
-            progress: 100,
-            message: photoErrorMessage(payload.error?.code, payload.error?.message, locale),
-          });
-        }
-        resolve();
-      });
-      request.addEventListener("error", () => {
-        updateItem(item.id, {
-          status: "error",
-          progress: 100,
-          message: t("通信できませんでした。もう一度お試しください。", "Connection lost. Please try again."),
-        });
-        resolve();
-      });
-      for (const event of ["timeout", "abort"]) {
-        request.addEventListener(event, () => {
-          updateItem(item.id, { status: "error", progress: 0, message: t("通信が途切れました。「もう一度追加する」で再送できます。", "Connection interrupted. Use Retry to send this photo again.") });
-          resolve();
-        });
-      }
-      updateItem(item.id, { status: "uploading", progress: 0, message: t("追加しています…", "Sending…") });
-      request.send(item.file);
-    });
-  }
-
-  async function startUpload() {
-    if (uploadGuard.current || uploading) return;
-    const uploadable = items.filter((item) => item.status === "queued" || (item.status === "error" && !validateFile(item.file)));
-    if (uploadable.length < 1) {
-      setBatchError(t("アップロードできる写真を選んでください。", "Please choose photos to add."));
-      return;
-    }
-
-    uploadGuard.current = true;
-    setUploading(true);
-    setBatchError("");
-    setComplete(false);
-
-    try {
-      const batch = await apiJson<{ batchId: string }>("/api/photos/batches", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": session.csrfToken ?? "",
-        },
-        body: JSON.stringify({
-          count: uploadable.length,
-          category,
-          uploaderName,
-          comment,
-        }),
-      });
-
-      let cursor = 0;
-      async function worker() {
-        while (cursor < uploadable.length) {
-          const index = cursor;
-          cursor += 1;
-          await uploadOne(uploadable[index], batch.batchId, index);
-        }
-      }
-      await Promise.all([worker(), worker()]);
-      setComplete(true);
-    } catch (caught) {
-      setBatchError(
-        caught instanceof Error ? caught.message : t("アップロードを開始できませんでした。", "Photos could not be sent. Please try again."),
-      );
-    } finally {
-      uploadGuard.current = false;
-      setUploading(false);
-    }
-  }
-
-  const overallProgress = complete
-    ? 100
-    : items.length > 0
-      ? Math.round(items.reduce((total, item) => total + item.progress, 0) / items.length)
-      : 0;
-  const retryableCount = items.filter((item) => item.status === "error" && !validateFile(item.file)).length;
-  const successCount = items.filter((item) => item.status === "success").length;
-  const duplicateCount = items.filter((item) => item.status === "duplicate").length;
-  const errorCount = items.filter((item) => item.status === "error").length;
+  const validCount = items.filter((item) => !validateFile(item.file)).length;
+  const errorCount = items.length - validCount;
 
   return (
     <dialog
       ref={dialogRef}
       className="photos-upload-dialog"
       aria-labelledby="upload-dialog-title"
-      onCancel={(event) => {
-        if (uploading) event.preventDefault();
-        else requestClose();
-      }}
+      onCancel={requestClose}
       onClose={() => {
         if (open) requestClose();
       }}
@@ -487,7 +329,6 @@ function UploadDialog({
           className="photos-icon-button"
           type="button"
           onClick={requestClose}
-          disabled={uploading}
           aria-label={t("写真追加画面を閉じる", "Close photo upload")}
         >
           ×
@@ -515,8 +356,7 @@ function UploadDialog({
             type="file"
             accept="image/jpeg,image/png,image/webp"
             multiple
-            disabled={uploading || items.length >= session.limits.maxFilesPerBatch}
-            onChange={(event) => {
+              onChange={(event) => {
               addFiles(Array.from(event.target.files ?? []));
               event.target.value = "";
             }}
@@ -525,13 +365,12 @@ function UploadDialog({
           <strong>{t("写真を選ぶ", "Choose photos")}</strong>
           <p>{t("スマートフォンの写真から選べます。", "Choose from your phone. On a computer, you can also drag photos here.")}</p>
           <small>
-            {t(`JPEG・PNG・WebP ／ 1枚${Math.floor(session.limits.maxFileBytes / 1_000_000)}MBまで ／ 1回${session.limits.maxFilesPerBatch}枚まで`, `JPEG, PNG or WebP · Up to ${Math.floor(session.limits.maxFileBytes / 1_000_000)}MB each · ${session.limits.maxFilesPerBatch} photos at a time`)}
+            {t(`JPEG・PNG・WebP ／ 1枚${Math.floor(session.limits.maxFileBytes / 1_000_000)}MBまで ／ 枚数制限なし`, `JPEG, PNG or WebP · Up to ${Math.floor(session.limits.maxFileBytes / 1_000_000)}MB each · No photo count limit`)}
           </small>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploading || items.length >= session.limits.maxFilesPerBatch}
-          >
+            >
             {t("写真を選ぶ", "Choose photos")}
           </button>
           </div>
@@ -546,27 +385,23 @@ function UploadDialog({
           <div
             className="photos-upload-preview"
             aria-label={t("選択した写真", "Selected photos")}
-            aria-busy={uploading}
           >
             {items.map((item) => (
               <article className={`photos-upload-item is-${item.status}`} key={item.id}>
                 <div className="photos-upload-item__image">
                   {/* Browser previews are local-only and are never treated as saved data. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.previewUrl} alt={t(`${item.file.name}のプレビュー`, `Preview of ${item.file.name}`)} />
+                  <img loading="lazy" src={item.previewUrl} alt={t(`${item.file.name}のプレビュー`, `Preview of ${item.file.name}`)} />
                 </div>
                 <div className="photos-upload-item__body">
                   <strong title={item.file.name}>{item.file.name}</strong>
                   <small>{formatFileSize(item.file.size)}</small>
-                  {item.status === "uploading" ? (
-                    <progress value={item.progress} max="100" aria-label={t(`${item.file.name}の進捗`, `Progress for ${item.file.name}`)} />
-                  ) : null}
                   <span className="photos-upload-item__status">
                     {item.status === "success" ? "✓ " : item.status === "error" ? "! " : ""}
                     {item.message || t("待機中", "Ready to send")}
                   </span>
                 </div>
-                {!uploading && item.status !== "success" ? (
+                {item.status !== "success" ? (
                   <button type="button" onClick={() => removeItem(item.id)} aria-label={t(`${item.file.name}を選択から外す`, `Remove ${item.file.name}`)}>
                     ×
                   </button>
@@ -581,7 +416,7 @@ function UploadDialog({
         <div className="photos-upload-fields">
           <label>
             <span>{t("場面", "Category")}</span>
-            <select value={category} onChange={(event) => setCategory(event.target.value)} disabled={uploading}>
+            <select value={category} onChange={(event) => setCategory(event.target.value)}>
               {session.categories.map((item) => (
                 <option key={item.id} value={item.id}>{categoryLabel(item.id, item.label, locale)}</option>
               ))}
@@ -594,8 +429,7 @@ function UploadDialog({
               value={uploaderName}
               onChange={(event) => setUploaderName(event.target.value)}
               maxLength={60}
-              disabled={uploading}
-              placeholder={t("例：はるかの友人", "e.g. Haruka’s friend")}
+                  placeholder={t("例：はるかの友人", "e.g. Haruka’s friend")}
             />
           </label>
           <label className="photos-upload-fields__comment">
@@ -605,48 +439,69 @@ function UploadDialog({
               onChange={(event) => setComment(event.target.value)}
               maxLength={300}
               rows={3}
-              disabled={uploading}
-              placeholder={t("写真にまつわるひとこと", "A message about these photos")}
+                  placeholder={t("写真にまつわるひとこと", "A message about these photos")}
             />
           </label>
         </div>
 
         </details>
 
-        {uploading || complete ? (
-          <div className="photos-overall-progress" aria-live="polite">
-            <div>
-              <strong>{uploading ? t("アップロードしています", "Sending your photos…") : errorCount > 0 ? t("追加できなかった写真があります", "Some photos could not be added") : t("アップロードが完了しました", "Your photos have been added")}</strong>
-              <span>{overallProgress}%</span>
-            </div>
-            <progress value={overallProgress} max="100" aria-label={t("アップロード全体の進捗", "Overall upload progress")} />
-            {complete ? (
-              <p>{t(`${successCount}枚追加 ／ ${duplicateCount}枚は登録済み ／ ${errorCount}枚は追加できませんでした`, `${successCount} added · ${duplicateCount} already shared · ${errorCount} could not be added`)}</p>
-            ) : null}
-          </div>
-        ) : null}
 
-        {batchError ? (
-          <p className="photos-form-error" role="alert"><span aria-hidden="true">!</span> {batchError}</p>
-        ) : null}
       </div>
 
       <div className="photos-dialog-footer">
-        <button type="button" className="photos-secondary-button" onClick={requestClose} disabled={uploading}>
-          {complete ? t("完了", "Done") : t("キャンセル", "Cancel")}
+        <button type="button" className="photos-secondary-button" onClick={requestClose}>
+          {t("キャンセル", "Cancel")}
         </button>
-        {!complete || retryableCount > 0 ? (
-          <button
-            type="button"
-            className="photos-primary-button"
-            onClick={startUpload}
-            disabled={uploading || (items.every((item) => item.status !== "queued") && retryableCount < 1)}
-          >
-            {uploading ? t("追加しています…", "Sending…") : complete ? t("失敗した写真をもう一度追加する", "Retry failed photos") : t(`${items.filter((item) => item.status === "queued").length}枚を追加する`, `Add ${items.filter((item) => item.status === "queued").length} photos`)}
-          </button>
-        ) : null}
+        <button type="button" onClick={startUpload} disabled={validCount < 1}>
+          {t(`${validCount}枚を追加する`, `Add ${validCount} photos`)}
+        </button>
       </div>
     </dialog>
+  );
+}
+
+function UploadPhotoCard({ item, onView, onSelect, selectionMode, selected }: {
+  item: UploadItem;
+  onView: (photo: Photo) => void;
+  onSelect: (id: string) => void;
+  selectionMode: boolean;
+  selected: boolean;
+}) {
+  const { t } = usePhotoText();
+  const ready = item.status === "success" || item.status === "duplicate";
+  const status = item.status === "queued" ? t("順番を待っています", "Waiting to send")
+    : item.status === "saving" ? t("保存しています…", "Saving…")
+    : item.status === "uploading" ? t("アップロード中", "Uploading")
+    : item.status === "error" ? t("もう一度お試しください", "Please retry")
+    : item.status === "duplicate" ? t("登録済み", "Already shared") : t("追加しました", "Added");
+  return (
+    <article className={`photos-card photos-pending-card is-${item.status}${selected ? " is-selected" : ""}`}>
+      <button className="photos-card__image-button" type="button" disabled={!ready || !item.photo}
+        onClick={() => item.photo && (selectionMode ? onSelect(item.photo.id) : onView(item.photo))}
+        aria-label={ready && item.photo ? t(`${item.file.name}を${selectionMode ? "選択" : "拡大表示"}`, `${selectionMode ? "Select" : "View"} ${item.file.name}`) : `${item.file.name} · ${status}`}
+        aria-pressed={selectionMode && ready ? selected : undefined}>
+        {/* Keep the local preview until the queue is dismissed: this avoids a
+            flash while the saved thumbnail is being loaded. */}
+        <img src={item.previewUrl} alt={item.file.name} loading="lazy" decoding="async" />
+        <span className="photos-upload-overlay" aria-hidden={ready || undefined}>
+            {item.status === "error" ? <span className="photos-upload-failed" aria-hidden="true">!</span> : (
+              <span className="photos-upload-circle" role={ready ? undefined : "progressbar"} aria-label={t(`${item.file.name}のアップロード`, `Uploading ${item.file.name}`)}
+                aria-valuemin={0} aria-valuemax={100} aria-valuenow={item.progress} aria-valuetext={`${item.progress}% · ${status}`}>
+                <svg viewBox="0 0 100 100" aria-hidden="true"><circle className="photos-upload-circle__track" cx="50" cy="50" r="42" /><circle className="photos-upload-circle__fill" cx="50" cy="50" r="42" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - item.progress} /></svg>
+                <strong>{item.progress}%</strong>
+              </span>
+            )}
+            <span className="photos-upload-overlay__label">{status}</span>
+          </span>
+        {ready && selectionMode && item.photo ? <span className="photos-card__check" aria-hidden="true">{selected ? "✓" : ""}</span> : ready ? <span className="photos-card__zoom" aria-hidden="true">＋</span> : null}
+      </button>
+      <div className="photos-card__meta">
+        <strong className="photos-pending-card__status">{ready ? "✓ " : ""}{status}</strong>
+        <span title={item.file.name}>{item.file.name}</span>
+        {ready && item.photo ? <a href={item.photo.downloadUrl} download>{t("保存", "Save")}</a> : item.status === "error" ? <p className="photos-pending-card__error">{item.message}</p> : <span className="photos-pending-card__hint">{t("完了したら開けます", "View when ready")}</span>}
+      </div>
+    </article>
   );
 }
 
@@ -795,11 +650,20 @@ export function PhotosApp() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [downloading, setDownloading] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const uploadGuard = useRef(false);
+  const uploadItemsRef = useRef<UploadItem[]>([]);
+  const uploadDetails = useRef<UploadDetails>({ category: "other", uploaderName: "", comment: "" });
+  const uploadController = useRef<AbortController | null>(null);
+  const uploadPreviewUrls = useRef(new Set<string>());
+  const galleryRef = useRef<HTMLElement>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
-  const loadPhotos = useCallback(async () => {
-    setLoadingPhotos(true);
+  const loadPhotos = useCallback(async (quiet = false) => {
+    if (!quiet) setLoadingPhotos(true);
     setGalleryError("");
     try {
       const result = await apiJson<{ photos: Photo[] }>("/api/photos");
@@ -812,7 +676,7 @@ export function PhotosApp() {
     } catch (caught) {
       setGalleryError(caught instanceof Error ? caught.message : t("写真を読み込めませんでした。", "Photos could not be loaded. Please try again."));
     } finally {
-      setLoadingPhotos(false);
+      if (!quiet) setLoadingPhotos(false);
     }
   }, []);
 
@@ -846,6 +710,95 @@ export function PhotosApp() {
   function addUploadedPhoto(photo: Photo) {
     setPhotos((current) => [photo, ...current.filter((item) => item.id !== photo.id)]);
   }
+
+  useEffect(() => {
+    const urls = uploadPreviewUrls.current;
+    return () => {
+      uploadController.current?.abort();
+      for (const url of urls) URL.revokeObjectURL(url);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!uploading) return;
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+    return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
+  }, [uploading]);
+
+  function updateUploadItem(id: string, patch: Partial<UploadItem>) {
+    const next = uploadItemsRef.current.map((item) => item.id === id ? { ...item, ...patch } : item);
+    uploadItemsRef.current = next;
+    setUploadItems(next);
+  }
+
+  function clearUploadQueue() {
+    if (uploadGuard.current) return;
+    for (const url of uploadPreviewUrls.current) URL.revokeObjectURL(url);
+    uploadPreviewUrls.current.clear();
+    uploadItemsRef.current = [];
+    setUploadItems([]);
+    setUploadError("");
+  }
+
+  async function sendUploadQueue(items: UploadItem[]) {
+    if (!session?.csrfToken || uploadGuard.current) return;
+    uploadGuard.current = true;
+    setUploading(true);
+    setUploadError("");
+    const controller = new AbortController();
+    uploadController.current = controller;
+    try {
+      await runUploadQueue({
+        items, batchSize: session.limits.maxFilesPerBatch, signal: controller.signal,
+        createBatch: async (count) => {
+          const result = await apiJson<{ batchId: string }>("/api/photos/batches", {
+            method: "POST", headers: { "Content-Type": "application/json", "X-CSRF-Token": session.csrfToken! },
+            body: JSON.stringify({ count, ...uploadDetails.current }),
+          });
+          return result.batchId;
+        },
+        send: (item, onProgress) => sendPhoto(item, session.csrfToken!, onProgress, controller.signal),
+        update: updateUploadItem, onPhoto: addUploadedPhoto,
+        errorMessage: (error) => error instanceof PhotoUploadError && error.code !== "connection_lost"
+          ? photoErrorMessage(error.code, error.message, locale)
+          : t("通信が途切れました。下の「再送する」でやり直せます。", "Connection interrupted. Use Retry below to try again."),
+      });
+    } catch (error) {
+      if (!controller.signal.aborted) setUploadError(error instanceof Error ? error.message : t("追加を開始できませんでした。再送をお試しください。", "Could not start sending. Please retry."));
+    } finally {
+      if (!controller.signal.aborted) {
+        uploadGuard.current = false;
+        setUploading(false);
+        void loadPhotos(true);
+      }
+    }
+  }
+
+  function beginUpload(items: UploadItem[], details: UploadDetails) {
+    if (uploadGuard.current) return;
+    clearUploadQueue();
+    uploadDetails.current = details;
+    for (const item of items) uploadPreviewUrls.current.add(item.previewUrl);
+    uploadItemsRef.current = items;
+    setUploadItems(items);
+    setActiveCategory("all");
+    setSelectionMode(false);
+    void sendUploadQueue(items);
+    requestAnimationFrame(() => galleryRef.current?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start",
+    }));
+  }
+
+  const completedUploads = uploadItems.filter((item) => item.status === "success" || item.status === "duplicate").length;
+  const unfinishedUploads = uploadItems.length - completedUploads;
+  const visibleUploads = uploadItems.filter((item) => activeCategory === "all" || (item.photo?.category ?? uploadDetails.current.category) === activeCategory);
+  const queuePhotoIds = new Set(visibleUploads.flatMap((item) => item.photo ? [item.photo.id] : []));
+  const otherPhotos = filteredPhotos.filter((photo) => !queuePhotoIds.has(photo.id));
+  const visibleCount = visibleUploads.length + otherPhotos.length;
 
   function toggleSelected(id: string) {
     setSelected((current) => {
@@ -948,8 +901,8 @@ export function PhotosApp() {
         <>
           <section className="photos-toolbar" aria-label={t("写真アルバムの操作", "Album actions")}>
             <div className="photos-toolbar__primary">
-              <button className="photos-primary-button" type="button" onClick={() => setUploadOpen(true)}>
-                <span aria-hidden="true">＋</span> {t("写真を追加する", "Add photos")}
+              <button className="photos-primary-button" type="button" disabled={uploading} onClick={() => setUploadOpen(true)}>
+                <span aria-hidden="true">＋</span> {uploading ? t("アップロード中…", "Uploading…") : t("写真を追加する", "Add photos")}
               </button>
               <div>
                 <strong>{t(`${photos.length}枚の写真`, `${photos.length} photos`)}</strong>
@@ -1014,24 +967,44 @@ export function PhotosApp() {
             <p className="photos-gallery-error" role="alert"><span aria-hidden="true">!</span> {galleryError}</p>
           ) : null}
 
-          <section className="photos-gallery-section" aria-labelledby="photo-list-title">
+          <section ref={galleryRef} className="photos-gallery-section" aria-labelledby="photo-list-title">
             <div className="photos-gallery-heading">
               <div><p className="photos-eyebrow">Shared Memories</p><h2 id="photo-list-title">{t("写真一覧", "Photos")}</h2></div>
-              <span>{t(`${filteredPhotos.length}枚`, `${filteredPhotos.length} photos`)}</span>
+              <span>{t(`${visibleCount}枚`, `${visibleCount} photos`)}</span>
             </div>
 
-            {loadingPhotos ? (
+            {uploadItems.length > 0 ? (
+              <div className="photos-upload-summary">
+                <div role="status" aria-live="polite" aria-atomic="true">
+                  <strong>{uploading ? t(`写真を追加しています · ${completedUploads} / ${uploadItems.length}枚完了`, `Adding photos · ${completedUploads} / ${uploadItems.length} ready`)
+                    : unfinishedUploads > 0 ? t(`${completedUploads}枚完了 · ${unfinishedUploads}枚を再送できます`, `${completedUploads} ready · ${unfinishedUploads} to retry`)
+                    : t(`${completedUploads}枚の追加が完了しました`, `All ${completedUploads} photos are ready`)}</strong>
+                  <p>{uploading ? t("一覧を見ながらお待ちいただけます。このページを開いたままにしてください。", "You can browse while waiting. Keep this page open until sending finishes.")
+                    : unfinishedUploads > 0 ? t("完了した写真はそのままです。残りの写真だけやり直せます。", "Your completed photos are safe. Retry sends only the remaining photos.")
+                    : t("写真をタップしてご覧いただけます。", "Tap a photo to view it.")}</p>
+                </div>
+                {!uploading && unfinishedUploads > 0 ? <button type="button" className="photos-primary-button" onClick={() => void sendUploadQueue(uploadItemsRef.current)}>{t(`${unfinishedUploads}枚を再送する`, `Retry ${unfinishedUploads} photos`)}</button> : null}
+                {!uploading ? <button type="button" className="photos-text-button" onClick={clearUploadQueue}>{unfinishedUploads > 0 ? t("残りの追加をやめる", "Dismiss remaining photos") : t("閉じる", "Dismiss")}</button> : null}
+                {uploadError ? <p className="photos-form-error" role="alert">{uploadError}</p> : null}
+              </div>
+            ) : null}
+
+            {loadingPhotos && visibleCount < 1 ? (
               <div className="photos-empty-state" aria-live="polite"><span className="photos-spinner" aria-hidden="true" /><p>{t("写真を読み込んでいます…", "Loading photos…")}</p></div>
-            ) : filteredPhotos.length < 1 ? (
+            ) : visibleCount < 1 ? (
               <div className="photos-empty-state">
                 <span className="photos-empty-state__mark" aria-hidden="true">◇</span>
                 <h3>{photos.length < 1 ? t("最初の一枚をお待ちしています", "No photos yet") : t("この場面の写真はまだありません", "No photos in this category yet")}</h3>
                 <p>{t("撮影した写真を、ぜひ追加してください。", "Share a photo from the wedding to start the album.")}</p>
-                <button className="photos-primary-button" type="button" onClick={() => setUploadOpen(true)}>{t("写真を追加する", "Add photos")}</button>
+                <button className="photos-primary-button" type="button" disabled={uploading} onClick={() => setUploadOpen(true)}>{t("写真を追加する", "Add photos")}</button>
               </div>
             ) : (
               <div className="photos-grid">
-                {filteredPhotos.map((photo) => {
+                {visibleUploads.map((item) => (
+                  <UploadPhotoCard key={item.id} item={item} onView={setLightboxPhoto} onSelect={toggleSelected}
+                    selectionMode={selectionMode} selected={item.photo ? selected.has(item.photo.id) : false} />
+                ))}
+                {otherPhotos.map((photo) => {
                   const isSelected = selected.has(photo.id);
                   const label = makePhotoAlt(photo, session.categories, locale);
                   return (
@@ -1080,7 +1053,7 @@ export function PhotosApp() {
             open={uploadOpen}
             session={session}
             onClose={() => setUploadOpen(false)}
-            onPhoto={addUploadedPhoto}
+            onStart={beginUpload}
           />
           <PhotoLightbox
             photo={lightboxPhoto}
