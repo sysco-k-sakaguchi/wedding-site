@@ -14,7 +14,7 @@ import { PhotoLocaleContext, usePhotoText, categoryLabel, photoErrorMessage, typ
 
 import { runUploadQueue, sendPhoto, PhotoUploadError, type UploadItem, type UploadDetails } from "./photo-uploads";
 
-import { PhotoSaveProvider, PhotoSaveButton, usePhotoSaveDevice } from "./PhotoSaveButton";
+import { PhotoSaveButton } from "./PhotoSaveButton";
 
 interface Category {
   id: string;
@@ -466,10 +466,9 @@ function UploadDialog({
   );
 }
 
-function UploadPhotoCard({ item, onView, onSave, onSelect, selectionMode, selected, keepAlbumOpen }: {
+function UploadPhotoCard({ item, onView, onSelect, selectionMode, selected, keepAlbumOpen }: {
   item: UploadItem;
   onView: (photo: Photo) => void;
-  onSave: (photo: Photo) => void;
   keepAlbumOpen: boolean;
   onSelect: (id: string) => void;
   selectionMode: boolean;
@@ -506,7 +505,7 @@ function UploadPhotoCard({ item, onView, onSave, onSelect, selectionMode, select
       <div className="photos-card__meta">
         <strong className="photos-pending-card__status">{ready ? "✓ " : ""}{status}</strong>
         <span title={item.file.name}>{item.file.name}</span>
-        {ready && item.photo ? <PhotoSaveButton photo={item.photo} onFallback={onSave} keepAlbumOpen={keepAlbumOpen} /> : item.status === "error" ? <p className="photos-pending-card__error">{item.message}</p> : <span className="photos-pending-card__hint">{t("完了したら開けます", "View when ready")}</span>}
+        {ready && item.photo ? <PhotoSaveButton photo={item.photo} keepAlbumOpen={keepAlbumOpen} /> : item.status === "error" ? <p className="photos-pending-card__error">{item.message}</p> : <span className="photos-pending-card__hint">{t("完了したら開けます", "View when ready")}</span>}
       </div>
     </article>
   );
@@ -518,8 +517,6 @@ function PhotoLightbox({
   categories,
   onChange,
   onClose,
-  saveHelp,
-  onSaveHelp,
   keepAlbumOpen,
 }: {
   photo: Photo | null;
@@ -527,12 +524,9 @@ function PhotoLightbox({
   categories: Category[];
   onChange: (photo: Photo) => void;
   onClose: () => void;
-  saveHelp: boolean;
-  onSaveHelp: () => void;
   keepAlbumOpen: boolean;
 }) {
   const { locale, t } = usePhotoText();
-  const device = usePhotoSaveDevice();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [failedPhotoId, setFailedPhotoId] = useState<string | null>(null);
@@ -593,7 +587,7 @@ function PhotoLightbox({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={photo.id}
-                src={device !== "desktop" ? photo.originalUrl : photo.viewUrl}
+                src={photo.viewUrl}
                 alt={makePhotoAlt(photo, categories, locale)}
                 onError={() => setFailedPhotoId(photo.id)}
               />
@@ -623,18 +617,7 @@ function PhotoLightbox({
             {photo.uploaderName ? <p>{t(`${photo.uploaderName}さんより`, `Shared by ${photo.uploaderName}`)}</p> : null}
             {photo.comment ? <p className="photos-lightbox__comment">{photo.comment}</p> : null}
             <small>{formatDate(photo.createdAt, locale)} · {formatFileSize(photo.fileSize)}</small>
-            {device !== "desktop" ? (
-              <div className="photos-native-save-help" role={saveHelp ? "status" : undefined}>
-                <strong>{device === "ios" ? t("Safariから写真を保存", "Save a photo from Safari") : saveHelp ? t("写真を長押しして保存", "Touch and hold the photo to save") : t("写真アプリへ保存", "Save to your photo app")}</strong>
-                <p>{saveHelp
-                  ? device === "ios" ? t("上の写真を長押しし、「写真に保存」（または「画像を保存」）を選んでください。", "Touch and hold the photo above, then choose Save to Photos or Save Image.")
-                    : t("上の写真を長押しし、スマホの「画像を保存」メニューを使ってください。", "Touch and hold the photo above and use your phone’s Save Image menu.")
-                  : device === "ios" ? t("下のボタンで保存画面を開き、写真を長押しして「写真に保存」を選んでください。", "Open the save screen below, then touch and hold the photo and choose Save to Photos.")
-                    : t("下のボタンからスマホのメニューを開き、写真アプリを選んでください。", "Tap below, then select your photo app from your phone’s menu.")}</p>
-              </div>
-            ) : null}
-            <PhotoSaveButton key={photo.id} photo={photo} className="photos-primary-button" expanded onFallback={onSaveHelp} keepAlbumOpen={keepAlbumOpen} />
-            {device !== "desktop" ? <a className="photos-text-button" href={photo.originalUrl} target={keepAlbumOpen ? "_blank" : undefined} rel={keepAlbumOpen ? "noopener" : undefined}>{t("写真だけを開く", "Open image only")}</a> : null}
+            <PhotoSaveButton key={photo.id} photo={photo} className="photos-primary-button" keepAlbumOpen={keepAlbumOpen} />
           </aside>
         </div>
       ) : null}
@@ -685,8 +668,6 @@ function PhotosAlbum() {
   const uploadPreviewUrls = useRef(new Set<string>());
   const galleryRef = useRef<HTMLElement>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
-  const [saveHelp, setSaveHelp] = useState(false);
-  const device = usePhotoSaveDevice();
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
   const loadPhotos = useCallback(async (quiet = false) => {
@@ -821,8 +802,7 @@ function PhotosAlbum() {
     }));
   }
 
-  function openForSaving(photo: Photo) { setSaveHelp(true); setLightboxPhoto(photo); }
-  function openPhoto(photo: Photo) { setSaveHelp(false); setLightboxPhoto(photo); }
+  function openPhoto(photo: Photo) { setLightboxPhoto(photo); }
 
   const completedUploads = uploadItems.filter((item) => item.status === "success" || item.status === "duplicate").length;
   const unfinishedUploads = uploadItems.length - completedUploads;
@@ -907,7 +887,7 @@ function PhotosAlbum() {
         <p className="photos-eyebrow">Guest Album</p>
         <h1 id="photos-title">{t("みんなの写真", "Guest photo album")}</h1>
         <p className="photos-lead">
-          {t("撮った写真を追加。気に入った写真を保存。みんなで思い出を共有しましょう。", "Add your photos. Save your favorites. Share memories of our day.")}
+          {t("みんなで撮った、大切な一日。", "Our day, through everyone’s eyes.")}
         </p>
       </section>
 
@@ -935,13 +915,11 @@ function PhotosAlbum() {
               <button className="photos-primary-button" type="button" disabled={uploading} onClick={() => setUploadOpen(true)}>
                 <span aria-hidden="true">＋</span> {uploading ? t("アップロード中…", "Uploading…") : t("写真を追加する", "Add photos")}
               </button>
-              <div>
-                <strong>{t(`${photos.length}枚の写真`, `${photos.length} photos`)}</strong>
-                <span>{t("新しい写真から表示しています", "Newest photos first")}</span>
-              </div>
             </div>
 
-            <div className="photos-filters" role="group" aria-label={t("場面で絞り込む", "Filter photos")}>
+            <details className="photos-filter-options">
+              <summary>{t("場面", "Moment")}：{activeCategory === "all" ? t("すべて", "All") : categoryLabel(activeCategory, session.categories.find((category) => category.id === activeCategory)?.label ?? "", locale)}</summary>
+              <div className="photos-filters" role="group" aria-label={t("場面で絞り込む", "Filter photos")}>
               {[{ id: "all", label: t("すべて", "All") }, ...session.categories].map((category) => (
                 <button
                   key={category.id}
@@ -954,45 +932,44 @@ function PhotosAlbum() {
                   <span>{category.id === "all" ? photos.length : photos.filter((photo) => photo.category === category.id).length}</span>
                 </button>
               ))}
-            </div>
+              </div>
+            </details>
 
-            <div className="photos-selection-bar">
-              <button
-                type="button"
-                className="photos-secondary-button"
-                onClick={() => setSelectionMode((current) => !current)}
-                aria-pressed={selectionMode}
-                disabled={photos.length < 1}
-              >
-                {selectionMode ? t("選択を終える", "Finish selecting") : t("選択する", "Choose photos to save")}
-              </button>
-              {selectionMode ? (
-                <>
-                  <p className="photos-selection-help">{t("保存したい写真をタップして選んでください。", "Tap the photos you want to save.")}</p>
-                  <strong aria-live="polite">{t(`${selected.size}枚選択中`, `${selected.size} selected`)}</strong>
-                  <button type="button" className="photos-text-button" onClick={() => setSelected(new Set())} disabled={selected.size < 1}>
-                    {t("選択を解除", "Clear selection")}
-                  </button>
-                  <button type="button" className="photos-primary-button" onClick={downloadSelected} disabled={selected.size < 1 || downloading}>
-                    {downloading ? t("準備中…", "Preparing…") : device === "desktop" ? t("選んだ写真をまとめて保存", "Save selected photos") : t("選んだ写真をZIPで保存", "Download selected as ZIP")}
-                  </button>
-                </>
-              ) : (
-                <button type="button" className="photos-secondary-button" onClick={downloadAll} disabled={photos.length < 1 || downloading}>
-                  {downloading ? t("準備中…", "Preparing…") : device === "desktop" ? t("すべてまとめて保存", "Save all photos") : t("すべてZIPで保存", "Download all as ZIP")}
+            <details className="photos-download-options" onToggle={(event) => { if (!event.currentTarget.open) setSelectionMode(false); }}>
+              <summary>{t("まとめて保存", "Download multiple photos")}</summary>
+              <div className="photos-selection-bar">
+                <button
+                  type="button"
+                  className="photos-secondary-button"
+                  onClick={() => setSelectionMode((current) => !current)}
+                  aria-pressed={selectionMode}
+                  disabled={photos.length < 1}
+                >
+                  {selectionMode ? t("選択を終える", "Finish selecting") : t("選択する", "Choose photos to save")}
                 </button>
-              )}
-            </div>
+                {selectionMode ? (
+                  <>
+                    <p className="photos-selection-help">{t("保存したい写真をタップして選んでください。", "Tap the photos you want to save.")}</p>
+                    <strong aria-live="polite">{t(`${selected.size}枚選択中`, `${selected.size} selected`)}</strong>
+                    <button type="button" className="photos-text-button" onClick={() => setSelected(new Set())} disabled={selected.size < 1}>
+                      {t("選択を解除", "Clear selection")}
+                    </button>
+                    <button type="button" className="photos-primary-button" onClick={downloadSelected} disabled={selected.size < 1 || downloading}>
+                      {downloading ? t("準備中…", "Preparing…") : t("選んだ写真をZIPで保存", "Download selected as ZIP")}
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="photos-secondary-button" onClick={downloadAll} disabled={photos.length < 1 || downloading}>
+                    {downloading ? t("準備中…", "Preparing…") : t("すべてZIPで保存", "Download all as ZIP")}
+                  </button>
+                )}
+              </div>
+            </details>
           </section>
 
           <div className="photos-help-row">
-            <p>{device === "desktop" ? t("写真をタップすると大きく見られます。「保存」で1枚ずつ保存できます。", "Tap a photo to view it. Use Save to download one photo at a time.") : device === "ios" ? t("「写真を保存」で保存画面を開けます。写真を長押しして「写真に保存」を選んでください。", "Open the save screen, then touch and hold the photo and choose Save to Photos.") : t("「写真に保存」でスマホの保存メニューを開けます。写真をタップすると大きく見られます。", "Use Save photo to open your phone’s menu. Tap a photo to view it.")}</p>
-            <button className="photos-secondary-button" type="button" onClick={() => void loadPhotos()} disabled={loadingPhotos}>{t("最新の写真を表示", "Refresh photos")}</button>
+            <p>{t("写真をタップで拡大。保存先はファイル／ダウンロードです。", "Tap a photo to view it. Downloads go to Files or Downloads.")}</p>
           </div>
-          <details className="photos-save-help">
-            <summary>{t("写真アプリに保存するには？", "How do I save to my photo app?")}</summary>
-            <p>{t("iPhoneでは「写真を保存」で保存画面を開き、写真を長押しして「写真に保存」を選んでください。保存後は写真アプリの「最近保存した項目」で確認できます。Androidでは端末の保存メニューを使います。ZIPでまとめて保存した写真は「ファイル」や「ダウンロード」に入ります。", "On iPhone, open the save screen, touch and hold the photo, and choose Save to Photos. Check Recently Saved in Photos afterward. On Android, use your phone’s save menu. ZIP downloads go to Files or Downloads.")}</p>
-          </details>
 
           {galleryError ? (
             <p className="photos-gallery-error" role="alert"><span aria-hidden="true">!</span> {galleryError}</p>
@@ -1000,8 +977,9 @@ function PhotosAlbum() {
 
           <section ref={galleryRef} className="photos-gallery-section" aria-labelledby="photo-list-title">
             <div className="photos-gallery-heading">
-              <div><p className="photos-eyebrow">Shared Memories</p><h2 id="photo-list-title">{t("写真一覧", "Photos")}</h2></div>
+              <h2 id="photo-list-title">{t("写真一覧", "Photos")}</h2>
               <span>{t(`${visibleCount}枚`, `${visibleCount} photos`)}</span>
+              <button className="photos-text-button" type="button" onClick={() => void loadPhotos()} disabled={loadingPhotos}>{t("更新", "Refresh")}</button>
             </div>
 
             {uploadItems.length > 0 ? (
@@ -1032,11 +1010,11 @@ function PhotosAlbum() {
             ) : (
               <div className="photos-grid">
                 {visibleUploads.map((item) => (
-                  <UploadPhotoCard key={item.id} item={item} onView={openPhoto} onSave={openForSaving} onSelect={toggleSelected} keepAlbumOpen={uploading}
-                    selectionMode={selectionMode} selected={item.photo ? selected.has(item.photo.id) : false} />
+                  <UploadPhotoCard key={item.id} item={item} onView={openPhoto} onSelect={toggleSelected} keepAlbumOpen={uploading}
+                    selectionMode={selectionMode} selected={selectionMode && Boolean(item.photo && selected.has(item.photo.id))} />
                 ))}
                 {otherPhotos.map((photo) => {
-                  const isSelected = selected.has(photo.id);
+                  const isSelected = selectionMode && selected.has(photo.id);
                   const label = makePhotoAlt(photo, session.categories, locale);
                   return (
                     <article className={`photos-card${isSelected ? " is-selected" : ""}`} key={photo.id}>
@@ -1066,7 +1044,7 @@ function PhotosAlbum() {
                       <div className="photos-card__meta">
                         <strong>{categoryLabel(photo.category, session.categories.find((item) => item.id === photo.category)?.label ?? "", locale)}</strong>
                         <span>{photo.uploaderName ? t(`${photo.uploaderName}さん`, photo.uploaderName) : formatDate(photo.createdAt, locale)}</span>
-                        <PhotoSaveButton photo={photo} onFallback={openForSaving} keepAlbumOpen={uploading} />
+                        <PhotoSaveButton photo={photo} keepAlbumOpen={uploading} />
                       </div>
                     </article>
                   );
@@ -1092,9 +1070,7 @@ function PhotosAlbum() {
             categories={session.categories}
             onChange={openPhoto}
             onClose={() => setLightboxPhoto(null)}
-            saveHelp={saveHelp}
             keepAlbumOpen={uploading}
-            onSaveHelp={() => setSaveHelp(true)}
           />
         </>
       )}
@@ -1104,5 +1080,5 @@ function PhotosAlbum() {
 }
 
 export function PhotosApp() {
-  return <PhotoSaveProvider><PhotosAlbum /></PhotoSaveProvider>;
+  return <PhotosAlbum />;
 }

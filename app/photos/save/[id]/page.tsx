@@ -3,7 +3,7 @@ import { PhotoSaveScreen } from "../../PhotoSaveScreen";
 import "../../photos.css";
 
 export const metadata: Metadata = {
-  title: "写真を保存 | Masato & Haruka",
+  title: "写真 | Masato & Haruka",
   robots: { index: false, follow: false, nocache: true },
 };
 
