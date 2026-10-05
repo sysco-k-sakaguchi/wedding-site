@@ -592,23 +592,23 @@ function PhotoLightbox({
                 onError={() => setFailedPhotoId(photo.id)}
               />
             )}
+            {photos.length > 1 ? (
+              <>
+                <button
+                  className="photos-lightbox__nav photos-lightbox__nav--previous"
+                  type="button"
+                  onClick={() => onChange(photos[(index - 1 + photos.length) % photos.length])}
+                  aria-label={t("前の写真を表示", "Previous photo")}
+                >←</button>
+                <button
+                  className="photos-lightbox__nav photos-lightbox__nav--next"
+                  type="button"
+                  onClick={() => onChange(photos[(index + 1) % photos.length])}
+                  aria-label={t("次の写真を表示", "Next photo")}
+                >→</button>
+              </>
+            ) : null}
           </div>
-          {photos.length > 1 ? (
-            <>
-              <button
-                className="photos-lightbox__nav photos-lightbox__nav--previous"
-                type="button"
-                onClick={() => onChange(photos[(index - 1 + photos.length) % photos.length])}
-                aria-label={t("前の写真を表示", "Previous photo")}
-              >←</button>
-              <button
-                className="photos-lightbox__nav photos-lightbox__nav--next"
-                type="button"
-                onClick={() => onChange(photos[(index + 1) % photos.length])}
-                aria-label={t("次の写真を表示", "Next photo")}
-              >→</button>
-            </>
-          ) : null}
           <aside className="photos-lightbox__meta">
             <div>
               <span>{index + 1} / {photos.length}</span>
