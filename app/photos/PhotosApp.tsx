@@ -15,6 +15,8 @@ import { PhotoLocaleContext, usePhotoText, categoryLabel, photoErrorMessage, typ
 import { runUploadQueue, sendPhoto, PhotoUploadError, type UploadItem, type UploadDetails } from "./photo-uploads";
 
 import { PhotoSaveButton } from "./PhotoSaveButton";
+import { PhotoImage } from "./PhotoImage";
+import { photoImageCache, PHOTO_AUTH_EXPIRED } from "./photo-image-cache";
 
 interface Category {
   id: string;
@@ -65,7 +67,12 @@ export async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
   try {
     const response = await fetch(url, { credentials: "same-origin", signal: controller.signal, ...init });
     const payload = (await response.json().catch(() => ({}))) as T & ApiErrorBody;
-    if (!response.ok) throw new Error(photoErrorMessage(payload.error?.code, payload.error?.message, locale()));
+    if (!response.ok) {
+      if ((response.status === 401 || response.status === 403) && (!init?.method || init.method === "GET") && url !== "/api/photos/session") {
+        photoImageCache.clear(); window.dispatchEvent(new Event(PHOTO_AUTH_EXPIRED));
+      }
+      throw new Error(photoErrorMessage(payload.error?.code, payload.error?.message, locale()));
+    }
     return payload;
   } catch (caught) {
     if (controller.signal.aborted || caught instanceof TypeError) {
@@ -529,9 +536,7 @@ function PhotoLightbox({
   const { locale, t } = usePhotoText();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const [failedPhotoId, setFailedPhotoId] = useState<string | null>(null);
   const index = photo ? photos.findIndex((item) => item.id === photo.id) : -1;
-  const imageFailed = Boolean(photo && failedPhotoId === photo.id);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -581,17 +586,7 @@ function PhotoLightbox({
         <div className="photos-lightbox__layout">
           <button ref={closeRef} className="photos-lightbox__close" type="button" onClick={onClose} aria-label={t("拡大表示を閉じる", "Close photo viewer")}>×</button>
           <div className="photos-lightbox__image-wrap">
-            {imageFailed ? (
-              <p role="alert">{t("画像を読み込めませんでした。", "This photo could not be loaded.")}</p>
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={photo.id}
-                src={photo.viewUrl}
-                alt={makePhotoAlt(photo, categories, locale)}
-                onError={() => setFailedPhotoId(photo.id)}
-              />
-            )}
+            <PhotoImage key={photo.id} thumbnailUrl={photo.thumbnailUrl} viewUrl={photo.viewUrl} alt={makePhotoAlt(photo, categories, locale)} />
             {photos.length > 1 ? (
               <>
                 <button
@@ -669,6 +664,18 @@ function PhotosAlbum() {
   const galleryRef = useRef<HTMLElement>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
+  const [imageRetries, setImageRetries] = useState<Record<string, number>>({});
+  const [galleryRevision, setGalleryRevision] = useState(0);
+
+  useEffect(() => {
+    const expired = () => {
+      setSession((current) => current ? { ...current, authenticated: false, csrfToken: null } : current);
+      setPhotos([]); setLightboxPhoto(null); setSelected(new Set());
+      uploadController.current?.abort();
+    };
+    window.addEventListener(PHOTO_AUTH_EXPIRED, expired);
+    return () => { window.removeEventListener(PHOTO_AUTH_EXPIRED, expired); photoImageCache.clear(); };
+  }, []);
 
   const loadPhotos = useCallback(async (quiet = false) => {
     if (!quiet) setLoadingPhotos(true);
@@ -677,6 +684,7 @@ function PhotosAlbum() {
       const result = await apiJson<{ photos: Photo[] }>("/api/photos");
       setPhotos(result.photos);
       setBrokenImages(new Set());
+      setGalleryRevision((current) => current + 1);
       setSelected((current) => {
         const available = new Set(result.photos.map((photo) => photo.id));
         return new Set([...current].filter((id) => available.has(id)));
@@ -1000,6 +1008,9 @@ function PhotosAlbum() {
 
             {loadingPhotos && visibleCount < 1 ? (
               <div className="photos-empty-state" aria-live="polite"><span className="photos-spinner" aria-hidden="true" /><p>{t("写真を読み込んでいます…", "Loading photos…")}</p></div>
+            ) : visibleCount < 1 && galleryError ? (
+              <div className="photos-empty-state"><p>{t("通信を確認して、もう一度お試しください。", "Check your connection and try again.")}</p>
+                <button className="photos-secondary-button" type="button" onClick={() => void loadPhotos()}>{t("もう一度読み込む", "Retry")}</button></div>
             ) : visibleCount < 1 ? (
               <div className="photos-empty-state">
                 <span className="photos-empty-state__mark" aria-hidden="true">◇</span>
@@ -1025,25 +1036,17 @@ function PhotosAlbum() {
                         aria-label={selectionMode ? t(`${label}を${isSelected ? "選択解除" : "選択"}`, `${isSelected ? "Deselect" : "Select"} ${label}`) : t(`${label}を拡大表示`, `View ${label}`)}
                         aria-pressed={selectionMode ? isSelected : undefined}
                       >
-                        {brokenImages.has(photo.id) ? (
-                          <span className="photos-card__broken">{t("画像を読み込めません", "Photo unavailable")}</span>
-                        ) : (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={photo.thumbnailUrl}
-                            alt={label}
-                            width={photo.width}
-                            height={photo.height}
-                            loading="lazy"
-                            decoding="async"
-                            onError={() => setBrokenImages((current) => new Set(current).add(photo.id))}
-                          />
-                        )}
+                        <PhotoImage compact thumbnailUrl={photo.thumbnailUrl} alt={label} retryKey={galleryRevision + (imageRetries[photo.id] ?? 0)}
+                          onState={(failed) => setBrokenImages((current) => {
+                            if (current.has(photo.id) === failed) return current;
+                            const next = new Set(current); if (failed) next.add(photo.id); else next.delete(photo.id); return next;
+                          })} />
                         {selectionMode ? <span className="photos-card__check" aria-hidden="true">{isSelected ? "✓" : ""}</span> : <span className="photos-card__zoom" aria-hidden="true">＋</span>}
                       </button>
                       <div className="photos-card__meta">
                         <strong>{categoryLabel(photo.category, session.categories.find((item) => item.id === photo.category)?.label ?? "", locale)}</strong>
                         <span>{photo.uploaderName ? t(`${photo.uploaderName}さん`, photo.uploaderName) : formatDate(photo.createdAt, locale)}</span>
+                        {brokenImages.has(photo.id) ? <button className="photos-text-button" type="button" onClick={() => setImageRetries((current) => ({ ...current, [photo.id]: (current[photo.id] ?? 0) + 1 }))}>{t("もう一度読み込む", "Retry photo")}</button> : null}
                         <PhotoSaveButton photo={photo} keepAlbumOpen={uploading} />
                       </div>
                     </article>

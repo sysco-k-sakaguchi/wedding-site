@@ -101,10 +101,12 @@ test("XHR送信終了だけでは完了せず、空JSON・HTTP失敗・非表示
     responseText = "";
     withCredentials = false;
     timeout = 0;
+    body: FormData | null = null;
+    headers = new Map<string, string>();
     constructor() { super(); TestRequest.current = this; }
     open() {}
-    setRequestHeader() {}
-    send() {}
+    setRequestHeader(name: string, value: string) { this.headers.set(name, value); }
+    send(body: FormData) { this.body = body; }
     abort() { this.dispatchEvent(new Event("abort")); }
   }
   globalThis.XMLHttpRequest = TestRequest as unknown as typeof XMLHttpRequest;
@@ -116,8 +118,15 @@ test("XHR送信終了だけでは完了せず、空JSON・HTTP失敗・非表示
     ] as const) {
       const item = selection(1)[0]; item.batchId = "batch"; item.fileIndex = 0;
       const progress: number[] = [];
-      const promise = sendPhoto(item, "csrf", (value) => progress.push(value), new AbortController().signal);
+      const promise = sendPhoto(item, "csrf", (value) => progress.push(value), new AbortController().signal,
+        async () => ({ thumbnail: new Blob(["thumbnail"], { type: "image/jpeg" }), display: new Blob(["display"], { type: "image/jpeg" }) }));
+      await Promise.resolve();
       const request = TestRequest.current;
+      assert.ok(request.body instanceof FormData);
+      assert.deepEqual([...request.body.keys()], ["original", "thumbnail", "display"]);
+      assert.equal(await (request.body.get("original") as File).text(), await item.file.text());
+      assert.equal((request.body.get("thumbnail") as File).type, "image/jpeg");
+      assert.equal(request.headers.has("Content-Type"), false); // Browser supplies the multipart boundary.
       request.upload.dispatchEvent(Object.assign(new Event("progress"), { lengthComputable: true, loaded: 100, total: 100 }));
       assert.deepEqual(progress, [95]);
       request.status = status; request.responseText = JSON.stringify(payload);

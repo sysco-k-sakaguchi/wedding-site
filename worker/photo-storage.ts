@@ -228,6 +228,13 @@ export class PhotoRepository {
     return this.database.prepare(query).bind(id).first<PhotoRow>();
   }
 
+  async setVariants(photo: PhotoRow, thumbnailKey: string, displayKey: string) {
+    await this.ready();
+    await this.database.prepare(
+      "UPDATE photos SET thumbnail_key = ?, display_key = ? WHERE id = ? AND sha256 = ? AND thumbnail_key = ? AND display_key = ?",
+    ).bind(thumbnailKey, displayKey, photo.id, photo.sha256, photo.thumbnail_key, photo.display_key).run();
+  }
+
   async setVisibility(id: string, visible: boolean) {
     await this.ready();
     const result = await this.database
@@ -333,6 +340,7 @@ export interface PhotoObjectStorage {
   getThumbnail(key: string): Promise<R2ObjectBody | null>;
   getDisplayImage(key: string): Promise<R2ObjectBody | null>;
   deleteObjects(keys: string[]): Promise<void>;
+  deletePhotoObjects(photo: PhotoRow): Promise<void>;
 }
 
 export class R2PhotoObjectStorage implements PhotoObjectStorage {
@@ -371,6 +379,53 @@ export class R2PhotoObjectStorage implements PhotoObjectStorage {
   async deleteObjects(keys: string[]) {
     if (keys.length > 0) {
       await this.bucket.delete(keys);
+    }
+  }
+
+  async deletePhotoObjects(photo: PhotoRow) {
+    // Validate before deriving prefixes: malformed IDs must never widen deletion.
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(photo.id)) {
+      throw new Error("Cannot delete photo objects with an invalid UUID.");
+    }
+    const prefixes = [
+      `originals/${photo.id}.`,
+      `thumbnails/${photo.id}.`,
+      `display/${photo.id}.`,
+      `thumbnails/light-v1/${photo.id}.`,
+      `thumbnails/light-v1/${photo.id}-`,
+      `display/light-v1/${photo.id}.`,
+      `display/light-v1/${photo.id}-`,
+    ];
+    const belongsToPhoto = (key: string) => prefixes.some((prefix) =>
+      key.startsWith(prefix) && key.length > prefix.length && !key.slice(prefix.length).includes("/"),
+    );
+    const currentKeys = [photo.object_key, photo.thumbnail_key, photo.display_key];
+    if (currentKeys.some((key) => !belongsToPhoto(key))) {
+      throw new Error("Cannot delete objects referenced outside this photo's prefixes.");
+    }
+    const keys = new Set(currentKeys);
+
+    // Finish every listing before deleting. Removing a page while following its
+    // cursor can otherwise skip older variants or failed-backfill objects.
+    for (const prefix of prefixes) {
+      let cursor: string | undefined;
+      const seenCursors = new Set<string>();
+      while (true) {
+        const page = await this.bucket.list({ prefix, limit: 1000, ...(cursor ? { cursor } : {}) });
+        for (const object of page.objects) {
+          if (belongsToPhoto(object.key)) keys.add(object.key);
+        }
+        if (!page.truncated) break;
+        if (!page.cursor || seenCursors.has(page.cursor)) {
+          throw new Error("Cannot finish listing photo objects: invalid R2 cursor.");
+        }
+        seenCursors.add(page.cursor);
+        cursor = page.cursor;
+      }
+    }
+    const allKeys = [...keys];
+    for (let offset = 0; offset < allKeys.length; offset += 1000) {
+      await this.bucket.delete(allKeys.slice(offset, offset + 1000));
     }
   }
 }

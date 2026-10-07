@@ -42,10 +42,14 @@ npm run dev
 ローカル開発ではCloudflare MiniflareのD1とR2を使用します。
 
 - D1: 写真メタデータ、アップロードバッチ、短期ZIP job、SHA-256重複判定、簡易レート制限。写真を参照しない期限切れバッチと期限切れjobは後続作成時に削除
-- R2: 原本、サムネイル、表示画像。`transform`モードでは640px / 1920pxのWebP、`original`モードでは入力画像をそのまま使用
+- R2: 原本、サムネイル、表示画像。ブラウザーからの新規投稿は480px / 1600px以内のJPEGを原本と一緒に送ります。旧raw APIは互換性を保持し、`transform`モードでは640px / 1920pxのWebP、`original`モードでは入力画像をそのまま使用
 - 保存先: プロジェクト配下の `.wrangler/state`（Git対象外）
 
 ブラウザのLocalStorageへ写真は保存しません。同じ開発サーバーへ接続する別ブラウザからも同じ写真を参照でき、ページ再読み込みや通常のdev server再起動をまたいで残ります。
+
+閲覧中は画面付近のサムネイルだけを取得し、拡大時はサムネイルを先に表示してから表示用画像へ切り替えます。失敗した画像は個別に再試行できます。取得済み画像はページ内メモリだけに保持し、目安12MB・40件のLRUで表示中の画像を保護します。ページ離脱・認証切れで破棄し、画像APIの`private, no-store`と認証は維持します。保存とZIPは原本を使います。
+
+既存写真の軽量化は管理者用 `scripts/optimize-photos.mjs` を使用します。Node.jsと既存のSharp依存が必要です。`PHOTO_OPTIMIZE_BASE_URL`と`PHOTO_ADMIN_CODE`を設定し、まず`--dry-run --audit outputs/photo-light-plan.json`で確認します。`--apply --audit outputs/photo-light-applied.json`で派生画像だけを更新し、配信JPEGのデコード・容量・縦横比と全原本のハッシュ、写真一覧・公開状態の不変を照合します。途中で停止しても最適化済みの写真は再更新しません。監査ファイルはGit対象外の`outputs/`へ保存してください。
 
 バックアップする場合はdev serverを停止し、`.wrangler/state` を日時付きの別ディレクトリへコピーしてください。初期化は、そのバックアップを確認したうえで `.wrangler` を退避してから行います。`public/images` は静的同期時に再生成されるため、投稿写真の保存先には使用していません。
 
@@ -163,14 +167,15 @@ npm run test:integration
 | `POST` | `/api/photos/batches` | 最大枚数を固定したアップロードバッチ作成 |
 | `GET` / `POST` | `/api/photos` | 一覧 / 画像1枚アップロード |
 | `GET` | `/api/photos/:id` | 詳細 |
-| `GET` | `/api/photos/:id/thumbnail` | サムネイル（`transform`時はWebP、`original`時は入力形式） |
-| `GET` | `/api/photos/:id/view` | 拡大表示画像（`transform`時はWebP、`original`時は入力形式） |
+| `GET` | `/api/photos/:id/thumbnail` | 軽量サムネイル（最適化済みは480px以内・200KB以内のJPEG） |
+| `GET` | `/api/photos/:id/view` | 拡大表示画像（最適化済みは1600px以内・900KB以内のJPEG） |
 | `GET` | `/api/photos/:id/download` | 原本ダウンロード |
 | `GET` | `/api/photos/:id/original` | スマホの保存・共有用の原本表示（認証必須、inline） |
 | `POST` | `/api/photos/download` | 選択写真を検証し、10分有効・1回限りの短期URLを発行 |
 | `GET` | `/api/photos/download/:jobId` | jobに固定したZIPをストリーミング取得 |
 | `POST` | `/api/photos/download-all` | 全表示写真を検証し、同じ短期URLを発行 |
 | `GET` | `/api/admin/photos` | 非表示を含む管理一覧 |
+| `PUT` | `/api/admin/photos/:id/variants` | 管理者認証・CSRF・原本hashを照合し、表示用JPEGだけを追加・更新 |
 | `PATCH` / `DELETE` | `/api/admin/photos/:id` | 公開状態変更 / 完全削除 |
 
 ## 写真の閲覧とファイル保存

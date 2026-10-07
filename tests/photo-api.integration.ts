@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { createHash } from "node:crypto";
 import { unzipSync } from "fflate";
+import sharp from "sharp";
 
 const baseUrl = process.env.PHOTO_TEST_BASE_URL ?? "http://localhost:3000";
 const guestCode = process.env.PHOTO_ACCESS_CODE;
@@ -138,6 +140,89 @@ function uniqueJpeg(bytes: Uint8Array) {
   result.set(payload, 6);
   result.set(bytes.slice(2), 6 + payload.byteLength);
   return result;
+}
+
+interface PreparedVariants {
+  thumbnail: Uint8Array;
+  display: Uint8Array;
+}
+
+function imageBlob(bytes: Uint8Array, type = "image/jpeg") {
+  return new Blob([new Uint8Array(bytes)], { type });
+}
+
+async function prepareVariants(bytes: Uint8Array): Promise<PreparedVariants> {
+  const thumbnail = await sharp(bytes).rotate()
+    .resize({ width: 480, height: 480, fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 72 }).toBuffer();
+  const display = await sharp(bytes).rotate()
+    .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 80 }).toBuffer();
+  return { thumbnail, display };
+}
+
+function variantsForm(variants: PreparedVariants, sourceSha256?: string) {
+  const form = new FormData();
+  form.append("thumbnail", imageBlob(variants.thumbnail), "thumbnail.jpg");
+  form.append("display", imageBlob(variants.display), "display.jpg");
+  if (sourceSha256 !== undefined) form.append("sourceSha256", sourceSha256);
+  return form;
+}
+
+async function updateVariants(
+  id: string,
+  form: FormData,
+  csrfToken: string,
+  jar: CookieJar = adminCookies,
+) {
+  return request(`/api/admin/photos/${id}/variants`, {
+    method: "PUT",
+    headers: { "X-CSRF-Token": csrfToken },
+    body: form,
+  }, jar);
+}
+
+async function uploadMultipart(
+  csrfToken: string,
+  batchId: string,
+  form: FormData,
+  jar: CookieJar = guestCookies,
+) {
+  return request(`/api/photos?${new URLSearchParams({ batchId, fileIndex: "0" })}`, {
+    method: "POST",
+    headers: {
+      "X-CSRF-Token": csrfToken,
+      "X-Photo-Filename": encodeURIComponent("multipart-original.png"),
+    },
+    body: form,
+  }, jar);
+}
+
+async function assertServedVariants(
+  photo: { thumbnailUrl: string; viewUrl: string },
+  expected: PreparedVariants,
+) {
+  for (const [path, bytes, edge, maximum] of [
+    [photo.thumbnailUrl, expected.thumbnail, 480, 200_000],
+    [photo.viewUrl, expected.display, 1600, 900_000],
+  ] as const) {
+    const response = await request(path, {}, guestCookies);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "image/jpeg");
+    const actual = new Uint8Array(await response.arrayBuffer());
+    assert.deepEqual(actual, new Uint8Array(bytes), `Stored derivative changed at ${path}`);
+    assert.ok(actual.byteLength <= maximum);
+    const metadata = await sharp(actual).metadata();
+    const wanted = await sharp(bytes).metadata();
+    assert.equal(metadata.format, "jpeg");
+    assert.deepEqual([metadata.width, metadata.height], [wanted.width, wanted.height]);
+    assert.ok(Math.max(metadata.width!, metadata.height!) <= edge);
+    // Metadata parsing alone does not prove that JPEG scan data is readable.
+    const decoded = await sharp(actual).raw().toBuffer({ resolveWithObject: true });
+    assert.equal(decoded.info.width, metadata.width);
+    assert.equal(decoded.info.height, metadata.height);
+    assert.ok(decoded.data.byteLength > 0);
+  }
 }
 
 const createdIds: string[] = [];
@@ -315,6 +400,88 @@ try {
   assert.equal(inlineOriginal.headers.get("cache-control"), "private, no-store");
   assert.deepEqual(new Uint8Array(await inlineOriginal.arrayBuffer()), firstBytes);
 
+  // Backfill an existing raw upload before ZIP checks. Its original must remain
+  // byte-for-byte identical while only thumbnail/view move to lightweight JPEGs.
+  const firstSourceHash = createHash("sha256").update(firstBytes).digest("hex");
+  const firstVariants = await prepareVariants(firstBytes);
+  const adminBeforeBackfill = await json<{
+    photos: Array<{ id: string; sourceSha256: string; optimized: boolean }>;
+  }>(await request("/api/admin/photos", {}, adminCookies));
+  const existingPhoto = adminBeforeBackfill.photos.find((photo) => photo.id === firstPhoto.photo.id);
+  assert.equal(existingPhoto?.sourceSha256, firstSourceHash);
+  assert.equal(existingPhoto?.optimized, false);
+
+  for (const jar of [anonymousCookies, guestCookies]) {
+    const forbidden = await updateVariants(firstPhoto.photo.id,
+      variantsForm(firstVariants, firstSourceHash), guest.csrfToken, jar);
+    assert.equal(forbidden.status, 403);
+    assert.equal(await errorCode(forbidden), "admin_required");
+  }
+  const invalidVariantCsrf = await updateVariants(firstPhoto.photo.id,
+    variantsForm(firstVariants, firstSourceHash), "invalid");
+  assert.equal(invalidVariantCsrf.status, 403);
+  assert.equal(await errorCode(invalidVariantCsrf), "invalid_csrf");
+  const wrongSource = await updateVariants(firstPhoto.photo.id,
+    variantsForm(firstVariants, "0".repeat(64)), adminCsrf);
+  assert.equal(wrongSource.status, 409);
+  assert.equal(await errorCode(wrongSource), "source_changed");
+
+  const squareJpeg = await sharp({ create: {
+    width: 240, height: 240, channels: 3, background: "#e2b859",
+  } }).jpeg().toBuffer();
+  const wrongAspect = await updateVariants(firstPhoto.photo.id,
+    variantsForm({ ...firstVariants, thumbnail: squareJpeg }, firstSourceHash), adminCsrf);
+  assert.equal(wrongAspect.status, 400);
+  assert.equal(await errorCode(wrongAspect), "invalid_photo");
+
+  const oversizedEdgeJpeg = await sharp(firstBytes).resize(481, 321).jpeg().toBuffer();
+  const invalidEdge = await updateVariants(firstPhoto.photo.id,
+    variantsForm({ ...firstVariants, thumbnail: oversizedEdgeJpeg }, firstSourceHash), adminCsrf);
+  assert.equal(invalidEdge.status, 400);
+  const duplicateVariantPart = variantsForm(firstVariants, firstSourceHash);
+  duplicateVariantPart.append("thumbnail", imageBlob(firstVariants.thumbnail), "second.jpg");
+  const duplicatePartAttempt = await updateVariants(firstPhoto.photo.id, duplicateVariantPart, adminCsrf);
+  assert.equal(duplicatePartAttempt.status, 400);
+  const duplicateHashPart = variantsForm(firstVariants, firstSourceHash);
+  duplicateHashPart.append("sourceSha256", firstSourceHash);
+  assert.equal((await updateVariants(firstPhoto.photo.id, duplicateHashPart, adminCsrf)).status, 400);
+
+  const pngThumbnail = await sharp(firstVariants.thumbnail).png().toBuffer();
+  const pngVariantAttempt = await updateVariants(firstPhoto.photo.id,
+    variantsForm({ ...firstVariants, thumbnail: pngThumbnail }, firstSourceHash), adminCsrf);
+  assert.equal(pngVariantAttempt.status, 400);
+  const invalidVariantSize = await updateVariants(firstPhoto.photo.id,
+    variantsForm({ ...firstVariants, thumbnail: new Uint8Array(200_001) }, firstSourceHash), adminCsrf);
+  assert.equal(invalidVariantSize.status, 400);
+
+  const notBackfilled = await json<{ photo: { optimized: boolean } }>(
+    await request(`/api/photos/${firstPhoto.photo.id}`, {}, guestCookies),
+  );
+  assert.equal(notBackfilled.photo.optimized, false, "Rejected variants must not change the row");
+  const backfill = await updateVariants(firstPhoto.photo.id,
+    variantsForm(firstVariants, firstSourceHash), adminCsrf);
+  assert.equal(backfill.status, 200, await backfill.clone().text());
+  const backfilled = await json<{ photo: {
+    id: string; optimized: boolean; sourceSha256: string; thumbnailUrl: string; viewUrl: string;
+  } }>(backfill);
+  assert.equal(backfilled.photo.id, firstPhoto.photo.id);
+  assert.equal(backfilled.photo.optimized, true);
+  assert.equal(backfilled.photo.sourceSha256, firstSourceHash);
+  await assertServedVariants(backfilled.photo, firstVariants);
+  assert.deepEqual(new Uint8Array(await (
+    await request(`/api/photos/${firstPhoto.photo.id}/download`, {}, guestCookies)
+  ).arrayBuffer()), firstBytes);
+
+  const differentVariants = {
+    thumbnail: await sharp(firstVariants.thumbnail).jpeg({ quality: 45 }).toBuffer(),
+    display: await sharp(firstVariants.display).jpeg({ quality: 45 }).toBuffer(),
+  };
+  const repeatedBackfill = await updateVariants(firstPhoto.photo.id,
+    variantsForm(differentVariants, firstSourceHash), adminCsrf);
+  assert.equal(repeatedBackfill.status, 200);
+  assert.equal((await json<{ unchanged: boolean }>(repeatedBackfill)).unchanged, true);
+  await assertServedVariants(backfilled.photo, firstVariants);
+
   const duplicateBatch = await createBatch(guest.csrfToken, 1);
   const duplicate = await upload(
     guest.csrfToken,
@@ -460,6 +627,78 @@ try {
   assert.equal(allNames.some((name) => name.includes(createdIds[0].slice(0, 8))), true);
   assert.equal(allNames.some((name) => name.includes(createdIds[1].slice(0, 8))), true);
 
+  // A PNG original exercises different MIME types for original and JPEG variants.
+  const multipartBytes = await sharp(firstBytes).resize(960, 640).png().toBuffer();
+  const multipartVariants = await prepareVariants(multipartBytes);
+  const multipartForm = (variants = multipartVariants) => {
+    const form = variantsForm(variants);
+    form.append("original", imageBlob(multipartBytes, "image/png"), "original.png");
+    return form;
+  };
+  const multipartBatch = await createBatch(guest.csrfToken, 1);
+  assert.equal(multipartBatch.response.status, 201);
+  const multipartBatchId = multipartBatch.body.batchId!;
+  const anonymousMultipart = await uploadMultipart(guest.csrfToken, multipartBatchId,
+    multipartForm(), anonymousCookies);
+  assert.equal(anonymousMultipart.status, 401);
+  const invalidMultipartCsrf = await uploadMultipart("invalid", multipartBatchId, multipartForm());
+  assert.equal(invalidMultipartCsrf.status, 403);
+  assert.equal(await errorCode(invalidMultipartCsrf), "invalid_csrf");
+
+  const duplicateOriginalPart = multipartForm();
+  duplicateOriginalPart.append("original", imageBlob(multipartBytes, "image/png"), "second.png");
+  const invalidMultipartParts = await uploadMultipart(guest.csrfToken, multipartBatchId, duplicateOriginalPart);
+  assert.equal(invalidMultipartParts.status, 400);
+  const missingDisplay = multipartForm();
+  missingDisplay.delete("display");
+  assert.equal((await uploadMultipart(guest.csrfToken, multipartBatchId, missingDisplay)).status, 400);
+  const unknownPart = multipartForm();
+  unknownPart.append("unexpected", "value");
+  assert.equal((await uploadMultipart(guest.csrfToken, multipartBatchId, unknownPart)).status, 400);
+  const invalidMultipartAspect = await uploadMultipart(guest.csrfToken, multipartBatchId,
+    multipartForm({ ...multipartVariants, thumbnail: squareJpeg }));
+  assert.equal(invalidMultipartAspect.status, 400);
+
+  const multipartUpload = await uploadMultipart(guest.csrfToken, multipartBatchId, multipartForm());
+  assert.equal(multipartUpload.status, 201, await multipartUpload.clone().text());
+  const multipartPhoto = await json<{ photo: {
+    id: string; originalName: string; optimized: boolean; thumbnailUrl: string; viewUrl: string;
+  } }>(multipartUpload);
+  createdIds.push(multipartPhoto.photo.id);
+  assert.equal(multipartPhoto.photo.optimized, true);
+  assert.equal(multipartPhoto.photo.originalName.endsWith(".png"), true);
+  await assertServedVariants(multipartPhoto.photo, multipartVariants);
+  for (const suffix of ["original", "download"]) {
+    const response = await request(`/api/photos/${multipartPhoto.photo.id}/${suffix}`, {}, guestCookies);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "image/png");
+    assert.deepEqual(new Uint8Array(await response.arrayBuffer()), new Uint8Array(multipartBytes));
+  }
+  const multipartReplay = await uploadMultipart(guest.csrfToken, multipartBatchId, multipartForm());
+  assert.equal(multipartReplay.status, 200);
+  const multipartReplayBody = await json<{ photo: { id: string }; duplicate: boolean }>(multipartReplay);
+  assert.equal(multipartReplayBody.duplicate, true);
+  assert.equal(multipartReplayBody.photo.id, multipartPhoto.photo.id);
+  const secondMultipartBatch = await createBatch(guest.csrfToken, 1);
+  const duplicateMultipart = await uploadMultipart(guest.csrfToken, secondMultipartBatch.body.batchId!, multipartForm());
+  assert.equal(duplicateMultipart.status, 409);
+  assert.equal(await errorCode(duplicateMultipart), "duplicate_photo");
+
+  const multipartZipJob = await request("/api/photos/download", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": guest.csrfToken },
+    body: JSON.stringify({ ids: [multipartPhoto.photo.id] }),
+  }, guestCookies);
+  assert.equal(multipartZipJob.status, 201);
+  const multipartZipUrl = (await json<{ downloadUrl: string }>(multipartZipJob)).downloadUrl;
+  const multipartZip = await request(multipartZipUrl, {}, guestCookies);
+  assert.equal(multipartZip.status, 200);
+  const multipartFiles = unzipSync(new Uint8Array(await multipartZip.arrayBuffer()));
+  const multipartNames = Object.keys(multipartFiles).filter((name) => !name.endsWith("/"));
+  assert.equal(multipartNames.length, 1);
+  assert.equal(multipartNames[0].endsWith(".png"), true);
+  assert.deepEqual(multipartFiles[multipartNames[0]], new Uint8Array(multipartBytes));
+
   const jobBeforeHide = await request(
     "/api/photos/download",
     {
@@ -564,7 +803,7 @@ try {
   assert.equal(deletedDetail.status, 404);
 
   console.log(
-    "Integration checks passed: auth/CSRF separation, persistence, raw size/decode/MIME checks, idempotency, canonical names, derivatives/originals, atomic streamed ZIP jobs, hidden-resource boundaries, admin visibility/delete.",
+    "Integration checks passed: auth/CSRF separation, persistence, raw and multipart uploads, decoded JPEG variants, protected/idempotent backfill, hash/aspect/part validation, unchanged originals and ZIPs, atomic streamed ZIP jobs, hidden-resource boundaries, admin visibility/delete.",
   );
 } finally {
   if (adminCsrf) {

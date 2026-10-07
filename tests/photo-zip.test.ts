@@ -51,6 +51,7 @@ test("同名写真をカテゴリー別の一意名でストリーミングZIP�
     async getThumbnail() { return null; },
     async getDisplayImage() { return null; },
     async deleteObjects() {},
+    async deletePhotoObjects() {},
   };
 
   const stream = createPhotoZipStream([
