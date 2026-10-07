@@ -30,6 +30,18 @@ export interface R2ObjectBody {
   };
 }
 
+export interface R2ListOptions {
+  prefix?: string;
+  cursor?: string;
+  limit?: number;
+}
+
+export interface R2Objects {
+  objects: Array<{ key: string }>;
+  truncated: boolean;
+  cursor?: string;
+}
+
 export interface R2Bucket {
   put(
     key: string,
@@ -42,6 +54,7 @@ export interface R2Bucket {
     },
   ): Promise<unknown>;
   get(key: string): Promise<R2ObjectBody | null>;
+  list(options?: R2ListOptions): Promise<R2Objects>;
   delete(keys: string | string[]): Promise<void>;
 }
 

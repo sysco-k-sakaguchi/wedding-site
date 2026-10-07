@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AccessPanel, apiJson, type Photo, type SessionInfo } from "./PhotosApp";
 import { PhotoLocaleContext, usePhotoText, type PhotoLocale } from "./photo-i18n";
 import { PhotoSaveButton } from "./PhotoSaveButton";
+import { PhotoImage } from "./PhotoImage";
+import { photoImageCache, PHOTO_AUTH_EXPIRED } from "./photo-image-cache";
 
 type SaveResult = { id: string; session: SessionInfo | null; photo: Photo | null; error: string };
 
@@ -11,8 +13,6 @@ function SaveContents({ id, changeLocale }: { id: string; changeLocale: (locale:
   const { locale, t } = usePhotoText();
   const [result, setResult] = useState<SaveResult | null>(null);
   const [revision, setRevision] = useState(0);
-  const [loadedId, setLoadedId] = useState("");
-  const [failedId, setFailedId] = useState("");
   const current = result?.id === id ? result : null;
 
   useEffect(() => {
@@ -29,7 +29,12 @@ function SaveContents({ id, changeLocale }: { id: string; changeLocale: (locale:
     return () => { cancelled = true; };
   }, [id, revision, locale]);
 
-  function retry() { setResult(null); setFailedId(""); setRevision((value) => value + 1); }
+  useEffect(() => {
+    const expired = () => { setResult(null); setRevision((value) => value + 1); };
+    window.addEventListener(PHOTO_AUTH_EXPIRED, expired);
+    return () => { window.removeEventListener(PHOTO_AUTH_EXPIRED, expired); photoImageCache.clear(); };
+  }, []);
+  function retry() { setResult(null); setRevision((value) => value + 1); }
   const photo = current?.photo;
 
   return <main className="photos-page photos-save-page">
@@ -46,12 +51,7 @@ function SaveContents({ id, changeLocale }: { id: string; changeLocale: (locale:
       {!current ? <p role="status">{t("写真を準備しています…", "Preparing your photo…")}</p> : current.error ? <div role="alert" className="photos-gallery-error">
         <p>{current.error}</p><button className="photos-secondary-button" type="button" onClick={retry}>{t("もう一度読み込む", "Try again")}</button>
       </div> : !current.session?.authenticated ? <AccessPanel configured={Boolean(current.session?.configured)} onAuthenticated={retry} actionLabel={t("写真を開く", "Open photo")} /> : photo ? <>
-        {failedId === photo.id ? <div className="photos-gallery-error" role="alert"><p>{t("画像を読み込めませんでした。", "The photo could not load.")}</p><button className="photos-secondary-button" type="button" onClick={retry}>{t("もう一度読み込む", "Try again")}</button></div> : <>
-          {loadedId !== photo.id ? <p role="status">{t("画像を読み込んでいます…", "Loading image…")}</p> : null}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img key={`${photo.id}-${revision}`} className="photos-save-image" src={photo.viewUrl} alt={t("共有された写真", "Shared photo")}
-            onLoad={() => setLoadedId(photo.id)} onError={() => setFailedId(photo.id)} />
-        </>}
+        <div className="photos-save-image"><PhotoImage thumbnailUrl={photo.thumbnailUrl} viewUrl={photo.viewUrl} alt={t("共有された写真", "Shared photo")} /></div>
         <PhotoSaveButton photo={photo} className="photos-primary-button photos-save-download" />
         <p className="photos-help">{t("保存先はファイル／ダウンロードです。", "Downloads go to Files or Downloads.")}</p>
       </> : null}

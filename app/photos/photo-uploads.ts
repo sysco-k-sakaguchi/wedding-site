@@ -1,4 +1,5 @@
 import type { Photo } from "./PhotosApp";
+import { preparePhoto } from "./photo-prepare";
 
 export type UploadStatus = "queued" | "uploading" | "saving" | "success" | "duplicate" | "error";
 export interface UploadDetails {
@@ -27,12 +28,18 @@ export function uploadProgress(loaded: number, total: number) {
   return total > 0 ? Math.min(95, Math.max(0, Math.floor(loaded / total * 95))) : 0;
 }
 
-export function sendPhoto(
+export async function sendPhoto(
   item: UploadItem,
   csrfToken: string,
   onProgress: (progress: number) => void,
   signal: AbortSignal,
+  prepare: typeof preparePhoto = preparePhoto,
 ): Promise<{ photo?: Photo; duplicate?: boolean }> {
+  const prepared = await prepare(item.file, signal);
+  const body = new FormData();
+  body.append("original", item.file);
+  body.append("thumbnail", prepared.thumbnail, "thumbnail.jpg");
+  body.append("display", prepared.display, "display.jpg");
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     const abort = () => request.abort();
@@ -44,7 +51,6 @@ export function sendPhoto(
     request.withCredentials = true;
     request.timeout = 120_000;
     request.setRequestHeader("X-CSRF-Token", csrfToken);
-    request.setRequestHeader("Content-Type", item.file.type || "application/octet-stream");
     request.setRequestHeader("X-Photo-Filename", encodeURIComponent(item.file.name));
     request.upload.addEventListener("progress", (event) => {
       if (event.lengthComputable) onProgress(uploadProgress(event.loaded, event.total));
@@ -67,7 +73,7 @@ export function sendPhoto(
       finish(() => reject(new PhotoUploadError("connection_lost", "")));
       return;
     }
-    request.send(item.file);
+    request.send(body);
   });
 }
 

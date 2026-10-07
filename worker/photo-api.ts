@@ -32,6 +32,7 @@ import {
   type SupportedImageMime,
 } from "./photo-utils";
 import { createPhotoZipStream, getPhotoZipCapacityIssue } from "./photo-zip";
+import { PHOTO_VARIANT_LIMITS, PHOTO_VARIANT_VERSION, validatePhotoVariant } from "./photo-variants";
 
 const API_HEADERS = {
   "Cache-Control": "no-store",
@@ -230,6 +231,8 @@ async function readLimitedBody(
 }
 
 function photoPayload(photo: PhotoRow, admin = false) {
+  const optimized = photo.thumbnail_key.includes(`/${PHOTO_VARIANT_VERSION}/`) && photo.display_key.includes(`/${PHOTO_VARIANT_VERSION}/`);
+  const version = optimized ? `?v=${PHOTO_VARIANT_VERSION}` : "";
   return {
     id: photo.id,
     originalName: photo.original_name,
@@ -241,11 +244,41 @@ function photoPayload(photo: PhotoRow, admin = false) {
     uploaderName: photo.uploader_name,
     comment: photo.comment,
     createdAt: photo.created_at,
-    thumbnailUrl: `/api/photos/${photo.id}/thumbnail`,
-    viewUrl: `/api/photos/${photo.id}/view`,
+    thumbnailUrl: `/api/photos/${photo.id}/thumbnail${version}`,
+    viewUrl: `/api/photos/${photo.id}/view${version}`,
+    optimized,
+    ...(admin ? { sourceSha256: photo.sha256 } : {}),
     downloadUrl: `/api/photos/${photo.id}/download`,
     originalUrl: `/api/photos/${photo.id}/original`,
     ...(admin ? { isVisible: photo.is_visible === 1 } : {}),
+  };
+}
+
+async function readPhotoForm(request: Request, maximumBytes: number, fields: string[]) {
+  if (!(request.headers.get("content-type") ?? "").startsWith("multipart/form-data;")) {
+    throw new PhotoValidationError("写真の送信形式を確認してください。");
+  }
+  const bytes = await readLimitedBody(request, maximumBytes);
+  let form: FormData;
+  try { form = await new Response(bytes.buffer as ArrayBuffer, { headers: { "Content-Type": request.headers.get("content-type")! } }).formData(); }
+  catch { throw new PhotoValidationError("写真の送信内容を確認してください。"); }
+  const keys = [...form.keys()];
+  if (keys.length !== fields.length || fields.some((field) => form.getAll(field).length !== 1) || keys.some((key) => !fields.includes(key))) {
+    throw new PhotoValidationError("写真の送信内容を確認してください。");
+  }
+  return form;
+}
+
+async function photoFormBytes(form: FormData, field: string, maximum: number) {
+  const value = form.get(field);
+  if (!value || typeof value === "string" || value.size < 1 || value.size > maximum) throw new PhotoValidationError("写真の容量を確認してください。");
+  return new Uint8Array(await value.arrayBuffer());
+}
+
+async function formVariants(form: FormData, source: { width: number; height: number }) {
+  return {
+    thumbnail: validatePhotoVariant(await photoFormBytes(form, "thumbnail", PHOTO_VARIANT_LIMITS.thumbnail.bytes), "thumbnail", source),
+    display: validatePhotoVariant(await photoFormBytes(form, "display", PHOTO_VARIANT_LIMITS.display.bytes), "display", source),
   };
 }
 
@@ -605,10 +638,19 @@ async function handleUpload(
     return jsonResponse({ photo: photoPayload(retried), duplicate: true }, 200);
   }
 
-  const declaredMime = (request.headers.get("content-type") ?? "")
+  let declaredMime = (request.headers.get("content-type") ?? "")
     .split(";", 1)[0]
     .trim()
     .toLowerCase();
+  const form = declaredMime === "multipart/form-data" ? await readPhotoForm(request,
+    config.maxFileBytes + PHOTO_VARIANT_LIMITS.thumbnail.bytes + PHOTO_VARIANT_LIMITS.display.bytes + 16_384,
+    ["original", "thumbnail", "display"],
+  ) : null;
+  if (form) {
+    const original = form.get("original");
+    if (!original || typeof original === "string") throw new PhotoValidationError("原本の写真がありません。");
+    declaredMime = original.type.toLowerCase();
+  }
   const allowedDeclared = ["", "application/octet-stream", "image/jpeg", "image/png", "image/webp"];
   if (!allowedDeclared.includes(declaredMime)) {
     throw new PhotoValidationError(
@@ -619,7 +661,7 @@ async function handleUpload(
     );
   }
 
-  const bytes = await readLimitedBody(request, config.maxFileBytes);
+  const bytes = form ? await photoFormBytes(form, "original", config.maxFileBytes) : await readLimitedBody(request, config.maxFileBytes);
   const image = inspectImage(bytes, { maxPixels: config.maxPixels });
   if (
     declaredMime !== "" &&
@@ -641,14 +683,15 @@ async function handleUpload(
     }, 409);
   }
 
-  const thumbnail = await processVariant(
+  const prepared = form ? await formVariants(form, image) : null;
+  const thumbnail = prepared?.thumbnail ?? await processVariant(
     env,
     bytes,
     image,
     config.variantMode,
     { width: 640, quality: 78 },
   );
-  const displayImage = await processVariant(
+  const displayImage = prepared?.display ?? await processVariant(
     env,
     bytes,
     image,
@@ -658,8 +701,9 @@ async function handleUpload(
 
   const id = crypto.randomUUID();
   const objectKey = `originals/${id}.${image.extension}`;
-  const thumbnailKey = `thumbnails/${id}.${thumbnail.extension}`;
-  const displayKey = `display/${id}.${displayImage.extension}`;
+  const variantPath = prepared ? `${PHOTO_VARIANT_VERSION}/` : "";
+  const thumbnailKey = `thumbnails/${variantPath}${id}.${thumbnail.extension}`;
+  const displayKey = `display/${variantPath}${id}.${displayImage.extension}`;
 
   const writes = await Promise.allSettled([
     objects.putOriginal(objectKey, bytes, image.mimeType),
@@ -751,7 +795,7 @@ async function handlePhotoResource(
 
     const contentType =
       object.httpMetadata?.contentType ??
-      (variantKey.endsWith(".webp") ? "image/webp" : photo.mime_type);
+      (variantKey.endsWith(".webp") ? "image/webp" : variantKey.endsWith(".jpg") ? "image/jpeg" : photo.mime_type);
     return new Response(object.body, {
       headers: binaryHeaders(contentType, "private, no-store"),
     });
@@ -987,11 +1031,7 @@ async function handleAdminPhoto(
 
   if (request.method === "DELETE") {
     await repository.setVisibility(id, false);
-    await objects.deleteObjects([
-      photo.object_key,
-      photo.thumbnail_key,
-      photo.display_key,
-    ]);
+    await objects.deletePhotoObjects(photo);
     const deleted = await repository.deletePhoto(id);
     if (!deleted) {
       throw new PhotoApiError(
@@ -1004,6 +1044,38 @@ async function handleAdminPhoto(
   }
 
   throw new PhotoApiError(405, "method_not_allowed", "この操作は利用できません。");
+}
+
+async function handleUpdateVariants(request: Request, repository: PhotoRepository, objects: PhotoObjectStorage,
+  session: Awaited<ReturnType<typeof readPhotoSession>>, id: string) {
+  assertMethod(request, ["PUT"]);
+  assertAdmin(session);
+  assertCsrf(request, session);
+  const photo = await repository.getPhoto(id, true);
+  if (!photo) throw new PhotoApiError(404, "photo_not_found", "写真が見つかりませんでした。");
+  if (photoPayload(photo).optimized) return jsonResponse({ photo: photoPayload(photo, true), unchanged: true });
+  const form = await readPhotoForm(request, PHOTO_VARIANT_LIMITS.thumbnail.bytes + PHOTO_VARIANT_LIMITS.display.bytes + 16_384,
+    ["thumbnail", "display", "sourceSha256"]);
+  if (form.get("sourceSha256") !== photo.sha256) throw new PhotoApiError(409, "source_changed", "原本の確認に失敗しました。");
+  const variants = await formVariants(form, photo);
+  const key = `${PHOTO_VARIANT_VERSION}/${id}-${crypto.randomUUID()}.jpg`;
+  const thumbnailKey = `thumbnails/${key}`, displayKey = `display/${key}`;
+  const writes = await Promise.allSettled([
+    objects.putThumbnail(thumbnailKey, variants.thumbnail.bytes, variants.thumbnail.mimeType),
+    objects.putDisplayImage(displayKey, variants.display.bytes, variants.display.mimeType),
+  ]);
+  const failure = writes.find((result) => result.status === "rejected");
+  if (failure?.status === "rejected") throw failure.reason;
+  // Keep originals and old variants. If a commit response is lost, read it back;
+  // never remove an object that a committed row may already reference.
+  let updateError: unknown;
+  try { await repository.setVariants(photo, thumbnailKey, displayKey); } catch (error) { updateError = error; }
+  const updated = await repository.getPhoto(id, true);
+  if (updated?.thumbnail_key !== thumbnailKey || updated.display_key !== displayKey) {
+    if (updateError) throw updateError;
+    throw new PhotoApiError(409, "source_changed", "写真が更新されました。もう一度お試しください。");
+  }
+  return jsonResponse({ photo: photoPayload(updated, true) });
 }
 
 export async function handlePhotoApi(request: Request, env: PhotoEnv) {
@@ -1090,6 +1162,8 @@ export async function handlePhotoApi(request: Request, env: PhotoEnv) {
       return await handleAdminCollection(request, repository, session);
     }
 
+    const variantsMatch = url.pathname.match(/^\/api\/admin\/photos\/([0-9a-f-]{36})\/variants$/i);
+    if (variantsMatch) return await handleUpdateVariants(request, repository, objects, session, variantsMatch[1]);
     const adminMatch = url.pathname.match(/^\/api\/admin\/photos\/([0-9a-f-]{36})$/i);
     if (adminMatch) {
       return await handleAdminPhoto(
